@@ -77,6 +77,7 @@ Navigate to **operation**:
 
 ```
 cd operation
+docker compose pull
 docker compose up
 ```
 

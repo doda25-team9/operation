@@ -1,0 +1,21 @@
+services:
+  model-service:
+    image: "${MODEL_IMAGE}"
+    volumes:
+      - ./output:/app/output
+    environment:
+      MODEL_PORT: "${MODEL_PORT}"
+    expose:
+      - "${MODEL_PORT}"
+    restart: unless-stopped
+
+  app:
+    image: "${APP_IMAGE}"
+    depends_on:
+      - model-service
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    environment:
+      APP_PORT: "${APP_PORT}"
+      MODEL_HOST: "http://model-service:${MODEL_PORT}"
+    restart: unless-stopped

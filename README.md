@@ -10,14 +10,12 @@ This README contains all instructions required for a new user to run the final i
 
 ## Repository Structure
 
-Your organization should contain the following repositories:
+These are all related repositories:
 
-```
-app/               > Java application
-model-service/     > Python ML model API
-lib-version/       > Shared version library
-operation/         > THIS repo — orchestration + docker-compose
-```
+- [app](https://github.com/doda25-team9/app) — frontend/backend Java application
+- [model-service](https://github.com/doda25-team9/model-service) — ML API
+- [lib-version](https://github.com/doda25-team9/lib-version) — shared version library
+- [operation](https://github.com/doda25-team9/operation) — this repository
 
 This repository (`operation`) contains:
 
@@ -91,5 +89,18 @@ This starts:
 
 Open:
 http://localhost:8080/sms
+or replace 8080 in the link above with the app port you find in the .env file
 
 If you see the SMS Checker interface, can submit messages and get a model agreement/disagreement message back after pressing _Check_, everything works.
+
+## Useful Docker Compose Commands
+
+| Action                               | Command                      | Description                            |
+| ------------------------------------ | ---------------------------- | -------------------------------------- |
+| **Start everything**                 | `docker compose up`          | Starts all services (shows logs)       |
+| **Start in background**              | `docker compose up -d`       | Runs services in detached mode         |
+| **Stop all running services**        | `docker compose down`        | Stops and removes containers, networks |
+| **Rebuild images**                   | `docker compose up --build`  | Rebuilds images before starting        |
+| **View logs**                        | `docker compose logs`        | Shows combined logs from all services  |
+| **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
+| **Restart one service**              | `docker compose restart app` | Restarts only the app service          |

@@ -5,6 +5,8 @@ services:
       - ./output:/app/output
     environment:
       MODEL_PORT: "${MODEL_PORT}"
+    expose:
+      - "${MODEL_PORT}"
     restart: unless-stopped
 
   app:

@@ -1,7 +1,6 @@
 services:
   model-service:
     image: "${MODEL_IMAGE}"
-    container_name: model-service
     volumes:
       - ./output:/app/output
     environment:
@@ -10,11 +9,10 @@ services:
 
   app:
     image: "${APP_IMAGE}"
-    container_name: app
     depends_on:
       - model-service
     ports:
-      - "${APP_PORT}:8080"
+      - "${APP_PORT}:${APP_PORT}"
     environment:
       APP_PORT: "${APP_PORT}"
       MODEL_HOST: "http://model-service:${MODEL_PORT}"

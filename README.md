@@ -151,15 +151,6 @@ vagrant halt
 vagrant destroy -f
 ```
 
-### Configuration
-
-To change cluster size or resources, edit these variables at the top of `Vagrantfile`:
-- `NUM_WORKERS` - Number of worker nodes (default: 2)
-- `CONTROLLER_MEMORY` - Controller RAM in MB (default: 4096 = 4GB)
-- `WORKER_MEMORY` - Worker RAM in MB (default: 6144 = 6GB)
-
-After changing variables, run `vagrant destroy -f && vagrant up` to recreate VMs with new settings.
-
 ### Common Workflow
 ```bash
 # Initial setup
@@ -173,3 +164,52 @@ vagrant up                    # Start VMs next day
 vagrant destroy -f            # Delete old VMs
 vagrant up                    # Create new VMs with updated config
 ```
+
+### Configuration variables
+
+To change cluster size or resources, edit these variables at the top of `Vagrantfile`:
+- `NUM_WORKERS` - Number of worker nodes (default: 2)
+- `CONTROLLER_MEMORY` - Controller RAM in MB (default: 4096 = 4GB)
+- `WORKER_MEMORY` - Worker RAM in MB (default: 6144 = 6GB)
+
+After changing variables, run `vagrant destroy -f && vagrant up` to recreate VMs with new settings.
+
+### VM Network Configuration
+
+Each VM has a private network IP for direct communication:
+- **ctrl**: `192.168.56.100`
+- **node-1**: `192.168.56.101`
+- **node-2**: `192.168.56.102`
+
+### Testing Network Connectivity
+
+**Test VM-to-VM communication:**
+```bash
+# SSH into controller
+vagrant ssh ctrl
+
+# Ping worker nodes
+ping -c 3 192.168.56.101
+ping -c 3 192.168.56.102
+
+# Exit
+exit
+```
+
+**Test host-to-VM communication:**
+```bash
+# From your Mac terminal, ping any VM
+ping -c 3 192.168.56.100    # Controller
+ping -c 3 192.168.56.101    # Worker 1
+ping -c 3 192.168.56.102    # Worker 2
+```
+
+**SSH directly via IP (alternative to `vagrant ssh`):**
+```bash
+# SSH using IP address
+ssh vagrant@192.168.56.100
+
+# Password: vagrant
+```
+
+**Expected result:** All pings should succeed (you see reply messages).

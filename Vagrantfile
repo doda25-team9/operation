@@ -20,9 +20,10 @@ Vagrant.configure("2") do |config|
   config.vm.define "ctrl" do |ctrl|
     # Use Ubuntu 24.04 as base operating system
     ctrl.vm.box = "bento/ubuntu-24.04"
-    
-    # Set hostname inside the VM
     ctrl.vm.hostname = "ctrl"
+
+    # Add private network with fixed IP
+    ctrl.vm.network "private_network", ip: "192.168.56.100"
     
     # VirtualBox-specific configuration
     ctrl.vm.provider "virtualbox" do |vb|
@@ -43,6 +44,9 @@ Vagrant.configure("2") do |config|
       # Set hostname with number (node-1, node-2, etc.)
       node.vm.hostname = "node-#{i}"
       
+      # Add private network with sequential IPs (192.168.56.101, 102, etc.)
+      node.vm.network "private_network", ip: "192.168.56.#{100+i}"
+
       # VirtualBox-specific configuration
       node.vm.provider "virtualbox" do |vb|
         vb.name = "k8s-node-#{i}"

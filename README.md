@@ -1,6 +1,6 @@
-# Operation -- Running the Full SMS Checker Application
+# Operation - Running the Full SMS Checker Application
 
-This repository contains the runtime configuration for the full SMS Checker system:
+This repository contains infrastructure and the runtime configuration for the full SMS Checker system:
 
 - `app` (Java frontend/backend service)
 - `model-service` (Python ML model API)
@@ -26,7 +26,9 @@ operation/
     - README.md      (this file)
 ```
 
-## Prerequisites
+## Docker Compose Setup (Assignment 1)
+
+### Prerequisites
 
 Before running anything, make sure you have:
 
@@ -58,7 +60,7 @@ If you don't have these output files yet, follow the training instructions in `m
 
 Once you have done that, you should have a folder called `model-service/output/`. Copy that output folder into `operation/output/`.
 
-## Configuration (.env)
+### Configuration (.env)
 
 The compose setup uses a `.env` file:
 
@@ -71,7 +73,7 @@ MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 
 You can change ports or image versions here.
 
-## Running the Full Application
+### Running the Full Application
 
 Navigate to **operation**:
 
@@ -94,7 +96,7 @@ or replace 8080 in the link above with the app port you find in the .env file
 
 If you see the SMS Checker interface, can submit messages and get a model agreement/disagreement message back after pressing _Check_, everything works.
 
-## Useful Docker Compose Commands
+### Useful Docker Compose Commands
 
 | Action                               | Command                      | Description                            |
 | ------------------------------------ | ---------------------------- | -------------------------------------- |
@@ -105,3 +107,69 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 | **View logs**                        | `docker compose logs`        | Shows combined logs from all services  |
 | **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
+
+
+## VM Infrastructure (Assignment 2)
+
+This section provisions virtual machines using Vagrant for infrastructure automation.
+
+### What Gets Created
+
+Running `vagrant up` automatically creates 3 Ubuntu VMs:
+- **ctrl**: Controller node (1 CPU, 4GB RAM)
+- **node-1**: Worker node (2 CPUs, 6GB RAM)
+- **node-2**: Worker node (2 CPUs, 6GB RAM)
+
+All VMs run Ubuntu 24.04 and are configured via the `Vagrantfile`.
+
+### Prerequisites
+
+- Vagrant
+- VirtualBox
+
+### Quick Start
+```bash
+# Create and start all VMs (first run downloads Ubuntu image ~500MB, takes 5-10 min)
+vagrant up
+
+# Check which VMs are running
+vagrant status
+# Shows: ctrl, node-1, node-2 with their status (running/stopped/not created)
+
+# Access the controller VM via SSH
+vagrant ssh ctrl
+# Opens a terminal inside the ctrl VM
+
+# Access a worker VM via SSH
+vagrant ssh node-1
+# Opens a terminal inside the node-1 VM
+
+# Stop all VMs (keeps them for later)
+vagrant halt
+
+# Completely remove all VMs (frees disk space)
+vagrant destroy -f
+```
+
+### Configuration
+
+To change cluster size or resources, edit these variables at the top of `Vagrantfile`:
+- `NUM_WORKERS` - Number of worker nodes (default: 2)
+- `CONTROLLER_MEMORY` - Controller RAM in MB (default: 4096 = 4GB)
+- `WORKER_MEMORY` - Worker RAM in MB (default: 6144 = 6GB)
+
+After changing variables, run `vagrant destroy -f && vagrant up` to recreate VMs with new settings.
+
+### Common Workflow
+```bash
+# Initial setup
+vagrant up                    # Create VMs (first time)
+
+# Daily work
+vagrant halt                  # Stop VMs when done working
+vagrant up                    # Start VMs next day
+
+# Testing changes to Vagrantfile
+vagrant destroy -f            # Delete old VMs
+vagrant up                    # Create new VMs with updated config
+```

@@ -1,0 +1,9 @@
+---
+# Controller-specific setup tasks
+- name: Setup Kubernetes controller
+  hosts: all
+  become: yes
+  tasks:
+    - name: Test controller provisioning
+      debug:
+        msg: "Controller provisioning is working"

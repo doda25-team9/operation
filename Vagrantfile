@@ -31,6 +31,15 @@ Vagrant.configure("2") do |config|
       vb.memory = CONTROLLER_MEMORY       # Allocate RAM
       vb.cpus = CONTROLLER_CPUS           # Allocate CPU cores
     end
+
+    # Ansible provisioning for controller
+    ctrl.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/general.yaml"
+    end
+    ctrl.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/ctrl.yaml"
+    end
+
   end
   
   # Worker VMs (node-1, node-2, ...)
@@ -52,6 +61,14 @@ Vagrant.configure("2") do |config|
         vb.name = "k8s-node-#{i}"
         vb.memory = WORKER_MEMORY
         vb.cpus = WORKER_CPUS
+      end
+
+      # Ansible provisioning for workers
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "playbooks/general.yaml"
+      end
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "playbooks/node.yaml"
       end
     end
   end

@@ -213,3 +213,22 @@ ssh vagrant@192.168.56.100
 ```
 
 **Expected result:** All pings should succeed (you see reply messages).
+
+### Ansible Provisioning
+
+VMs are automatically configured using Ansible playbooks during `vagrant up`:
+
+- **playbooks/general.yaml** - Runs on all VMs (shared configuration)
+- **playbooks/ctrl.yaml** - Runs only on controller
+- **playbooks/node.yaml** - Runs only on workers
+
+**Re-run provisioning without recreating VMs:**
+```bash
+# Apply playbook changes to existing VMs
+vagrant provision
+
+# Or provision specific VM
+vagrant provision ctrl
+vagrant provision node-1
+```
+**Note:** Currently playbooks contain only test tasks. Actual configuration tasks will be added in subsequent steps. (To Be Removed)

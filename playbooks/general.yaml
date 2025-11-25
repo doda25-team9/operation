@@ -1,0 +1,9 @@
+---
+# General setup tasks for all VMs
+- name: General system setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Test Ansible connection
+      debug:
+        msg: "Ansible is working on {{ inventory_hostname }}"

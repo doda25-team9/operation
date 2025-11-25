@@ -1,0 +1,9 @@
+---
+# Worker node setup tasks
+- name: Setup worker nodes
+  hosts: all
+  become: yes
+  tasks:
+    - name: Test worker provisioning
+      debug:
+        msg: "Worker provisioning is working"

@@ -127,7 +127,7 @@ All VMs run Ubuntu 24.04 and are configured via the `Vagrantfile`.
 - Vagrant
 - VirtualBox
 
-### Quick Start
+### How to Run
 ```bash
 # Create and start all VMs (first run downloads Ubuntu image ~500MB, takes 5-10 min)
 vagrant up
@@ -151,16 +151,8 @@ vagrant halt
 vagrant destroy -f
 ```
 
-### Common Workflow
-```bash
-# Initial setup
-vagrant up                    # Create VMs (first time)
-
-# Daily work
-vagrant halt                  # Stop VMs when done working
-vagrant up                    # Start VMs next day
-
-# Testing changes to Vagrantfile
+#### Testing changes to Vagrantfile
+```bash                
 vagrant destroy -f            # Delete old VMs
 vagrant up                    # Create new VMs with updated config
 ```

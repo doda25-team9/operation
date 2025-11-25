@@ -224,3 +224,12 @@ vagrant provision ctrl
 vagrant provision node-1
 ```
 **Note:** Currently playbooks contain only test tasks. Actual configuration tasks will be added in subsequent steps. (To Be Removed)
+
+
+## Keys
+
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+keys/
+    johan.pub
+

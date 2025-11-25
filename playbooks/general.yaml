@@ -4,6 +4,79 @@
   hosts: all
   become: yes
   tasks:
-    - name: Test Ansible connection
-      debug:
-        msg: "Ansible is working on {{ inventory_hostname }}"
+    - name: Read public keys from files
+      ansible.builtin.find:
+        paths: "./keys"
+        patterns: "*.pub"
+      register: pubkey_files
+
+    - name: Register public SSH keys for user 'vagrant'
+      ansible.posix.authorized_key:
+        user: vagrant
+        state: present
+        key: "{{ lookup('file', item.path) }}"
+      loop: "{{ pubkey_files.files }}"
+      when: pubkey_files.matched | default(0) > 0
+
+    - name: Disable swap immediately
+      ansible.builtin.shell: swapoff -a
+      args:
+        warn: false
+
+    - name: Remove or comment swap entries in /etc/fstab
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^\s*([^#]\S+)\s+\S+\s+swap\s+\S+\s+\S+\s+\S+'
+        replace: '# \1 swap disabled for Kubernetes'
+      notify: Reload fstab comment notice
+
+    - name: Ensure no swap devices are enabled (idempotent)
+      ansible.builtin.command: swapon --summary
+      register: swapon_summary
+      changed_when: false
+
+    - name: Ensure /swapfile entry absent
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^\s*/swapfile'
+        state: absent
+
+    - name: Persist module loading across reboots
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/k8s.conf
+        content: |
+          overlay
+          br_netfilter
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Load overlay module now
+      ansible.builtin.modprobe:
+        name: overlay
+        state: present
+
+    - name: Load br_netfilter module now
+      ansible.builtin.modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: Persist Kubernetes sysctl settings
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/k8s.conf
+        content: |
+          net.ipv4.ip_forward = 1
+          net.bridge.bridge-nf-call-iptables = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Apply sysctl settings (reload)
+      ansible.builtin.command: sysctl --system
+      changed_when: false
+
+  handlers:
+    - name: Reload fstab comment notice
+      ansible.builtin.debug:
+        msg: "/etc/fstab updated to disable swap (commented entries)."

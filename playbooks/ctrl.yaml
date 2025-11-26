@@ -18,3 +18,18 @@
     - name: Update apt cache after adding Kubernetes repo
       ansible.builtin.apt:
         update_cache: yes
+
+    # Step 10: Install Kubernetes tools
+    - name: Install container runtime and Kubernetes tools
+      apt:
+        name:
+          - containerd
+          - runc
+          - kubeadm=1.32.4-1.1
+          - kubelet=1.32.4-1.1
+          - kubectl=1.32.4-1.1
+        state: present
+        update_cache: yes
+
+    - name: Hold Kubernetes packages
+      command: apt-mark hold kubeadm kubelet kubectl containerd runc

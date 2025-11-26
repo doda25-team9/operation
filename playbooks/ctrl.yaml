@@ -46,10 +46,6 @@
       command: containerd config default
       register: containerd_config
 
-    - name: Generate default containerd config
-      command: containerd config default
-      register: containerd_config
-
     - name: Ensure /etc/containerd directory exists
       file:
         path: /etc/containerd

@@ -34,6 +34,7 @@
     - name: Hold Kubernetes packages
       command: apt-mark hold kubeadm kubelet kubectl containerd runc
 
+    # Step 12: Enable kubelet
     - name: Enable and start kubelet
       ansible.builtin.service:
         name: kubelet

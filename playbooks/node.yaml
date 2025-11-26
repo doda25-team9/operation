@@ -33,3 +33,39 @@
 
     - name: Hold Kubernetes packages
       command: apt-mark hold kubeadm kubelet kubectl containerd runc
+
+    - name: Enable and start kubelet
+      ansible.builtin.service:
+        name: kubelet
+        state: started
+        enabled: yes
+
+    # Step 11: Configure containerd
+    - name: Generate default containerd config
+      command: containerd config default
+      register: containerd_config
+
+    - name: Generate default containerd config
+      command: containerd config default
+      register: containerd_config
+
+    - name: Ensure /etc/containerd directory exists
+      file:
+        path: /etc/containerd
+        state: directory
+        mode: "0755"
+
+    - name: Write containerd configuration
+      copy:
+        dest: /etc/containerd/config.toml
+        content: '{{ containerd_config.stdout
+          | regex_replace(''SystemdCgroup = false'', ''SystemdCgroup = true'')
+          | regex_replace(''sandbox_image = "registry.k8s.io/pause.*"'',''sandbox_image = "registry.k8s.io/pause:3.10"'')
+          | regex_replace(''disable_apparmor = false'', ''disable_apparmor = true'') }}'
+        mode: "0644"
+
+    - name: Restart containerd
+      service:
+        name: containerd
+        state: restarted
+        enabled: yes

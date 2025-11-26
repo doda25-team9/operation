@@ -4,27 +4,19 @@
   hosts: all
   become: yes
   tasks:
-    - name: Loop over public key files
-      ansible.builtin.find:
-        paths: "./keys"
-        patterns: "*.pub"
-      register: pubkey_files
-
     - name: Register public SSH keys
       ansible.posix.authorized_key:
         user: vagrant
         state: present
-        key: "{{ lookup('file', item.path) }}"
-      loop: "{{ pubkey_files.files }}"
-      when: pubkey_files.matched | default(0) > 0
+        key: "{{ lookup('file', item) }}"
+      with_fileglob:
+        - "{{ playbook_dir }}/../keys/*.pub"
 
     - name: Disable swap 
       ansible.builtin.shell: swapoff -a
-      args:
-        warn: false
 
     - name: Remove swap entry
-      ansible.builtin.replace:
+      ansible.builtin.lineinfile:
         path: /etc/fstab
         regexp: '^\s*[^#].*\s+swap\s+.*$'
         state: absent

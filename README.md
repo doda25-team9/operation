@@ -126,6 +126,21 @@ All VMs run Ubuntu 24.04 and are configured via the `Vagrantfile`.
 
 - Vagrant
 - VirtualBox
+- Ansible
+
+Verify these are installed by running:
+```bash
+ansible --version
+vagrant --version
+VBoxManage --version
+```
+
+Otherwise instill by running:
+```sudo apt update
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+sudo apt install -y ansible virtualbox vagrant
+```
 
 ### How to Run
 ```bash
@@ -214,6 +229,16 @@ VMs are automatically configured using Ansible playbooks during `vagrant up`:
 - **playbooks/ctrl.yaml** - Runs only on controller
 - **playbooks/node.yaml** - Runs only on workers
 
+### General.yaml
+
+This playbook runs on all VMs and performs the following tasks:
+- Add all public keys from the `keys` directory into the `vagrant` user’s `authorized_keys`.
+- Disable swap and remove swap entries from `/etc/fstab` to keep it disabled after reboot.
+- Ensure `overlay` and `br_netfilter` are registered in `k8s.conf` for future boot and loaded now.
+- Configure IPv4 forwarding in `k8s.conf` and apply the changes.
+
+
+
 **Re-run provisioning without recreating VMs:**
 ```bash
 # Apply playbook changes to existing VMs
@@ -223,13 +248,49 @@ vagrant provision
 vagrant provision ctrl
 vagrant provision node-1
 ```
-**Note:** Currently playbooks contain only test tasks. Actual configuration tasks will be added in subsequent steps. (To Be Removed)
 
+### Test Provisioning
 
-## Keys
+```bash
+vagrant ssh <VM NAME>
+ 
+# Check SSH keys
+cat ~/.ssh/authorized_keys
 
+# Verify swap is disabled (should show no output)
+swapon --summary        
+grep swap /etc/fstab    
+
+# Verify kernel modules are loaded and present in k8s.conf
+cat /etc/modules-load.d/k8s.conf
+lsmod | grep overlay
+lsmod | grep br_netfilter
+
+# Verify sysctl settings (should all be 1)
+sysctl net.ipv4.ip_forward
+sysctl net.bridge.bridge-nf-call-iptables
+sysctl net.bridge.bridge-nf-call-ip6tables
+```
+
+### Key generation for SSH
+
+To enable SSH with the VMs you should generate an SSH key pair by running:
+```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
+```
+
+You can subsequently find this key in the folder /root/.ssh. Copy the .pub file to the keys folder to create the structure below.
 
 keys/
-    johan.pub
+    your_name_here.pub
 
+### Errors
+
+It is possible that on running `vagrant up`, you encounter:
+Stderr: VBoxManage: error: VirtualBox can't operate in VMX root mode. 
+
+This happens because VirtualBox conflicts with KVM. Run the following to solve this error:
+```bash
+sudo modprobe -r kvm_intel
+sudo modprobe -r kvm
+```

@@ -3,6 +3,12 @@
 - name: Setup Kubernetes controller
   hosts: ctrl
   become: yes
+  vars:
+    controller_ip: "192.168.56.100"
+    pod_network_cidr: "10.244.0.0/16"
+    k8s_version: "1.32.4"
+    flannel_version: "0.26.7"
+
   tasks:
     # Step 9: Add Kubernetes repository
     - name: Add Kubernetes apt GPG key
@@ -70,3 +76,24 @@
         state: restarted
         enabled: yes
       changed_when: false
+
+    # Step 13: Initialize Kubernetes cluster
+
+    - name: Check if Kubernetes cluster is already initialized
+      ansible.builtin.stat:
+        path: /etc/kubernetes/admin.conf
+      register: kubeadm_init_check
+
+    - name: Initialize Kubernetes cluster with kubeadm
+      ansible.builtin.command: >
+        kubeadm init
+        --apiserver-advertise-address={{ controller_ip }}
+        --node-name=ctrl
+        --pod-network-cidr={{ pod_network_cidr }}
+      when: not kubeadm_init_check.stat.exists
+      register: kubeadm_init_output
+
+    - name: Display kubeadm init output
+      ansible.builtin.debug:
+        var: kubeadm_init_output.stdout_lines
+      when: kubeadm_init_output is defined and kubeadm_init_output.changed

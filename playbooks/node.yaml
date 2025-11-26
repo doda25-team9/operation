@@ -1,9 +1,72 @@
 ---
 # Worker node setup tasks
 - name: Setup worker nodes
-  hosts: all
+  hosts: node-*
   become: yes
   tasks:
-    - name: Test worker provisioning
-      debug:
-        msg: "Worker provisioning is working"
+    # Step 9: Add Kubernetes repository
+    - name: Add Kubernetes apt GPG key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+        state: present
+
+    - name: Update apt cache after adding Kubernetes repo
+      ansible.builtin.apt:
+        update_cache: yes
+
+    # Step 10: Install Kubernetes tools
+    - name: Install container runtime and Kubernetes tools
+      apt:
+        name:
+          - containerd
+          - runc
+          - kubeadm=1.32.4-1.1
+          - kubelet=1.32.4-1.1
+          - kubectl=1.32.4-1.1
+        state: present
+        update_cache: yes
+
+    - name: Hold Kubernetes packages
+      command: apt-mark hold kubeadm kubelet kubectl containerd runc
+      register: hold_result
+      changed_when: "'hold' not in hold_result.stdout"
+
+    # Step 12: Enable kubelet
+    - name: Enable and start kubelet
+      ansible.builtin.service:
+        name: kubelet
+        state: started
+        enabled: yes
+
+    # Step 11: Configure containerd
+    - name: Generate default containerd config
+      command: containerd config default
+      register: containerd_config
+      changed_when: false
+
+    - name: Ensure /etc/containerd directory exists
+      file:
+        path: /etc/containerd
+        state: directory
+        mode: "0755"
+
+    - name: Write containerd configuration
+      copy:
+        dest: /etc/containerd/config.toml
+        content: '{{ containerd_config.stdout
+          | regex_replace(''SystemdCgroup = false'', ''SystemdCgroup = true'')
+          | regex_replace(''sandbox_image = "registry.k8s.io/pause.*"'',''sandbox_image = "registry.k8s.io/pause:3.10"'')
+          | regex_replace(''disable_apparmor = false'', ''disable_apparmor = true'') }}'
+        mode: "0644"
+
+    - name: Restart containerd
+      service:
+        name: containerd
+        state: restarted
+        enabled: yes
+      changed_when: false

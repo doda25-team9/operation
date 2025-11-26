@@ -12,8 +12,9 @@
       with_fileglob:
         - "{{ playbook_dir }}/../keys/*.pub"
 
-    - name: Disable swap 
+    - name: Disable swap
       ansible.builtin.shell: swapoff -a
+      changed_when: false
 
     - name: Remove swap entry
       ansible.builtin.lineinfile:
@@ -29,7 +30,7 @@
           br_netfilter
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
 
     - name: Load overlay module
       ansible.builtin.modprobe:
@@ -50,10 +51,16 @@
           net.bridge.bridge-nf-call-ip6tables = 1
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
 
     - name: Apply sysctl settings
       ansible.builtin.command: sysctl --system
       changed_when: false
 
-
+    - name: Configure /etc/hosts for cluster node name resolution
+      copy:
+        src: "{{ playbook_dir }}/hosts"
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: "0644"

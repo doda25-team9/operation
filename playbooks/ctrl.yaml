@@ -97,3 +97,38 @@
       ansible.builtin.debug:
         var: kubeadm_init_output.stdout_lines
       when: kubeadm_init_output is defined and kubeadm_init_output.changed
+
+    # Step 14: Configure kubectl access
+    
+    - name: Create .kube directory for vagrant user
+      ansible.builtin.file:
+        path: /home/vagrant/.kube
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: "0755"
+
+    - name: Copy admin.conf to vagrant user's .kube/config
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        owner: vagrant
+        group: vagrant
+        mode: "0600"
+        remote_src: yes
+
+    - name: Copy admin.conf to /vagrant for host access
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /vagrant/kubeconfig
+        owner: vagrant
+        group: vagrant
+        mode: "0600"
+        remote_src: yes
+
+    - name: Add KUBECONFIG to vagrant user's .bashrc
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: 'export KUBECONFIG=/home/vagrant/.kube/config'
+        state: present
+        create: yes

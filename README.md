@@ -294,3 +294,59 @@ This happens because VirtualBox conflicts with KVM. Run the following to solve t
 sudo modprobe -r kvm_intel
 sudo modprobe -r kvm
 ```
+
+### Hostname Resolution
+Every VM now receives an updated `/etc/hosts` file for node-to-node name resolution.
+
+**Test (in one of the VMs):**
+```
+cat /etc/hosts
+ping -c 1 ctrl
+ping -c 1 node-1
+ping -c 1 node-2
+```
+
+### Kubernetes Repository
+All nodes now use the official Kubernetes repository (v1.32).
+
+**Test (in one of the VMs):**
+```
+ls /etc/apt/sources.list.d
+cat /etc/apt/sources.list.d/pkgs_k8s_io_core_stable_v1_32_deb.list
+```
+
+### Installed Tools
+All nodes have the following tools installed:
+- `containerd`
+- `runc`
+- `kubeadm / kubelet / kubectl 1.32.4`
+
+**Test (in one of the VMs):**
+```
+containerd --version
+runc --version
+
+kubeadm version
+kubelet --version
+kubectl version --client=true
+```
+
+### containerd Configuration
+`containerd` is configured for Kubernetes:
+- `disable_apparmor = true`
+- `SystemdCgroup = true`
+- `sandbox_image = "registry.k8s.io/pause:3.10"`
+
+**Test (in one of the VMs):**
+```
+sudo grep SystemdCgroup /etc/containerd/config.toml
+sudo grep sandbox_image /etc/containerd/config.toml
+sudo grep disable_apparmor /etc/containerd/config.toml
+```
+
+Additionally you can check that the status of containerd is active: `systemctl status containerd`
+
+### kubelet (to be removed)
+`kubelet` is installed and enabled. You can check by using: `systemctl is-enabled kubelet`
+
+However, by running `systemctl status kubelet` you will see that it fails. That is expected to happen before Step 13, because it requires a valid Kubernetes configuration (`/var/lib/kubelet/config.yaml`) that does not exist yet. It should get fixed once Step 13 is implemented.

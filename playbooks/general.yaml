@@ -1,7 +1,7 @@
 ---
 # General setup tasks for all VMs
 - name: General system setup
-  hosts: ctrl
+  hosts: all
   become: yes
   tasks:
     - name: Register public SSH keys

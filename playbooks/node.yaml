@@ -33,6 +33,8 @@
 
     - name: Hold Kubernetes packages
       command: apt-mark hold kubeadm kubelet kubectl containerd runc
+      register: hold_result
+      changed_when: "'hold' not in hold_result.stdout"
 
     # Step 12: Enable kubelet
     - name: Enable and start kubelet
@@ -45,6 +47,7 @@
     - name: Generate default containerd config
       command: containerd config default
       register: containerd_config
+      changed_when: false
 
     - name: Ensure /etc/containerd directory exists
       file:
@@ -66,3 +69,4 @@
         name: containerd
         state: restarted
         enabled: yes
+      changed_when: false

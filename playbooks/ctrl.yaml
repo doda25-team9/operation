@@ -1,9 +1,20 @@
 ---
 # Controller-specific setup tasks
 - name: Setup Kubernetes controller
-  hosts: all
+  hosts: ctrl
   become: yes
   tasks:
-    - name: Test controller provisioning
-      debug:
-        msg: "Controller provisioning is working"
+    # Step 9: Add Kubernetes repository
+    - name: Add Kubernetes apt GPG key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+        state: present
+
+    - name: Update apt cache after adding Kubernetes repo
+      ansible.builtin.apt:
+        update_cache: yes

@@ -1,9 +1,20 @@
 ---
 # Worker node setup tasks
 - name: Setup worker nodes
-  hosts: all
+  hosts: node-*
   become: yes
   tasks:
-    - name: Test worker provisioning
-      debug:
-        msg: "Worker provisioning is working"
+    # Step 9: Add Kubernetes repository
+    - name: Add Kubernetes apt GPG key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+        state: present
+
+    - name: Update apt cache after adding Kubernetes repo
+      ansible.builtin.apt:
+        update_cache: yes

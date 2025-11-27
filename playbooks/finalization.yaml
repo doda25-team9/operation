@@ -1,0 +1,40 @@
+---
+# Final Installation Steps
+- name: Final installations
+  hosts: all
+  become: yes
+  tasks:
+    # Step 20: Install MetalLB
+    - name: Install MetalLB CRDs
+      ansible.builtin.shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/refs/tags/v0.14.9/config/manifests/metallb-native.yaml
+
+    # Step 20: Wait Step
+    - name: Wait for MetalLB provisioning
+      ansible.builtin.shell: kubectl wait -n metallb-system -l app=metallb,component=controller --for=condition=ready pod --timeout=60s
+
+    # Step 20: Add IPAddressPool and Configure L2Advertisement
+    - name: Add IPAdressPool and L2Advertisement
+      ansible.builtin.copy:
+        dest: /metallb_config.yaml
+        content: |
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: default
+            namespace: metallb-system
+          spec:
+            addresses:
+              - 192.168.56.90-192.168.56.99
+          
+          ---
+          apiVersion: metallb.io/v1beta1
+          kind: L2Advertisement
+          metadata:
+            name: l2advertisement
+            namespace: metallb-system
+
+    - name: Apply MetalLb Config
+      ansible.builtin.shell: kubectl apply -f /metallb_config.yaml
+
+      
+

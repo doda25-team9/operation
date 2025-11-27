@@ -135,16 +135,90 @@
 
     # Step 15: Install Flannel pod network
 
-    - name: Download and modify Flannel manifest
+    - name: Create manifests directory
+      ansible.builtin.file:
+        path: /home/vagrant/manifests
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: "0755"
+
+    - name: Download Flannel manifest
+      ansible.builtin.get_url:
+        url: https://github.com/flannel-io/flannel/releases/download/v{{ flannel_version }}/kube-flannel.yml
+        dest: /home/vagrant/manifests/kube-flannel-original.yml
+        owner: vagrant
+        group: vagrant
+        mode: "0644"
+        force: no
+
+    - name: Check if modified Flannel manifest exists
+      ansible.builtin.stat:
+        path: /home/vagrant/manifests/kube-flannel.yml
+      register: flannel_modified
+
+    - name: Modify Flannel manifest to use eth1 interface
       ansible.builtin.shell: |
-        mkdir -p /home/vagrant/manifests
-        curl -L https://github.com/flannel-io/flannel/releases/download/v0.26.7/kube-flannel.yml \
-          -o /home/vagrant/manifests/kube-flannel.yml
+        cp /home/vagrant/manifests/kube-flannel-original.yml /home/vagrant/manifests/kube-flannel.yml
         sed -i '/--kube-subnet-mgr/a\        - --iface=eth1' /home/vagrant/manifests/kube-flannel.yml
       args:
         creates: /home/vagrant/manifests/kube-flannel.yml
+      when: not flannel_modified.stat.exists
 
     - name: Apply Flannel manifest
       ansible.builtin.command: kubectl apply -f /home/vagrant/manifests/kube-flannel.yml
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
+      register: flannel_apply
+      changed_when: "'created' in flannel_apply.stdout or 'configured' in flannel_apply.stdout"
+
+
+    # Step 16: Install Helm
+
+    - name: Check if Helm is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/helm
+      register: helm_check
+
+    - name: Download Helm installation script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: '0700'
+      when: not helm_check.stat.exists
+
+    - name: Install Helm using official script
+      ansible.builtin.command: /tmp/get_helm.sh
+      environment:
+        HELM_INSTALL_DIR: /usr/local/bin
+      when: not helm_check.stat.exists
+      register: helm_install
+      changed_when: helm_install.rc == 0
+
+    - name: Remove Helm installation script
+      ansible.builtin.file:
+        path: /tmp/get_helm.sh
+        state: absent
+      when: not helm_check.stat.exists
+
+    - name: Verify Helm installation
+      ansible.builtin.command: helm version
+      register: helm_version
+      changed_when: false
+
+    # Step 17: Install helm-diff plugin
+
+    - name: Check if helm-diff plugin is already installed
+      ansible.builtin.stat:
+        path: /home/vagrant/.local/share/helm/plugins/helm-diff
+      become_user: vagrant
+      register: helm_diff_check
+
+    - name: Install helm-diff plugin
+      ansible.builtin.command: helm plugin install https://github.com/databus23/helm-diff
+      become_user: vagrant
+      environment:
+        HOME: /home/vagrant
+      when: not helm_diff_check.stat.exists
+      register: helm_diff_install
+      changed_when: helm_diff_install.rc == 0

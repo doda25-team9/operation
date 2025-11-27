@@ -132,3 +132,19 @@
         line: 'export KUBECONFIG=/home/vagrant/.kube/config'
         state: present
         create: yes
+
+    # Step 15: Install Flannel pod network
+
+    - name: Download and modify Flannel manifest
+      ansible.builtin.shell: |
+        mkdir -p /home/vagrant/manifests
+        curl -L https://github.com/flannel-io/flannel/releases/download/v0.26.7/kube-flannel.yml \
+          -o /home/vagrant/manifests/kube-flannel.yml
+        sed -i '/--kube-subnet-mgr/a\        - --iface=eth1' /home/vagrant/manifests/kube-flannel.yml
+      args:
+        creates: /home/vagrant/manifests/kube-flannel.yml
+
+    - name: Apply Flannel manifest
+      ansible.builtin.command: kubectl apply -f /home/vagrant/manifests/kube-flannel.yml
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

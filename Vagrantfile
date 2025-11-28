@@ -6,7 +6,7 @@
 
 NUM_WORKERS = 2              # Number of worker nodes (change to scale cluster)
 CONTROLLER_MEMORY = 4096     # Controller RAM in MB (4GB)
-CONTROLLER_CPUS = 1          # Controller CPU cores
+CONTROLLER_CPUS = 2          # Controller CPU cores
 WORKER_MEMORY = 6144         # Worker RAM in MB (6GB)
 WORKER_CPUS = 2              # Worker CPU cores
 

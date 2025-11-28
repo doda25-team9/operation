@@ -143,3 +143,10 @@ Reviewed the following Pull Request:
 - [Steps 8-12: Kubernetes Preparation - PR #5 operation](https://github.com/doda25-team9/operation/pull/5)
 
 
+### **Adomas**
+
+Implemented step 22:
+- [Step 22: Install Kubernetes Dashboard by ABagdonas - PR #11 operation](https://github.com/doda25-team9/operation/pull/11)
+
+Reviewed the following Pull Request:
+- [Initial implementation for step 20 and 21 by ZofiaRT - PR #10 operation](https://github.com/doda25-team9/operation/pull/10)

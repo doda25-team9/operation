@@ -1,7 +1,7 @@
 ---
 # Final Installation Steps
 - name: Final installations
-  hosts: all
+  hosts: ctrl
   become: yes
   tasks:
     # Step 20: Install MetalLB
@@ -10,7 +10,7 @@
 
     # Step 20: Wait Step
     - name: Wait for MetalLB provisioning
-      ansible.builtin.shell: kubectl wait -n metallb-system -l app=metallb,component=controller --for=condition=ready pod --timeout=60s
+      ansible.builtin.shell: kubectl wait -n metallb-system -l app.kubernetes.io/component=controller --for=condition=ready pod --timeout=60s
 
     # Step 20: Add IPAddressPool and Configure L2Advertisement
     - name: Add IPAdressPool and L2Advertisement
@@ -35,6 +35,20 @@
 
     - name: Apply MetalLb Config
       ansible.builtin.shell: kubectl apply -f /metallb_config.yaml
+
+
+    # Step 21: Install Nginx Ingress Controller
+    - name: Add the Helm ingress-nginx repository
+      kubernetes.core.helm_repository:
+        name: ingress-nginx
+        repo_url: "https://kubernetes.github.io/ingress-nginx/"
+
+    - name: Install ingress-nginx chart
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: ingress-nginx
+        create_namespace: true
 
       
 

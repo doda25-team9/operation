@@ -104,7 +104,7 @@ Took part in the following reviews:
 - [Add Kubernetes cluster provisioning (Steps 13-17) - PR #6 operation](https://github.com/doda25-team9/operation/pull/6)
 - [Steps 8-12: Kubernetes Preparation by AntonioLupu - PR #5 operation](https://github.com/doda25-team9/operation/pull/5)
 
-### Antonio: 
+### **Antonio**
 
 Implemented steps 8-12:
 - [Steps 8-12: Kubernetes Preparation - PR #5 operation](https://github.com/doda25-team9/operation/pull/5)
@@ -113,7 +113,7 @@ Implemented steps 8-12:
 Reviewed the following Pull Requests:
 - [Ansible provisioning: Step 4, 5, 6 and 7 - PR #4 operation](https://github.com/doda25-team9/operation/pull/4)
 
-### Johan: 
+### **Johan**
 
 Implemented steps 4-7:
 - [Ansible provisioning: Step 4, 5, 6 and 7 - PR #4 operation](https://github.com/doda25-team9/operation/pull/4)
@@ -125,7 +125,7 @@ For A1 I also made a fix:
 - [Reverse patch and delete branch protection rule by - PR #4 lib-version](https://github.com/doda25-team9/lib-version/pull/4)
 
 
-### Konstantina: 
+### **Konstantina**
 
 Implemented steps 1-3:
 - [Steps 1 to 3 of Assignment 2 - VMs creation, Networking and Ansible Provisioning - PR #3 operation](https://github.com/doda25-team9/operation/pull/3)
@@ -134,7 +134,7 @@ Reviewed the following Pull Requests:
 - [Implementation of steps 18 and 19 - PR #9 operation](https://github.com/doda25-team9/operation/pull/9)
 - [Move steps 9-12 from node/ctrl.yaml to general.yaml - PR #8 operation](https://github.com/doda25-team9/operation/pull/8)
 
-### Medon
+### **Medon**
 
 Implemented steps 13-17:
 - [Add Kubernetes cluster provisioning (Steps 13-17)by MedonAbraham-Tu - PR #6 operation](https://github.com/doda25-team9/operation/pull/6)

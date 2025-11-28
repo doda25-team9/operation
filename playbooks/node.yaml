@@ -4,4 +4,6 @@
   hosts: node-*
   become: yes
   tasks:
-    
+    - name: Worker node Placeholder
+      debug:
+        msg: "Worker-specific tasks to be implemented"

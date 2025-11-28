@@ -346,7 +346,83 @@ sudo grep disable_apparmor /etc/containerd/config.toml
 
 Additionally you can check that the status of containerd is active: `systemctl status containerd`
 
-### kubelet (to be removed)
-`kubelet` is installed and enabled. You can check by using: `systemctl is-enabled kubelet`
+### kubelet
+`kubelet` is installed and enabled. You can check that it's enabled by using: `systemctl is-enabled kubelet`.
 
-However, by running `systemctl status kubelet` you will see that it fails. That is expected to happen before Step 13, because it requires a valid Kubernetes configuration (`/var/lib/kubelet/config.yaml`) that does not exist yet. It should get fixed once Step 13 is implemented.
+You can check its status by running `systemctl status kubelet`.
+
+## Kubernetes Cluster (Steps 13-17)
+
+The controller node is now configured as a fully functional Kubernetes cluster. This cluster can manage containerized applications, but requires worker nodes to actually run those applications (coming in Steps 18-19).
+
+**What Kubernetes provides:**
+- **Control Plane**: Manages the cluster, schedules workloads, and maintains desired state
+- **kubectl**: Command-line tool to interact with the cluster
+- **Flannel CNI**: Network layer that allows pods to communicate across nodes
+- **Helm**: Package manager for Kubernetes applications
+
+**What ctrl.yaml configures:**
+- **Step 13**: Initializes Kubernetes cluster with kubeadm (API server listens at 192.168.56.100:6443, pod network uses 10.244.0.0/16)
+- **Step 14**: Sets up kubectl access for vagrant user (config at `/home/vagrant/.kube/config`) and copies kubeconfig to `/vagrant/kubeconfig` for host access
+- **Step 15**: Installs Flannel CNI for pod networking (configured to use eth1 interface, which is the host-only network adapter for cluster communication)
+- **Step 16**: Installs Helm 3 package manager using official installation script from GitHub
+- **Step 17**: Installs helm-diff plugin to preview changes before applying Helm upgrades
+
+**Test the cluster:**
+```bash
+vagrant ssh ctrl
+
+# Check cluster node status
+kubectl get nodes
+# Expected: ctrl   Ready   control-plane
+# "Ready" means the node can accept workloads
+
+# Check system pods (cluster management components)
+kubectl get pods -n kube-system
+# These pods run the control plane: API server, scheduler, controller manager, etc.
+
+# Check Flannel networking
+kubectl get pods -n kube-flannel
+# Flannel manages pod-to-pod networking across the cluster
+
+# Verify Helm installation
+helm version
+# Helm allows you to install pre-packaged Kubernetes applications
+
+# Verify helm-diff plugin
+helm plugin list
+# helm-diff shows what changes before you apply them
+
+exit
+```
+
+**Current limitation:** 
+By default, Kubernetes prevents regular application pods from running on control plane nodes. Pods will stay in "Pending" state until worker nodes join (Steps 18-19).
+
+**Using kubectl:**
+
+kubectl is the main tool for interacting with Kubernetes. You can use it from inside the controller VM or from your host machine.
+
+From inside controller VM:
+```bash
+vagrant ssh ctrl
+kubectl get nodes              # List cluster nodes
+kubectl get pods               # List pods in default namespace
+kubectl get pods --all-namespaces  # List all pods in all namespaces
+```
+From host machine:
+```bash
+
+# Point kubectl to the cluster using the copied config file
+export KUBECONFIG=$(pwd)/kubeconfig
+kubectl get nodes
+```
+
+**Note:** 
+- This did not work during our testing on macOS with Apple Silicon (M3 chip), resulting in a "no route to host" error. This appears to be a known VirtualBox networking limitation on ARM-based Macs. kubectl works perfectly inside the VM via `vagrant ssh ctrl`. We will ask for clarification if this affects testing/grading.
+- The final steps for nodes (`Run join command`) will probably fail if you are using Linux as it is a common issue. We tested it on MacOS and it works. We will clarify this with the lecturers.
+
+
+**Understanding the shared folder:**
+
+Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.

@@ -418,7 +418,9 @@ export KUBECONFIG=$(pwd)/kubeconfig
 kubectl get nodes
 ```
 
-**Note:** This did not work during our testing on macOS with Apple Silicon (M3 chip), resulting in a "no route to host" error. This appears to be a known VirtualBox networking limitation on ARM-based Macs. kubectl works perfectly inside the VM via `vagrant ssh ctrl`. We will ask for clarification if this affects testing/grading.
+**Note:** 
+- This did not work during our testing on macOS with Apple Silicon (M3 chip), resulting in a "no route to host" error. This appears to be a known VirtualBox networking limitation on ARM-based Macs. kubectl works perfectly inside the VM via `vagrant ssh ctrl`. We will ask for clarification if this affects testing/grading.
+- The final steps for nodes (`Run join command`) will probably fail if you are using Linux as it is a common issue. We tested it on MacOS and it works. We will clarify this with the lecturers.
 
 
 **Understanding the shared folder:**

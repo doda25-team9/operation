@@ -51,4 +51,19 @@
         create_namespace: true
 
       
+    # Step 22: Install Kubernetes Dashboard
+    - name: Add kubernetes-dashboard repository
+      ansible.builtin.command: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 
+    - name: Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+      ansible.builtin.command: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+
+    - name: Apply admin-user ServiceAccount and RBAC
+      kubernetes.core.k8s:
+        state: present
+        src: manifests/dashboard-admin-user.yml
+
+    - name: Create Ingress for Kubernetes Dashboard
+      kubernetes.core.k8s:
+        state: present
+        src: manifests/dashboard-ingress.yml

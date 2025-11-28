@@ -347,7 +347,7 @@ sudo grep disable_apparmor /etc/containerd/config.toml
 Additionally you can check that the status of containerd is active: `systemctl status containerd`
 
 ### kubelet
-`kubelet` is installed and enabled. You can that it's enabled by using: `systemctl is-enabled kubelet`.
+`kubelet` is installed and enabled. You can check that it's enabled by using: `systemctl is-enabled kubelet`.
 
 You can check its status by running `systemctl status kubelet`.
 

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/doda25-team9/app:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: env-config-map
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: app-service
+spec:
+  selector:
+    app: app
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  defaultBackend:
+    service:
+      name: app-service
+      port: 
+        number: 8080

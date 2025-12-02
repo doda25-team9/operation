@@ -456,3 +456,182 @@ To start the app and model-service using kubernetes, run:
 ```
 kubectl apply -f k8s -R
 ```
+
+### Access Application
+
+#### Option A: kubectl port-forward
+Same port every time (8080), works on any Kubernetes cluster.
+
+**Step 1: Add hostname to /etc/hosts (one-time setup)**
+```bash
+echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+```
+
+Verify it was added:
+```bash
+cat /etc/hosts | grep sms-checker
+# Should show: 127.0.0.1 sms-checker.local
+```
+
+**Step 2: Port-forward to Ingress Controller**
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+```
+
+Keep this terminal open. You should see:
+```
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+```
+
+**Step 3: Access the application**
+
+In browser:
+```
+http://sms-checker.local:8080/sms/
+```
+
+Or with curl:
+```bash
+curl http://sms-checker.local:8080/sms/
+```
+
+**How It Works**
+
+1. Browser sends request to `sms-checker.local:8080`
+2. `/etc/hosts` resolves `sms-checker.local` to `127.0.0.1`
+3. `kubectl port-forward` tunnels `localhost:8080` to Ingress Controller port 80
+4. Ingress Controller receives request with `Host: sms-checker.local` header
+5. Ingress rules match the hostname and route to `app-service`
+6. App responds
+
+**Traffic flow:** Browser → port-forward → Ingress Controller → app-service
+
+This satisfies "accessing through Ingress" - the Ingress Controller processes routing rules.
+
+**Cleanup**
+
+**Stop port-forward:** Press `Ctrl+C` in the port-forward terminal
+
+**Remove hostname (optional):**
+```bash
+sudo sed -i '' '/sms-checker.local/d' /etc/hosts
+```
+
+
+### Option B: minikube service
+
+**Alternative method using Minikube's service tunnel command.**
+
+**Note:** Port number changes each time you restart the tunnel.
+
+**Step 1: Add hostname to /etc/hosts (one-time setup, if not already done)**
+```bash
+echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+```
+
+**Step 2: Start minikube service tunnel**
+```bash
+minikube service -n ingress-nginx ingress-nginx-controller
+```
+
+Keep this terminal open. You'll see output like:
+```
+http://127.0.0.1:54471
+http://127.0.0.1:54472
+```
+
+**Note the first port number** (e.g., `54471` - yours will be different each time)
+
+**Step 3: Access the application**
+
+Replace `PORT` with your actual port number from Step 2:
+
+In browser:
+```
+http://sms-checker.local:PORT/sms/
+```
+
+Example: `http://sms-checker.local:54471/sms/`
+
+Or with curl:
+```bash
+curl http://sms-checker.local:54471/sms/
+```
+
+#### How It Works
+
+1. `minikube service` creates a tunnel from localhost to the Ingress Controller
+2. Browser sends request to `sms-checker.local:PORT`
+3. `/etc/hosts` resolves `sms-checker.local` to `127.0.0.1`
+4. Tunnel forwards traffic to Ingress Controller
+5. Ingress Controller receives request with `Host: sms-checker.local` header
+6. Ingress rules match the hostname and route to `app-service`
+
+**Traffic flow:** Browser → minikube tunnel → Ingress Controller → app-service
+
+#### Important Notes
+
+- Port changes each time you restart the tunnel - check the output for the current port
+- The tunnel must stay running while you use the app
+- Stop with `Ctrl+C` in the tunnel terminal
+
+
+### Option C: Direct IP Access (Linux Only)
+
+**This method works on Linux. Did not work on macOS with M4 chip.**
+
+**Step 1: Get the Ingress Controller URL**
+```bash
+minikube service list
+```
+
+Look for `ingress-nginx-controller` and note the URL:
+```
+│ ingress-nginx │ ingress-nginx-controller │ http/80 │ http://192.168.49.2:31377 │
+```
+Use this URL.
+
+
+**Step 2: Access the application**
+
+Append `/sms/` to the URL:
+```bash
+curl http://192.168.49.2:31377/sms/
+```
+
+Or in browser:
+```
+http://192.168.49.2:31377/sms/
+```
+
+#### Why This Doesn't Work on macOS/Windows
+
+**The Problem: Network Isolation**
+
+When you run `minikube service list` on macOS, you see the same URL:
+```
+http://192.168.49.2:31377
+```
+
+But when you try to access it:
+```bash
+curl http://192.168.49.2:31377/sms/
+# Result: Connection timeout
+```
+
+**Why:**
+
+1. **Docker creates isolated network:**
+   - Minikube runs in Docker container on network `192.168.49.x`
+   - macOS host is on different network `192.168.0.x` (or `10.x.x.x`)
+
+2. **No direct route between networks:**
+   - macOS cannot reach Docker's internal network
+   - This is Docker's security/isolation design on macOS
+
+3. **Linux is different:**
+   - Linux Docker daemon runs directly on host
+   - No hypervisor layer (unlike macOS)
+   - Host can access container networks directly
+

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.modelService.name }}-deployment
+  labels:
+    app: {{ .Values.modelService.labels.app }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.modelService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.modelService.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.modelService.labels.app }}
+    spec:
+      containers:
+      - name: model
+        image: "{{ .Values.modelService.image.repository }}:{{ .Values.modelService.image.tag }}"
+        imagePullPolicy: {{ .Values.modelService.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.modelService.service.port }}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.secret.name }}
+        volumeMounts:
+          - name: model-storage
+            mountPath: /models
+      volumes:
+        - name: model-storage
+          hostPath:
+            path: {{ .Values.modelService.volume.hostPath }}
+            type: DirectoryOrCreate

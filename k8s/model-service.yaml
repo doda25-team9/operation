@@ -19,7 +19,7 @@ spec:
         - containerPort: 8081
         envFrom:
           - secretRef:
-              name: smtp-secret
+              name: secret
         volumeMounts:
           - name: model-storage
             mountPath: /models

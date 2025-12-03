@@ -463,6 +463,7 @@ kubectl apply -f k8s -R
 Same port every time (8080), works on any Kubernetes cluster.
 
 **Step 1: Add hostname to /etc/hosts (one-time setup)**
+Substitute 127.0.0.1 accordingly. You can find it by running `minikube ip`.
 ```bash
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
 ```

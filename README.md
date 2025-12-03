@@ -519,7 +519,7 @@ sudo sed -i '' '/sms-checker.local/d' /etc/hosts
 ```
 
 
-### Option B: minikube service
+### Option B: minikube service (macOS only)
 
 **Alternative method using Minikube's service tunnel command.**
 
@@ -575,63 +575,3 @@ curl http://sms-checker.local:54471/sms/
 - Port changes each time you restart the tunnel - check the output for the current port
 - The tunnel must stay running while you use the app
 - Stop with `Ctrl+C` in the tunnel terminal
-
-
-### Option C: Direct IP Access (Linux Only)
-
-**This method works on Linux. Did not work on macOS with M4 chip.**
-
-**Step 1: Get the Ingress Controller URL**
-```bash
-minikube service list
-```
-
-Look for `ingress-nginx-controller` and note the URL:
-```
-│ ingress-nginx │ ingress-nginx-controller │ http/80 │ http://192.168.49.2:31377 │
-```
-Use this URL.
-
-
-**Step 2: Access the application**
-
-Append `/sms/` to the URL:
-```bash
-curl http://192.168.49.2:31377/sms/
-```
-
-Or in browser:
-```
-http://192.168.49.2:31377/sms/
-```
-
-#### Why This Doesn't Work on macOS/Windows
-
-**The Problem: Network Isolation**
-
-When you run `minikube service list` on macOS, you see the same URL:
-```
-http://192.168.49.2:31377
-```
-
-But when you try to access it:
-```bash
-curl http://192.168.49.2:31377/sms/
-# Result: Connection timeout
-```
-
-**Why:**
-
-1. **Docker creates isolated network:**
-   - Minikube runs in Docker container on network `192.168.49.x`
-   - macOS host is on different network `192.168.0.x` (or `10.x.x.x`)
-
-2. **No direct route between networks:**
-   - macOS cannot reach Docker's internal network
-   - This is Docker's security/isolation design on macOS
-
-3. **Linux is different:**
-   - Linux Docker daemon runs directly on host
-   - No hypervisor layer (unlike macOS)
-   - Host can access container networks directly
-

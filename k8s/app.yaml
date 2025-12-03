@@ -6,11 +6,13 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: app
+      app: sms-checker
+      component: app
   template:
     metadata:
       labels:
-        app: app
+        app: sms-checker
+        component: app
     spec:
       containers:
       - name: app
@@ -27,7 +29,8 @@ metadata:
   name: app-service
 spec:
   selector:
-    app: app
+    app: sms-checker
+    component: app
   ports:
     - port: 8080
       targetPort: 8080
@@ -38,8 +41,15 @@ kind: Ingress
 metadata:
   name: app-ingress
 spec:
-  defaultBackend:
-    service:
-      name: app-service
-      port: 
-        number: 8080
+  ingressClassName: nginx
+  rules:
+  - host: sms-checker.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: app-service
+            port:
+              number: 8080

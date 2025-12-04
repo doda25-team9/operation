@@ -642,6 +642,8 @@ kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 
 Access in browser: `http://sms-checker.local:8080/sms/`
 
+
+
 ### Customization
 
 Override default values during installation:
@@ -655,6 +657,12 @@ helm install sms-checker ./helm-chart --set ingress.host=myapp.local
 
 # Disable ingress
 helm install sms-checker ./helm-chart --set ingress.enabled=false
+
+
+# Provide SMTP credentials
+helm install sms-checker ./helm-chart \
+  --set secret.smtpUser=real@email.com \
+  --set secret.smtpPass=realpassword
 
 # Use custom values file
 helm install sms-checker ./helm-chart -f my-values.yaml

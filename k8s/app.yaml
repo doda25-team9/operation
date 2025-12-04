@@ -62,11 +62,4 @@ spec:
             name: app-service
             port:
               number: 8080
-      - path: /predict
-        pathType: Prefix
-        backend:
-          service:
-            name: model-service
-            port:
-              number: 8081
 

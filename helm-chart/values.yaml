@@ -53,16 +53,22 @@ secret:
 kube-prometheus-stack:
   fullnameOverride: "prometheus"
 
-  grafana:
-    enabled: true
-
   prometheus:
     enabled: true
     prometheusSpec:
       serviceMonitorSelector:
         matchLabels:
-          release: prometheus  
-  # Alert manageer needed
+          release: prometheus
+      alertingEndpoints:
+      - name: prometheus-alertmanager
+        namespace: default
+        port: http-web
+        scheme: http
+          
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      configSecret: alertmanager-prometheus-alertmanager
 
-
-
+  grafana:
+    enabled: true

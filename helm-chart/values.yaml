@@ -49,3 +49,22 @@ secret:
   name: secret
   smtpUser: "placeholder-user"
   smtpPass: "placeholder-password"
+
+kube-prometheus-stack:
+  fullnameOverride: "prometheus"
+
+  grafana:
+    enabled: true
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector:
+        matchLabels:
+          release: prometheus
+
+  # Alert manageer needed
+
+
+

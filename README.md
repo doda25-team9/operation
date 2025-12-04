@@ -744,3 +744,159 @@ kubectl get all -l app.kubernetes.io/instance=sms-checker
 helm uninstall sms-checker
 helm install sms-checker ./helm-chart
 ```
+
+
+## Prometheus Monitoring Setup
+
+### Prerequisites
+
+- Minikube installed
+- kubectl installed
+- Helm 3 installed
+- Docker installed
+
+---
+
+### Installation Steps
+
+### 1. Start Minikube, if you haven't already
+```bash
+minikube start --driver=docker
+minikube addons enable ingress
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+```
+
+---
+
+### 2. Install Application with Monitoring
+```bash
+# Download Prometheus dependency
+cd helm-chart
+helm dependency update
+cd ..
+
+# Install everything (app + Prometheus)
+helm install sms-checker ./helm-chart
+
+# Wait for pods
+kubectl wait --for=condition=ready pod -l component=app --timeout=300s
+```
+
+---
+
+### 3. Verify Application Works
+```bash
+# Port-forward to app
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**In another terminal:**
+```bash
+# Test metrics endpoint
+curl http://localhost:8080/metrics
+```
+
+---
+
+### 4. Access Prometheus UI
+```bash
+kubectl port-forward svc/prometheus-prometheus 9090:9090
+```
+
+**Open browser:** http://localhost:9090
+
+---
+
+## View Metrics in Prometheus
+
+### Check Targets
+
+1. Go to **Status** → **Targets**
+2. Look for `serviceMonitor/default/app-monitor/0`
+3. Verify **State = UP** (3/3 pods)
+
+### Query Metrics
+
+1. Click **Graph** tab
+2. Type: `sms_requests_total` (or any other metric you prefer, check table metrics below)
+3. Click **Execute**
+
+---
+
+## Generate Test Traffic
+```bash
+# Port-forward (if not running)
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**In another terminal:**
+```bash
+# Send 10 requests
+for i in {1..10}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test message"}' 
+  sleep 1
+done
+```
+
+**Refresh Prometheus query** - metrics should update!
+
+---
+
+## Available Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `sms_requests_total` | Counter | Total SMS prediction requests |
+| `predictions_result_total` | Counter | Predictions by result (spam/ham) |
+| `active_users` | Gauge | Current active users |
+| `request_duration` | Histogram | Request duration distribution (seconds) |
+| `sms_length` | Histogram | SMS message length distribution |
+
+---
+
+## Useful Queries
+```promql
+# Total requests
+sms_requests_total
+
+# Requests per second
+rate(sms_requests_total[5m])
+
+# Spam vs Ham totals
+sum by (result) (predictions_result_total)
+
+# Average request duration
+rate(request_duration_sum[5m]) / rate(request_duration_count[5m])
+
+```
+
+---
+
+
+---
+
+## Clean Up
+```bash
+# Uninstall application
+helm uninstall sms-checker
+
+# Delete cluster
+minikube delete
+```
+
+---
+
+## Troubleshooting
+
+
+**Service name different:**
+```bash
+# Find correct service
+kubectl get svc | grep prometheus
+# Use the one with port 9090/TCP (not "operated")
+```

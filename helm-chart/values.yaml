@@ -1,0 +1,51 @@
+app:
+  name: app
+  replicas: 3
+  
+  image:
+    repository: ghcr.io/doda25-team9/app
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  service:
+    name: app-service
+    port: 8080
+    type: ClusterIP
+  
+  labels:
+    app: sms-checker
+    component: app
+
+modelService:
+  name: model
+  replicas: 2
+  
+  image:
+    repository: ghcr.io/doda25-team9/model-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  service:
+    name: model-service
+    port: 8081
+    type: ClusterIP
+  
+  labels:
+    app: model-service
+  
+  volume:
+    hostPath: /mnt/shared/models
+
+ingress:
+  enabled: true
+  name: app-ingress
+  className: nginx
+  host: sms-checker.local
+
+configMap:
+  name: env-config-map
+
+secret:
+  name: secret
+  smtpUser: "placeholder-user"
+  smtpPass: "placeholder-password"

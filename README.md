@@ -463,6 +463,7 @@ kubectl apply -f k8s -R
 Same port every time (8080), works on any Kubernetes cluster.
 
 **Step 1: Add hostname to /etc/hosts (one-time setup)**
+Substitute 127.0.0.1 accordingly. You can find it by running `minikube ip`.
 ```bash
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
 ```
@@ -575,3 +576,179 @@ curl http://sms-checker.local:54471/sms/
 - Port changes each time you restart the tunnel - check the output for the current port
 - The tunnel must stay running while you use the app
 - Stop with `Ctrl+C` in the tunnel terminal
+
+
+## Helm Chart Deployment (Assignment 3)
+
+The Helm chart provides a streamlined way to deploy the complete SMS Checker application to any Kubernetes cluster.
+
+### Prerequisites
+
+- Kubernetes cluster running (Minikube or provisioned cluster)
+- Helm 3.x installed
+- kubectl configured to access your cluster
+- Nginx Ingress Controller installed
+
+For Minikube:
+```bash
+minikube start
+minikube addons enable ingress
+
+# Wait for ingress controller to be ready
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+```
+
+### Quick Start
+
+Deploy the complete application:
+```bash
+cd operation
+helm install sms-checker ./helm-chart
+```
+
+This deploys:
+- Application service (3 replicas)
+- Model service (2 replicas)
+- Services (app-service, model-service)
+- Ingress (sms-checker.local)
+- ConfigMap (environment variables)
+- Secret (SMTP credentials)
+
+### Verify Deployment
+```bash
+helm status sms-checker
+kubectl get all
+kubectl get ingress
+```
+
+Expected output:
+- 3 app pods: Running
+- 2 model-service pods: Running
+- 2 services, 1 ingress, 1 configmap, 1 secret
+
+All pods should be in Running state once images are pulled from the registry.
+
+### Access Application
+```bash
+# Add hostname to /etc/hosts
+echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+
+# Port-forward Ingress Controller
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+```
+
+Access in browser: `http://sms-checker.local:8080/sms/`
+
+
+
+### Customization
+
+Override default values during installation:
+
+```bash
+# Change replicas
+helm install sms-checker ./helm-chart --set app.replicas=5
+
+# Change hostname
+helm install sms-checker ./helm-chart --set ingress.host=myapp.local
+
+# Disable ingress
+helm install sms-checker ./helm-chart --set ingress.enabled=false
+
+
+# Provide SMTP credentials
+helm install sms-checker ./helm-chart \
+  --set secret.smtpUser=real@email.com \
+  --set secret.smtpPass=realpassword
+
+# Use custom values file
+helm install sms-checker ./helm-chart -f my-values.yaml
+```
+
+Verify changes:
+```bash
+kubectl get pods -l component=app                              # Check replica count
+kubectl get ingress app-ingress -o jsonpath='{.spec.rules[0].host}'  # Check hostname
+```
+
+### Management
+```bash
+# View status
+helm status sms-checker
+
+# List releases
+helm list
+
+# Upgrade
+helm upgrade sms-checker ./helm-chart --set app.replicas=5
+
+# Rollback
+helm rollback sms-checker
+
+# Uninstall
+helm uninstall sms-checker
+```
+
+### Configuration Options
+
+Key values (see `helm-chart/values.yaml` for complete list):
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `app.replicas` | Number of app pods | `3` |
+| `modelService.replicas` | Number of model-service pods | `2` |
+| `ingress.enabled` | Enable/disable Ingress | `true` |
+| `ingress.host` | Hostname for accessing app | `sms-checker.local` |
+| `secret.smtpUser` | SMTP username | `placeholder-user` |
+| `secret.smtpPass` | SMTP password | `placeholder-password` |
+
+### Testing
+
+**Test upgrade functionality:**
+```bash
+helm upgrade sms-checker ./helm-chart --set app.replicas=5
+kubectl get pods -l component=app  # Verify 5 pods running
+```
+
+**Test configuration:**
+```bash
+# Verify ConfigMap values
+kubectl get configmap env-config-map -o jsonpath='{.data.MODEL_HOST}'
+# Should output: http://model-service:8081
+
+# Verify app pods can read ConfigMap
+kubectl exec deployment/app-deployment -- env | grep MODEL_HOST
+```
+
+**Test portability:**
+```bash
+# Deploy to different cluster
+minikube start -p test-cluster
+minikube addons enable ingress -p test-cluster
+helm install test ./helm-chart
+```
+
+### Troubleshooting
+```bash
+# Check pod status
+kubectl get pods
+kubectl describe pod <pod-name>
+kubectl logs <pod-name>
+
+# Check ingress
+kubectl describe ingress app-ingress
+
+# Check configuration
+kubectl get configmap env-config-map -o yaml
+kubectl get secret secret
+
+# View all release resources
+kubectl get all -l app.kubernetes.io/instance=sms-checker
+
+# If installation fails, clean up and retry
+helm uninstall sms-checker
+helm install sms-checker ./helm-chart
+```

@@ -5,7 +5,7 @@ app:
   image:
     repository: ghcr.io/doda25-team9/app
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   
   service:
     name: app-service
@@ -23,7 +23,7 @@ modelService:
   image:
     repository: ghcr.io/doda25-team9/model-service
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   
   service:
     name: model-service
@@ -59,11 +59,9 @@ kube-prometheus-stack:
   prometheus:
     enabled: true
     prometheusSpec:
-      serviceMonitorSelectorNilUsesHelmValues: false
       serviceMonitorSelector:
         matchLabels:
-          release: prometheus
-
+          release: prometheus  
   # Alert manageer needed
 
 

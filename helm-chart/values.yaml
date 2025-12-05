@@ -5,7 +5,7 @@ app:
   image:
     repository: ghcr.io/doda25-team9/app
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   
   service:
     name: app-service
@@ -23,7 +23,7 @@ modelService:
   image:
     repository: ghcr.io/doda25-team9/model-service
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   
   service:
     name: model-service
@@ -49,3 +49,20 @@ secret:
   name: secret
   smtpUser: "placeholder-user"
   smtpPass: "placeholder-password"
+
+kube-prometheus-stack:
+  fullnameOverride: "prometheus"
+
+  grafana:
+    enabled: true
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      serviceMonitorSelector:
+        matchLabels:
+          release: prometheus  
+  # Alert manageer needed
+
+
+

@@ -1125,6 +1125,12 @@ kubectl get pods | grep prometheus
 
 ---
 
+To generate traffic that appears in Grafana:
+
+`kubectl port-forward svc/app-service 8080:8080`
+
+Leave this terminal running. You can send requests so that the grafana dashboards will update in real time. 
+
 **Port-forward Grafana:**
 ```
 kubectl port-forward svc/sms-checker-grafana 3000:80

@@ -4,6 +4,10 @@
 .vagrant/
 *.log
 
+# Helm
+helm-chart/Chart.lock
+helm-chart/charts/
+
 # macOS
 .DS_Store
 

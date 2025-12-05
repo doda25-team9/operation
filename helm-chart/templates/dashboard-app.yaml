@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-app
+  labels:
+    grafana_dashboard: "1"
+data:
+  app-dashboard.json: |
+    {
+      "uid": "sms-app-dashboard",
+      "title": "SMS Checker - Application Metrics",
+      "schemaVersion": 39,
+      "panels": [
+        
+        {
+          "type": "timeseries",
+          "title": "SMS Request Volume (Counts per minute)",
+          "id": 1,
+          "gridPos": { "x": 0, "y": 0, "w": 16, "h": 8 },
+          "targets": [
+            {
+              "expr": "increase(sms_requests_total[1m])",
+              "legendFormat": "requests/min",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "type": "gauge",
+          "title": "Active Users",
+          "id": 2,
+          "gridPos": { "x": 16, "y": 0, "w": 8, "h": 8 },
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
+          },
+          "targets": [
+            { "expr": "sum(active_users)", "refId": "A" }
+          ]
+        },
+
+        {
+          "type": "timeseries",
+          "title": "Avg Request Duration",
+          "description": "Calculated as Rate(Sum) / Rate(Count)",
+          "id": 3,
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "rate(request_duration_sum[1m]) / rate(request_duration_count[1m])",
+              "legendFormat": "avg duration",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "type": "timeseries",
+          "title": "Request Rate (req/sec)",
+          "description": "The per-second traffic speed",
+          "id": 4,
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "rate(sms_requests_total[1m])",
+              "legendFormat": "req/s",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "type": "timeseries",
+          "title": "Spam vs Ham Predictions (Counts per minute)",
+          "id": 5,
+          "gridPos": { "x": 0, "y": 16, "w": 24, "h": 10 },
+          "options": {
+            "displayMode": "bars",
+            "barWidth": 0.8
+          },
+          "targets": [
+            {
+              "expr": "increase(predictions_result_total[1m])",
+              "legendFormat": "{{`{{result}}`}}",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "type": "heatmap",
+          "title": "Request Duration Histogram (seconds)",
+          "id": 6,
+          "gridPos": { "x": 0, "y": 26, "w": 12, "h": 12 },
+          "targets": [
+            {
+              "expr": "sum by (le)(increase(request_duration_bucket[1m]))",
+              "format": "heatmap",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "type": "heatmap",
+          "title": "SMS Length Histogram (characters)",
+          "id": 7,
+          "gridPos": { "x": 12, "y": 26, "w": 12, "h": 12 },
+          "targets": [
+            {
+              "expr": "sum by (le)(increase(sms_length_bucket[1m]))",
+              "format": "heatmap",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }

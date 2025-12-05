@@ -72,3 +72,5 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
+    adminUser: admin
+    adminPassword: admin123

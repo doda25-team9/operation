@@ -1104,3 +1104,63 @@ kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager | grep -i er
 ```
 
 ---
+
+## Grafana Dashboards
+
+If you have not installed the monitoring stack yet:
+
+```
+cd operation
+cd helm-chart
+helm dependency update
+cd ..
+helm install sms-checker ./helm-chart
+```
+
+**Verify the monitoring components:**
+```
+kubectl get pods | grep grafana
+kubectl get pods | grep prometheus
+```
+
+---
+
+**Port-forward Grafana:**
+```
+kubectl port-forward svc/sms-checker-grafana 3000:80
+```
+
+**Open in your browser:** http://localhost:3000/
+
+**Login to Grafana:**
+
+Grafana will prompt for credentials in the browser (they are configured through the Helm chart)
+
+Username: `admin`
+
+Password: `admin123`
+
+---
+
+**Access Installed Dashboards:**
+
+Once logged in:
+1. Click `Dashboards` (left sidebar)
+2. Find the two dashboards:
+    - `SMS Checker - Application Metrics`
+    - `SMS Checker - A/B Testing Dashboard` (has placeholder visuals, it is used in assignment 4)
+
+---
+
+**To make changes to the dashboards:**
+
+1. Make the changes in the `.json` files from `helm-chart/dashboards/`
+2. Run the following commands: 
+    ```
+    helm upgrade sms-checker ./helm-chart
+
+    kubectl delete pod $(kubectl get pod | grep grafana | awk '{print $1}')
+
+    kubectl port-forward svc/sms-checker-grafana 3000:80     
+    ```
+3. Refresh Grafana website.

@@ -150,3 +150,66 @@ Implemented step 22:
 
 Reviewed the following Pull Request:
 - [Initial implementation for step 20 and 21 by ZofiaRT - PR #10 operation](https://github.com/doda25-team9/operation/pull/10)
+
+
+## Week Q2.4 (December 1+) Working on Assignment 3
+### **Konstantina**
+Implemented:
+- [A3; Prometheus alerting #20](https://github.com/doda25-team9/operation/pull/20)
+- [fix: add GitHub authentication for Maven private packages #8](https://github.com/doda25-team9/app/pull/8) 
+
+However, the Maven build inside the container will be removed in next weeks, we just wanted it to work for now.
+
+Worked together with Zosia on:
+- [A3 Instalation of Prometheus through Helm #19](https://github.com/doda25-team9/operation/pull/19)
+
+Reviewed:
+- [Address remaining comments from PR 15 #17](https://github.com/doda25-team9/operation/pull/17)
+- [Deploy model-service #15](https://github.com/doda25-team9/operation/pull/15)
+- [Add k8s configuration for app #13](https://github.com/doda25-team9/operation/pull/13)
+- [Implementation of Prom Metrics #6](https://github.com/doda25-team9/app/pull/6)
+
+### **Adomas**
+Implemented:
+- [K8s configuration for `app`](https://github.com/doda25-team9/operation/pull/13)
+
+Reviewed:
+- [K8s configuration for `model-service`](https://github.com/doda25-team9/operation/pull/15)
+
+### **Johan**
+Implemented:
+- [Deploy model-service](https://github.com/doda25-team9/operation/pull/15)
+
+For which I later addressed some further comments:
+- [Address remaining comments from PR 15](https://github.com/doda25-team9/operation/pull/17)
+
+I reviewed:
+- [Add k8s configuration for app](https://github.com/doda25-team9/operation/pull/13)
+
+### **Antonio**
+Implemented:
+- [Grafana Dashboards](https://github.com/doda25-team9/operation/pull/21)
+
+Reviewed:
+- [A3; Prometheus alerting #20](https://github.com/doda25-team9/operation/pull/20)
+- [A3 Instalation of Prometheus through Helm #19](https://github.com/doda25-team9/operation/pull/19)
+
+### **Medon**
+Implemented:
+- [Helm Chart](https://github.com/doda25-team9/operation/pull/16)
+
+Reviewed:
+- [Grafana Dashboards](https://github.com/doda25-team9/operation/pull/21#pullrequestreview-3545792264)
+
+### **Zosia**
+Worked on metrics (Gauge, Histogram, Counter) implementation and exposing them through /metrics endpoint in the app repo.
+- [Implementation of Prom Metrics by ZofiaRT - PR #6 app](https://github.com/doda25-team9/app/pull/6)
+- [Fix Prometheus export format](https://github.com/doda25-team9/app/pull/10)
+
+Worked with Konstantina on set up of Prometheus in the Helm chart.
+- [A3 Instalation of Prometheus through Helm](https://github.com/doda25-team9/operation/pull/19)
+
+Reviewed:
+- [Helm Chart Implementation](https://github.com/doda25-team9/operation/pull/16)
+
+

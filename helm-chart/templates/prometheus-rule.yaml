@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-alerts
+  labels:
+    release: {{ .Release.Name }}
+    app: {{ .Values.app.labels.app }}
+spec:
+  groups:
+  - name: app-alerts
+    interval: 30s
+    rules:
+    - alert: HighRequestRate
+      expr: rate(sms_requests_total[1m]) > 0.25
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High request rate on SMS Checker"
+        description: "The application is receiving {{ "{{" }} $value | humanize {{ "}}" }} requests per second (>15 per minute) for more than 2 minutes."

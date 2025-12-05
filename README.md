@@ -756,3 +756,351 @@ kubectl get all -l app.kubernetes.io/instance=sms-checker
 helm uninstall sms-checker
 helm install sms-checker ./helm-chart
 ```
+
+
+## Prometheus Monitoring Setup
+
+### Prerequisites
+
+- Minikube installed
+- kubectl installed
+- Helm 3 installed
+- Docker installed
+
+---
+
+### Installation Steps
+
+### 1. Start Minikube, if you haven't already
+```bash
+minikube start --driver=docker
+minikube addons enable ingress
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+```
+
+---
+
+### 2. Install Application with Monitoring
+```bash
+# Download Prometheus dependency
+cd helm-chart
+helm dependency update
+cd ..
+
+# Install everything (app + Prometheus)
+helm install sms-checker ./helm-chart
+
+# Wait for pods
+kubectl wait --for=condition=ready pod -l component=app --timeout=300s
+```
+
+---
+
+### 3. Verify Application Works
+```bash
+# Port-forward to app
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**In another terminal:**
+```bash
+# Test metrics endpoint
+curl http://localhost:8080/metrics
+```
+
+---
+
+### 4. Access Prometheus UI
+```bash
+kubectl port-forward svc/prometheus-prometheus 9090:9090
+```
+
+**Open browser:** http://localhost:9090
+
+---
+
+## View Metrics in Prometheus
+
+### Check Targets
+
+1. Go to **Status** → **Targets**
+2. Look for `serviceMonitor/default/app-monitor/0`
+3. Verify **State = UP** (3/3 pods)
+
+### Query Metrics
+
+1. Click **Graph** tab
+2. Type: `sms_requests_total` (or any other metric you prefer, check table metrics below)
+3. Click **Execute**
+
+---
+
+## Generate Test Traffic
+```bash
+# Port-forward (if not running)
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**In another terminal:**
+```bash
+# Send 10 requests
+for i in {1..10}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test message"}' 
+  sleep 1
+done
+```
+
+**Refresh Prometheus query** - metrics should update!
+
+---
+
+### Available Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `sms_requests_total` | Counter | Total SMS prediction requests |
+| `predictions_result_total` | Counter | Predictions by result (spam/ham) |
+| `active_users` | Gauge | Current active users |
+| `request_duration` | Histogram | Request duration distribution (seconds) |
+| `sms_length` | Histogram | SMS message length distribution |
+
+---
+
+### Useful Queries
+```promql
+# Total requests
+sms_requests_total
+
+# Requests per second
+rate(sms_requests_total[5m])
+
+# Spam vs Ham totals
+sum by (result) (predictions_result_total)
+
+# Average request duration
+rate(request_duration_sum[5m]) / rate(request_duration_count[5m])
+
+```
+
+---
+
+
+---
+
+## Clean Up
+```bash
+# Uninstall application
+helm uninstall sms-checker
+
+# Delete cluster
+minikube delete
+```
+
+---
+
+## Troubleshooting
+
+
+**Service name different:**
+```bash
+# Find correct service
+kubectl get svc | grep prometheus
+# Use the one with port 9090/TCP (not "operated")
+```
+
+
+## Testing Alerting System
+
+### Prerequisites
+
+- Minikube running with the application deployed
+- Prometheus and AlertManager installed (included in Helm chart)
+
+---
+
+### Step 1: Access Webhook.site Dashboard
+
+**Open the webhook dashboard to monitor incoming alerts:**
+
+https://webhook.site/#!/view/5606ba46-85fe-438f-95b4-2fe8ba53dd0e/e63c2e7f-a5f8-42aa-b267-19740778e341/1
+
+**Keep this browser tab open** - alerts will appear here in real-time.
+
+---
+
+### Step 2: Port-Forward to Application
+```bash
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**Keep this terminal running.**
+
+---
+
+### Step 3: Generate High Traffic to Trigger Alert
+
+**Open a new terminal and run:**
+```bash
+# Send requests continuously
+for i in {1..500}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test alert message"}' 
+  echo "Request $i sent"
+  sleep 0.5
+done
+```
+
+**This sends 2 request per second (60 requests/minute), which exceeds the threshold of 15 requests/minute we have set.**
+
+---
+
+### Step 4: Monitor Alert Status in Prometheus
+
+**In another terminal:**
+```bash
+kubectl port-forward svc/prometheus-prometheus 9090:9090
+```
+
+**Open browser:** http://localhost:9090
+
+**Navigate to:** Alerts tab (top menu)
+
+**Watch the `HighRequestRate` alert progress:** Refresh every approximately 30 seconds to see the HighRequestRate changing status.
+
+| Time | Status | Color | Description |
+|------|--------|-------|-------------|
+| 0-30 seconds | Inactive | Green | Normal state, no alert |
+| 30 seconds - 2 minutes | Pending | Orange | Condition met, waiting for `for` duration |
+| After 2 minutes | **FIRING** | Red | Alert active and sent to AlertManager |
+
+---
+
+### Step 5: Check Webhook for Alert Notifications
+
+**Go back to your webhook.site tab**
+You will receive 2 POST requests:
+
+### 1. Firing Notification (when alert triggers)
+
+**After the alert enters `Firing` state (2+ minutes), you'll see:**
+```json
+{
+  "receiver": "webhook-notifications",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "HighRequestRate",
+        "severity": "warning",
+        "container": "app",
+        "endpoint": "http",
+        "job": "app-service",
+        "namespace": "default"
+      },
+      "annotations": {
+        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
+        "summary": "High request rate on SMS Checker"
+      },
+      "startsAt": "2025-12-05T10:52:03.472Z"
+    }
+  ]
+}
+```
+
+
+### 2. Resolved Notification (when alert clears)
+
+**After you stop the traffic and the alert resolves, you'll see:**
+```json
+{
+  "receiver": "webhook-notifications",
+  "status": "resolved",
+  "alerts": [
+    {
+      "status": "resolved",
+      "labels": {
+        "alertname": "HighRequestRate",
+        ...
+        "severity": "warning"
+      },
+      "annotations": {
+        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
+        "summary": "High request rate on SMS Checker"
+      },
+      "startsAt": "2025-12-05T10:52:03.472Z",
+      "endsAt": "2025-12-05T10:56:03.472Z"
+    }
+  ]
+}
+```
+
+**Note:** The `Resolved` notification is sent because we configured `send_resolved: true` in the AlertManager webhook configuration.
+
+---
+
+## Alert Configuration
+
+**Alert Rule:** `HighRequestRate`
+
+**Condition:** `rate(sms_requests_total[1m]) > 0.25`
+- Triggers when request rate exceeds 0.25 requests/second (15 requests/minute)
+
+**Duration:** `for: 2m`
+- Alert must be active for 2 continuous minutes before firing
+
+**Severity:** `warning`
+
+**Notification Channel:** Webhook (webhook.site)
+
+---
+
+## Stopping the Test
+
+**To stop generating traffic:**
+- Press `Ctrl+C` in the terminal running the curl loop
+
+**To stop port-forwards:**
+- Press `Ctrl+C` in each port-forward terminal
+
+**The alert will automatically resolve** once traffic drops below the threshold and will send a "resolved" notification to webhook.site.
+
+---
+
+## Troubleshooting
+
+### Alert not appearing in Prometheus
+```bash
+# Check if PrometheusRule exists
+kubectl get prometheusrule app-alerts
+
+# Check Prometheus logs
+kubectl logs prometheus-prometheus-prometheus-0 -c prometheus --tail=50
+```
+
+### Alert not reaching webhook.site
+```bash
+# Check AlertManager logs
+kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager --tail=100
+
+# Verify AlertManager config
+kubectl get secret alertmanager-prometheus-alertmanager -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d
+```
+
+### Alert firing but no webhook POST
+```bash
+# Check AlertManager is receiving alerts
+kubectl port-forward svc/prometheus-alertmanager 9093:9093
+# Open http://localhost:9093 and verify alert is listed
+
+# Check for errors in AlertManager logs
+kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager | grep -i error
+```
+
+---

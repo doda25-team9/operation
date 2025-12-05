@@ -17,19 +17,16 @@ These are all related repositories:
 - [lib-version](https://github.com/doda25-team9/lib-version) — shared version library
 - [operation](https://github.com/doda25-team9/operation) — this repository
 
-## README structure
+This repository (`operation`) contains:
 
-This file contains the information for the following assignments.
+```
+operation/
+    - docker-compose.yml
+    - .env
+    - README.md      (this file)
+```
 
-* [A1: Containerization](#a1-containerization)
-* [A2: Provisioning a Kubernetes Cluster](#a2-provisioning-a-kubernetes-cluster)
-* [A3: Operate and monitor kubernetes](#a3-operate-and-monitor-kubernetes)
-
-<br>
-
-# A1: Containerization
-
-## Docker Compose Setup
+## Docker Compose Setup (Assignment 1)
 
 ### Prerequisites
 
@@ -54,19 +51,16 @@ The **model-service** requires trained `.joblib` files:
 ```
 model.joblib
 preprocessor.joblib
+preprocessed_data.joblib
+misclassified_msgs.txt
+accuracy_scores.png
 ```
 
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
-Once you have done that, copy those files. You can either do this by running the following command from `[your-folder]/operation`:
+Once you have done that, you should have a folder called `model-service/output/`. Copy that output folder into `operation/output/`.
 
-```bash
-sudo cp -r ../model-service/output .
-```
-
-Or by manually copying the contents of `model-service/output/` into `operation/output/`.
-
-### Docker configuration
+### Configuration (.env)
 
 The compose setup uses a `.env` file:
 
@@ -102,11 +96,31 @@ or replace 8080 in the link above with the app port you find in the .env file
 
 If you see the SMS Checker interface, can submit messages and get a model agreement/disagreement message back after pressing _Check_, everything works.
 
-# A2: Provisioning a Kubernetes Cluster
+### Useful Docker Compose Commands
 
-## VM Infrastructure
+| Action                               | Command                      | Description                            |
+| ------------------------------------ | ---------------------------- | -------------------------------------- |
+| **Start everything**                 | `docker compose up`          | Starts all services (shows logs)       |
+| **Start in background**              | `docker compose up -d`       | Runs services in detached mode         |
+| **Stop all running services**        | `docker compose down`        | Stops and removes containers, networks |
+| **Rebuild images**                   | `docker compose up --build`  | Rebuilds images before starting        |
+| **View logs**                        | `docker compose logs`        | Shows combined logs from all services  |
+| **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
+| **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
+
+
+## VM Infrastructure (Assignment 2)
 
 This section provisions virtual machines using Vagrant for infrastructure automation.
+
+### What Gets Created
+
+Running `vagrant up` automatically creates 3 Ubuntu VMs:
+- **ctrl**: Controller node (1 CPU, 4GB RAM)
+- **node-1**: Worker node (2 CPUs, 6GB RAM)
+- **node-2**: Worker node (2 CPUs, 6GB RAM)
+
+All VMs run Ubuntu 24.04 and are configured via the `Vagrantfile`.
 
 ### Prerequisites
 
@@ -121,7 +135,7 @@ vagrant --version
 VBoxManage --version
 ```
 
-Otherwise install by running:
+Otherwise instill by running:
 ```sudo apt update
 wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
@@ -151,6 +165,21 @@ vagrant halt
 # Completely remove all VMs (frees disk space)
 vagrant destroy -f
 ```
+
+#### Testing changes to Vagrantfile
+```bash                
+vagrant destroy -f            # Delete old VMs
+vagrant up                    # Create new VMs with updated config
+```
+
+### Configuration variables
+
+To change cluster size or resources, edit these variables at the top of `Vagrantfile`:
+- `NUM_WORKERS` - Number of worker nodes (default: 2)
+- `CONTROLLER_MEMORY` - Controller RAM in MB (default: 4096 = 4GB)
+- `WORKER_MEMORY` - Worker RAM in MB (default: 6144 = 6GB)
+
+After changing variables, run `vagrant destroy -f && vagrant up` to recreate VMs with new settings.
 
 ### VM Network Configuration
 
@@ -302,6 +331,12 @@ kubelet --version
 kubectl version --client=true
 ```
 
+### containerd Configuration
+`containerd` is configured for Kubernetes:
+- `disable_apparmor = true`
+- `SystemdCgroup = true`
+- `sandbox_image = "registry.k8s.io/pause:3.10"`
+
 **Test (in one of the VMs):**
 ```
 sudo grep SystemdCgroup /etc/containerd/config.toml
@@ -361,6 +396,9 @@ helm plugin list
 exit
 ```
 
+**Current limitation:** 
+By default, Kubernetes prevents regular application pods from running on control plane nodes. Pods will stay in "Pending" state until worker nodes join (Steps 18-19).
+
 **Using kubectl:**
 
 kubectl is the main tool for interacting with Kubernetes. You can use it from inside the controller VM or from your host machine.
@@ -396,9 +434,12 @@ vagrant ssh ctrl -c "kubectl get nodes"
 
 - The final steps for nodes (`Run join command`) will probably fail if you are using Linux as it is a common issue. We tested it on MacOS and it works. We will clarify this with the lecturers.
 
-# A3: Operate and monitor kubernetes
 
-## Running the kubernetes cluster
+**Understanding the shared folder:**
+
+Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.
+
+## Running the kubernetes cluster (Assignment 3)
 
 First, start the minikube cluster 
 ```
@@ -460,6 +501,16 @@ Or with curl:
 curl http://sms-checker.local:8080/sms/
 ```
 
+**How It Works**
+
+1. Browser sends request to `sms-checker.local:8080`
+2. `/etc/hosts` resolves `sms-checker.local` to `127.0.0.1`
+3. `kubectl port-forward` tunnels `localhost:8080` to Ingress Controller port 80
+4. Ingress Controller receives request with `Host: sms-checker.local` header
+5. Ingress rules match the hostname and route to `app-service`
+6. App responds
+
+**Traffic flow:** Browser → port-forward → Ingress Controller → app-service
 
 This satisfies "accessing through Ingress" - the Ingress Controller processes routing rules.
 
@@ -513,6 +564,17 @@ Or with curl:
 curl http://sms-checker.local:54471/sms/
 ```
 
+#### How It Works
+
+1. `minikube service` creates a tunnel from localhost to the Ingress Controller
+2. Browser sends request to `sms-checker.local:PORT`
+3. `/etc/hosts` resolves `sms-checker.local` to `127.0.0.1`
+4. Tunnel forwards traffic to Ingress Controller
+5. Ingress Controller receives request with `Host: sms-checker.local` header
+6. Ingress rules match the hostname and route to `app-service`
+
+**Traffic flow:** Browser → minikube tunnel → Ingress Controller → app-service
+
 #### Important Notes
 
 - Port changes each time you restart the tunnel - check the output for the current port
@@ -520,7 +582,7 @@ curl http://sms-checker.local:54471/sms/
 - Stop with `Ctrl+C` in the tunnel terminal
 
 
-## Helm Chart Deployment
+## Helm Chart Deployment (Assignment 3)
 
 The Helm chart provides a streamlined way to deploy the complete SMS Checker application to any Kubernetes cluster.
 
@@ -533,6 +595,9 @@ The Helm chart provides a streamlined way to deploy the complete SMS Checker app
 
 For Minikube:
 ```bash
+minikube start
+minikube addons enable ingress
+
 # Wait for ingress controller to be ready
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
@@ -630,6 +695,19 @@ helm rollback sms-checker
 # Uninstall
 helm uninstall sms-checker
 ```
+
+### Configuration Options
+
+Key values (see `helm-chart/values.yaml` for complete list):
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `app.replicas` | Number of app pods | `3` |
+| `modelService.replicas` | Number of model-service pods | `2` |
+| `ingress.enabled` | Enable/disable Ingress | `true` |
+| `ingress.host` | Hostname for accessing app | `sms-checker.local` |
+| `secret.smtpUser` | SMTP username | `placeholder-user` |
+| `secret.smtpPass` | SMTP password | `placeholder-password` |
 
 ### Testing
 

@@ -10,17 +10,31 @@ data:
       "uid": "sms-app-dashboard",
       "title": "SMS Checker - Application Metrics",
       "schemaVersion": 39,
+      "timezone": "browser",
+      "refresh": "5s",
+      "templating": {
+        "list": [
+          {
+            "name": "interval",
+            "type": "interval",
+            "query": "1m,5m,10m,30m,1h",
+            "current": { "selected": true, "text": "1m", "value": "1m" },
+            "label": "Interval",
+            "hide": 0
+          }
+        ]
+      },
       "panels": [
         
         {
           "type": "timeseries",
-          "title": "SMS Request Volume (Counts per minute)",
+          "title": "SMS Request Volume (Counts per interval)",
           "id": 1,
           "gridPos": { "x": 0, "y": 0, "w": 16, "h": 8 },
           "targets": [
             {
-              "expr": "increase(sms_requests_total[1m])",
-              "legendFormat": "requests/min",
+              "expr": "increase(sms_requests_total[$interval])",
+              "legendFormat": "requests",
               "refId": "A"
             }
           ]
@@ -41,13 +55,13 @@ data:
 
         {
           "type": "timeseries",
-          "title": "Avg Request Duration",
+          "title": "Avg Request Duration (seconds)",
           "description": "Calculated as Rate(Sum) / Rate(Count)",
           "id": 3,
           "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "rate(request_duration_sum[1m]) / rate(request_duration_count[1m])",
+              "expr": "rate(request_duration_sum[$interval]) / rate(request_duration_count[$interval])",
               "legendFormat": "avg duration",
               "refId": "A"
             }
@@ -62,7 +76,7 @@ data:
           "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
           "targets": [
             {
-              "expr": "rate(sms_requests_total[1m])",
+              "expr": "rate(sms_requests_total[$interval])",
               "legendFormat": "req/s",
               "refId": "A"
             }
@@ -71,7 +85,7 @@ data:
 
         {
           "type": "timeseries",
-          "title": "Spam vs Ham Predictions (Counts per minute)",
+          "title": "Spam vs Ham Predictions (Counts per interval)",
           "id": 5,
           "gridPos": { "x": 0, "y": 16, "w": 24, "h": 10 },
           "options": {
@@ -80,7 +94,7 @@ data:
           },
           "targets": [
             {
-              "expr": "increase(predictions_result_total[1m])",
+              "expr": "increase(predictions_result_total[$interval])",
               "legendFormat": "{{`{{result}}`}}",
               "refId": "A"
             }
@@ -94,7 +108,7 @@ data:
           "gridPos": { "x": 0, "y": 26, "w": 12, "h": 12 },
           "targets": [
             {
-              "expr": "sum by (le)(increase(request_duration_bucket[1m]))",
+              "expr": "sum by (le)(increase(request_duration_bucket[$interval]))",
               "format": "heatmap",
               "refId": "A"
             }
@@ -108,7 +122,7 @@ data:
           "gridPos": { "x": 12, "y": 26, "w": 12, "h": 12 },
           "targets": [
             {
-              "expr": "sum by (le)(increase(sms_length_bucket[1m]))",
+              "expr": "sum by (le)(increase(sms_length_bucket[$interval]))",
               "format": "heatmap",
               "refId": "A"
             }

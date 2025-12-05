@@ -847,7 +847,7 @@ done
 
 ---
 
-## Available Metrics
+### Available Metrics
 
 | Metric | Type | Description |
 |--------|------|-------------|
@@ -859,7 +859,7 @@ done
 
 ---
 
-## Useful Queries
+### Useful Queries
 ```promql
 # Total requests
 sms_requests_total
@@ -900,3 +900,195 @@ minikube delete
 kubectl get svc | grep prometheus
 # Use the one with port 9090/TCP (not "operated")
 ```
+
+
+## Testing Alerting System
+
+### Prerequisites
+
+- Minikube running with the application deployed
+- Prometheus and AlertManager installed (included in Helm chart)
+
+---
+
+### Step 1: Access Webhook.site Dashboard
+
+**Open the webhook dashboard to monitor incoming alerts:**
+
+https://webhook.site/#!/view/5606ba46-85fe-438f-95b4-2fe8ba53dd0e/e63c2e7f-a5f8-42aa-b267-19740778e341/1
+
+**Keep this browser tab open** - alerts will appear here in real-time.
+
+---
+
+### Step 2: Port-Forward to Application
+```bash
+kubectl port-forward svc/app-service 8080:8080
+```
+
+**Keep this terminal running.**
+
+---
+
+### Step 3: Generate High Traffic to Trigger Alert
+
+**Open a new terminal and run:**
+```bash
+# Send requests continuously
+for i in {1..500}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test alert message"}' 
+  echo "Request $i sent"
+  sleep 0.5
+done
+```
+
+**This sends 2 request per second (60 requests/minute), which exceeds the threshold of 15 requests/minute we have set.**
+
+---
+
+### Step 4: Monitor Alert Status in Prometheus
+
+**In another terminal:**
+```bash
+kubectl port-forward svc/prometheus-prometheus 9090:9090
+```
+
+**Open browser:** http://localhost:9090
+
+**Navigate to:** Alerts tab (top menu)
+
+**Watch the `HighRequestRate` alert progress:** Refresh every approximately 30 seconds to see the HighRequestRate changing status.
+
+| Time | Status | Color | Description |
+|------|--------|-------|-------------|
+| 0-30 seconds | Inactive | Green | Normal state, no alert |
+| 30 seconds - 2 minutes | Pending | Orange | Condition met, waiting for `for` duration |
+| After 2 minutes | **FIRING** | Red | Alert active and sent to AlertManager |
+
+---
+
+### Step 5: Check Webhook for Alert Notifications
+
+**Go back to your webhook.site tab**
+You will receive 2 POST requests:
+
+### 1. Firing Notification (when alert triggers)
+
+**After the alert enters `Firing` state (2+ minutes), you'll see:**
+```json
+{
+  "receiver": "webhook-notifications",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "HighRequestRate",
+        "severity": "warning",
+        "container": "app",
+        "endpoint": "http",
+        "job": "app-service",
+        "namespace": "default"
+      },
+      "annotations": {
+        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
+        "summary": "High request rate on SMS Checker"
+      },
+      "startsAt": "2025-12-05T10:52:03.472Z"
+    }
+  ]
+}
+```
+
+
+### 2. Resolved Notification (when alert clears)
+
+**After you stop the traffic and the alert resolves, you'll see:**
+```json
+{
+  "receiver": "webhook-notifications",
+  "status": "resolved",
+  "alerts": [
+    {
+      "status": "resolved",
+      "labels": {
+        "alertname": "HighRequestRate",
+        ...
+        "severity": "warning"
+      },
+      "annotations": {
+        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
+        "summary": "High request rate on SMS Checker"
+      },
+      "startsAt": "2025-12-05T10:52:03.472Z",
+      "endsAt": "2025-12-05T10:56:03.472Z"
+    }
+  ]
+}
+```
+
+**Note:** The `Resolved` notification is sent because we configured `send_resolved: true` in the AlertManager webhook configuration.
+
+---
+
+## Alert Configuration
+
+**Alert Rule:** `HighRequestRate`
+
+**Condition:** `rate(sms_requests_total[1m]) > 0.25`
+- Triggers when request rate exceeds 0.25 requests/second (15 requests/minute)
+
+**Duration:** `for: 2m`
+- Alert must be active for 2 continuous minutes before firing
+
+**Severity:** `warning`
+
+**Notification Channel:** Webhook (webhook.site)
+
+---
+
+## Stopping the Test
+
+**To stop generating traffic:**
+- Press `Ctrl+C` in the terminal running the curl loop
+
+**To stop port-forwards:**
+- Press `Ctrl+C` in each port-forward terminal
+
+**The alert will automatically resolve** once traffic drops below the threshold and will send a "resolved" notification to webhook.site.
+
+---
+
+## Troubleshooting
+
+### Alert not appearing in Prometheus
+```bash
+# Check if PrometheusRule exists
+kubectl get prometheusrule app-alerts
+
+# Check Prometheus logs
+kubectl logs prometheus-prometheus-prometheus-0 -c prometheus --tail=50
+```
+
+### Alert not reaching webhook.site
+```bash
+# Check AlertManager logs
+kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager --tail=100
+
+# Verify AlertManager config
+kubectl get secret alertmanager-prometheus-alertmanager -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d
+```
+
+### Alert firing but no webhook POST
+```bash
+# Check AlertManager is receiving alerts
+kubectl port-forward svc/prometheus-alertmanager 9093:9093
+# Open http://localhost:9093 and verify alert is listed
+
+# Check for errors in AlertManager logs
+kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager | grep -i error
+```
+
+---

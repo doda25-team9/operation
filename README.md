@@ -1170,3 +1170,337 @@ Once logged in:
     kubectl port-forward svc/sms-checker-grafana 3000:80     
     ```
 3. Refresh Grafana website.
+
+
+## Traffic Management with Istio (Assignment 4)
+
+This implementation uses Istio service mesh to enable advanced traffic management including canary deployments and version-consistent routing between services.
+
+### Architecture Overview
+
+The deployment implements a 90/10 canary release pattern:
+
+**External Traffic Flow:**
+```
+User → Istio IngressGateway (port 80)
+  ↓
+Gateway (sms-gateway) - accepts traffic for sms-checker.local
+  ↓
+VirtualService (app-virtualservice) - 90/10 traffic split
+  ↓
+DestinationRule (app-destinationrule) - defines v1/v2 subsets
+  ↓
+90% → app-service v1 (3 replicas, stable)
+10% → app-service v2 (1 replica, canary)
+```
+
+**Internal Traffic Flow (Version Consistency):**
+```
+app-service v1 → VirtualService (model-virtualservice) → model-service v1
+app-service v2 → VirtualService (model-virtualservice) → model-service v2
+```
+
+**Key Features:**
+- **90/10 Canary Split:** 90% of traffic routes to stable v1, 10% to canary v2
+- **Version Consistency:** App v1 always calls model v1, app v2 always calls model v2 (enforced by sourceLabels)
+- **Configurable:** All settings (gateway name, hostname, traffic split) adjustable via values.yaml
+
+---
+
+### Prerequisites
+
+- Kubernetes cluster (Minikube recommended)
+- Istio 1.28+ installed
+- Helm 3.x
+- kubectl configured
+
+### Install Istio
+```bash
+# Download and install Istio
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-1.28.1
+export PATH=$PWD/bin:$PATH
+
+# Install Istio with demo profile
+istioctl install --set profile=demo -y
+
+# Enable automatic sidecar injection
+kubectl label namespace default istio-injection=enabled --overwrite
+
+# Install monitoring addons
+kubectl apply -f samples/addons/prometheus.yaml
+kubectl apply -f samples/addons/kiali.yaml
+
+# Verify installation
+kubectl get pods -n istio-system
+```
+
+**Expected:** All Istio components (istiod, istio-ingressgateway) running.
+
+---
+
+### Deploy Application
+```bash
+cd operation
+
+# Deploy with Istio traffic management
+helm install sms-checker ./helm-chart
+
+# Wait for pods to be ready (may take 1-2 minutes)
+kubectl wait --for=condition=ready pod -l app=sms-checker --timeout=120s
+kubectl wait --for=condition=ready pod -l app=model-service --timeout=120s
+
+# Verify deployment
+kubectl get pods
+```
+
+**Expected output:**
+```
+NAME                                   READY   STATUS    RESTARTS   AGE
+app-deployment-v1-xxx                  2/2     Running   0          1m
+app-deployment-v1-yyy                  2/2     Running   0          1m
+app-deployment-v1-zzz                  2/2     Running   0          1m
+app-deployment-v2-aaa                  2/2     Running   0          1m
+model-deployment-v1-bbb                2/2     Running   0          1m
+model-deployment-v1-ccc                2/2     Running   0          1m
+model-deployment-v1-ddd                2/2     Running   0          1m
+model-deployment-v2-eee                2/2     Running   0          1m
+```
+
+All pods should show `2/2` (application container + Istio sidecar proxy).
+
+**Verify Istio resources:**
+```bash
+kubectl get gateway,virtualservice,destinationrule
+```
+
+**Expected:** 1 Gateway, 2 VirtualServices, 2 DestinationRules.
+
+---
+
+### Testing Traffic Management
+
+#### Test 1: Verify 90/10 Traffic Split
+
+Since the application runs inside the cluster, testing must be done from within:
+```bash
+# Get IngressGateway endpoint
+INGRESS_HOST=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}')
+INGRESS_PORT=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+# Deploy temporary test pod
+kubectl run curl-test --image=curlimages/curl:latest --restart=Never -- sleep 120
+kubectl wait --for=condition=ready pod curl-test --timeout=30s
+
+# Send 100 requests and count version distribution
+kubectl exec curl-test -- sh -c "
+for i in \$(seq 1 100); do
+  curl -s -H 'Host: sms-checker.local' -I http://$INGRESS_HOST:$INGRESS_PORT/sms/ | grep 'x-app-version:'
+done" | awk '{print $2}' | sort | uniq -c
+
+# Cleanup
+kubectl delete pod curl-test
+```
+
+**Expected output:**
+```
+  93 v1
+   7 v2
+```
+(±10% variance acceptable - approximately 90/10 split)
+
+**What this proves:** 
+- Gateway correctly routes traffic to VirtualService
+- VirtualService applies 90/10 weight distribution
+- DestinationRule subsets (v1, v2) correctly filter pods by version label
+
+---
+
+#### Test 2: Verify Version Consistency
+```bash
+# Verify sourceLabels routing configuration
+kubectl get virtualservice model-virtualservice -o yaml | grep -B2 -A5 "sourceLabels:"
+
+# Verify DestinationRule subsets
+kubectl get destinationrule model-destinationrule -o jsonpath='{.spec.subsets[*].name}'
+echo ""
+
+# Verify pod labels match subsets
+kubectl get pods -l app=model-service -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels.version}{"\n"}{end}'
+```
+
+**Expected:**
+- sourceLabels show version: v1 and version: v2 routing rules
+- DestinationRule has v1 v2 subsets
+- Model pods labeled with v1 and v2
+
+**What this proves:** Configuration is correct for version consistency routing
+
+---
+
+#### Test 3: Verify Configuration
+```bash
+# Check traffic split weights
+kubectl get virtualservice app-virtualservice -o yaml | grep "weight:"
+
+# Check DestinationRule subsets
+kubectl get destinationrule app-destinationrule -o yaml | grep -A 6 "subsets:"
+
+# Run Istio configuration validation
+istioctl analyze
+```
+
+**Expected:** 
+- Weights show 90 and 10
+- Pods labeled with version=v1 and version=v2
+- Subsets v1 and v2 defined in DestinationRule
+- No validation issues from istioctl
+
+---
+
+### Configuration
+
+All Istio settings are configurable in `values.yaml`:
+```yaml
+istio:
+  enabled: true
+  host: sms-checker.local           # Hostname for accessing app
+  
+  gateway:
+    name: sms-gateway               # Gateway resource name
+    ingressGatewaySelector: ingressgateway  # Istio IngressGateway selector
+  
+  trafficSplit:
+    stable: 90                      # % traffic to v1 (stable)
+    canary: 10                      # % traffic to v2 (canary)
+
+versions:
+  v1:
+    enabled: true
+    replicas: 3                     # Stable version replicas
+    imageTag: latest
+  v2:
+    enabled: true
+    replicas: 1                     # Canary version replicas
+    imageTag: latest
+```
+
+#### Adjust Traffic Split
+
+Change the canary rollout percentage:
+```bash
+# 95/5 split (more conservative)
+helm upgrade sms-checker ./helm-chart \
+  --set istio.trafficSplit.stable=95 \
+  --set istio.trafficSplit.canary=5
+
+# Verify new split (run Test 1 again)
+```
+
+#### Change Hostname
+
+Deploy with custom hostname for grading:
+```bash
+helm upgrade sms-checker ./helm-chart \
+  --set istio.host=custom.grader.local
+
+# Update /etc/hosts if testing locally
+echo "127.0.0.1 custom.grader.local" | sudo tee -a /etc/hosts
+```
+
+#### Disable Canary
+
+Route 100% traffic to stable version:
+```bash
+helm upgrade sms-checker ./helm-chart \
+  --set versions.v2.enabled=false
+
+# Verify only v1 pods exist
+kubectl get pods | grep deployment
+```
+
+---
+
+### Monitoring with Kiali
+
+Visualize traffic distribution:
+```bash
+# Open Kiali dashboard
+istioctl dashboard kiali
+
+# In Kiali:
+# 1. Select namespace: default
+# 2. Go to Graph tab
+# 3. Display → Traffic Distribution
+# 4. Send traffic (run Test 1)
+# 5. Observe 90/10 split between v1 and v2
+```
+
+---
+
+### Troubleshooting
+
+**Pods show 1/2 Ready:**
+```bash
+# Check if Istio injection enabled
+kubectl get namespace default --show-labels
+# Should show: istio-injection=enabled
+
+# If missing, enable and recreate pods
+kubectl label namespace default istio-injection=enabled
+helm uninstall sms-checker
+helm install sms-checker ./helm-chart
+```
+
+**Traffic not splitting correctly:**
+```bash
+# Verify VirtualService weights
+kubectl get virtualservice app-virtualservice -o yaml | grep -A 15 "route:"
+
+# Check DestinationRule subsets match pod labels
+kubectl get destinationrule app-destinationrule -o yaml | grep -A 10 "subsets:"
+kubectl get pods -l app=sms-checker --show-labels
+```
+
+**Version consistency not working:**
+```bash
+# Check model VirtualService has sourceLabels
+kubectl get virtualservice model-virtualservice -o yaml | grep -A 5 "sourceLabels:"
+
+# Verify pod version labels
+kubectl get pods --show-labels | grep version
+```
+
+**Istio configuration issues:**
+```bash
+# Run Istio analyzer
+istioctl analyze
+
+# Check Istio proxy logs
+kubectl logs <pod-name> -c istio-proxy
+```
+
+---
+
+### Implementation Details
+
+**Components:**
+- **Gateway:** Entry point for external traffic, listens on port 80 for sms-checker.local
+- **VirtualService (app):** Routes external traffic with 90/10 split to app-service subsets
+- **VirtualService (model):** Routes internal traffic based on caller version (sourceLabels matching)
+- **DestinationRule (app):** Defines v1/v2 subsets, selects pods by version label
+- **DestinationRule (model):** Defines v1/v2 subsets for model-service
+- **Deployments:** Separate deployments for v1 (3 replicas) and v2 (1 replica) of each service
+
+**How it works:**
+1. User request hits Istio IngressGateway
+2. Gateway accepts traffic for sms-checker.local
+3. Routes to app-virtualservice
+4. VirtualService applies 90/10 weight: randomly selects v1 or v2
+5. DestinationRule filters pods: subset v1 → version=v1 pods, subset v2 → version=v2 pods
+6. When app calls model-service internally:
+   - model-virtualservice checks sourceLabels (caller's version label)
+   - Routes app v1 → model v1, app v2 → model v2
+7. Ensures version consistency throughout request lifecycle
+
+---

@@ -1,0 +1,52 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: app-virtualservice
+  labels:
+    app: {{ .Values.app.labels.app }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+  - "{{ .Values.istio.host }}"
+  
+  gateways:
+  - {{ .Values.istio.gateway.name }}
+  
+  http:
+  - match:
+    - uri:
+        prefix: /sms/  
+    
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        port:
+          number: {{ .Values.app.service.port }}
+        subset: v1  
+      weight: {{ .Values.istio.trafficSplit.stable }}
+      
+      headers:
+        response:
+          add:
+            x-app-version: "v1"
+    
+    - destination:
+        host: {{ .Values.app.service.name }}
+        port:
+          number: {{ .Values.app.service.port }}
+        subset: v2  
+      weight: {{ .Values.istio.trafficSplit.canary }}
+      
+      headers:
+        response:
+          add:
+            x-app-version: "v2"
+    
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+{{- end }}

@@ -1,0 +1,53 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: model-virtualservice
+  labels:
+    app: {{ .Values.modelService.labels.app }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+  - {{ .Values.modelService.service.name }}
+  
+  http:
+  - match:
+    - sourceLabels:
+        version: v1
+    route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v1
+      
+      headers:
+        response:
+          add:
+            x-model-version: "v1"
+  
+  - match:
+    - sourceLabels:
+        version: v2
+    route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v2
+      
+      headers:
+        response:
+          add:
+            x-model-version: "v2"
+  
+  - route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v1
+    
+    timeout: 60s  
+{{- end }}

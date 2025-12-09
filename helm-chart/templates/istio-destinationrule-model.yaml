@@ -1,0 +1,35 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: model-destinationrule
+  labels:
+    app: {{ .Values.modelService.labels.app }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  host: {{ .Values.modelService.service.name }}
+  
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 50
+      http:
+        http1MaxPendingRequests: 20
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 1
+    
+    outlierDetection:
+      consecutiveErrors: 3
+      interval: 60s
+      baseEjectionTime: 60s
+  
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  
+  - name: v2
+    labels:
+      version: v2
+{{- end }}

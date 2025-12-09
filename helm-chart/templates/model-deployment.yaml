@@ -1,3 +1,5 @@
+{{- if not .Values.istio.enabled }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,3 +35,5 @@ spec:
           hostPath:
             path: {{ .Values.modelService.volume.hostPath }}
             type: DirectoryOrCreate
+
+{{- end }}

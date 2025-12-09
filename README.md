@@ -1216,11 +1216,6 @@ app-service v2 → VirtualService (model-virtualservice) → model-service v2
 
 ### Install Istio
 ```bash
-# Download and install Istio
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-1.28.1
-export PATH=$PWD/bin:$PATH
-
 # Install Istio with demo profile
 istioctl install --set profile=demo -y
 
@@ -1323,7 +1318,6 @@ kubectl get virtualservice model-virtualservice -o yaml | grep -B2 -A5 "sourceLa
 
 # Verify DestinationRule subsets
 kubectl get destinationrule model-destinationrule -o jsonpath='{.spec.subsets[*].name}'
-echo ""
 
 # Verify pod labels match subsets
 kubectl get pods -l app=model-service -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels.version}{"\n"}{end}'
@@ -1337,18 +1331,6 @@ kubectl get pods -l app=model-service -o jsonpath='{range .items[*]}{.metadata.n
 **What this proves:** Configuration is correct for version consistency routing
 
 ---
-
-#### Test 3: Verify Configuration
-```bash
-# Check traffic split weights
-kubectl get virtualservice app-virtualservice -o yaml | grep "weight:"
-
-# Check DestinationRule subsets
-kubectl get destinationrule app-destinationrule -o yaml | grep -A 6 "subsets:"
-
-# Run Istio configuration validation
-istioctl analyze
-```
 
 **Expected:** 
 - Weights show 90 and 10

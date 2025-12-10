@@ -1,0 +1,60 @@
+{{- if .Values.versions.v2.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.modelService.name }}-deployment-v2
+  labels:
+    app: {{ .Values.modelService.labels.app }}
+    version: v2  
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.versions.v2.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.modelService.labels.app }}
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.modelService.labels.app }}
+        version: v2
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.modelService.service.port }}"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: model
+        image: "{{ .Values.modelService.image.repository }}:{{ .Values.versions.v2.imageTag }}"
+        imagePullPolicy: {{ .Values.modelService.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.modelService.service.port }}
+          name: http
+        
+        envFrom:
+        - secretRef:
+            name: {{ .Values.secret.name }}
+        
+        env:
+        - name: MODEL_VERSION
+          value: "v2"
+        
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      
+      volumes:
+      - name: model-storage
+        hostPath:
+          path: {{ .Values.modelService.volume.hostPath }}
+          type: DirectoryOrCreate
+{{- end }}

@@ -21,3 +21,5 @@ helm-chart/charts/
 join.sh
 
 kubeconfig
+
+istio*/

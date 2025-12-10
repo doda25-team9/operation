@@ -1,0 +1,53 @@
+{{- if .Values.versions.v2.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}-deployment-v2
+  labels:
+    app: {{ .Values.app.labels.app }}
+    component: {{ .Values.app.labels.component }}
+    version: v2 
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.versions.v2.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.labels.app }}
+      component: {{ .Values.app.labels.component }}
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.labels.app }}
+        component: {{ .Values.app.labels.component }}
+        version: v2
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.app.service.port }}"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: "{{ .Values.app.image.repository }}:{{ .Values.versions.v2.imageTag }}"
+        imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.app.service.port }}
+          name: http
+        
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.configMap.name }}
+        
+        env:
+        - name: APP_VERSION
+          value: "v2"
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+{{- end }}

@@ -1,0 +1,61 @@
+{{- if and .Values.istio.enabled .Values.shadowLaunch.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: model-virtualservice-shadow
+  labels:
+    app: {{ .Values.modelService.labels.app }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+  - {{ .Values.modelService.service.name }}
+  
+  http:
+  - match:
+    - sourceLabels:
+        version: v1
+    route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v1
+    
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
+  
+  - match:
+    - sourceLabels:
+        version: v2
+    route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v2
+    
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
+  
+  - route:
+    - destination:
+        host: {{ .Values.modelService.service.name }}
+        port:
+          number: {{ .Values.modelService.service.port }}
+        subset: v1
+    
+    timeout: 60s
+{{- end }}

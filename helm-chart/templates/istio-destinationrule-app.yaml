@@ -11,16 +11,23 @@ spec:
   host: {{ .Values.app.service.name }}
   
   trafficPolicy:
+    {{- if .Values.istio.stickySession.enabled }}
+    loadBalancer:
+      consistentHash:
+        httpCookie:
+          name: {{ .Values.istio.stickySession.cookieName }}
+          ttl: {{ .Values.istio.stickySession.ttl }}s
+    {{- end }}
+
     connectionPool:
       tcp:
         maxConnections: 100
       http:
         http1MaxPendingRequests: 50
         http2MaxRequests: 100
-        maxRequestsPerConnection: 2
     
     outlierDetection:
-      consecutiveErrors: 5
+      consecutive5xxErrors: 5
       interval: 30s
       baseEjectionTime: 30s
       maxEjectionPercent: 50

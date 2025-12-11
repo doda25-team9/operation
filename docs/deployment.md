@@ -6,6 +6,8 @@ This file documents the deployment process of our application.
 
 Our application is composed of a frontend (`app-service`) and a backend (`model-service`). To support continuous experimentation, we deploy two parallel versions of each service (`v1` and `v2`). The Istio service Mesh is deployed to manage traffic flow, enforce routing policies for versions and as a gateway for user requests.
 
+Moreover, we also deploy monitoring measures such as Prometheus and Grafana. More on that in the Monitoring section.
+
 ADD ADITIONAL USE CASE COMPONENT
 
 ## Data Flow
@@ -30,6 +32,9 @@ Two files are responsible for the decision process of the routing:
 ## Continuous Experimentation
 
 10% of users are routed to the canary group to test new features. We use Sticky Session to ensure consistent versioning for the entirety of the session (NOT IMPLEMENTED YET).
+
+## Monitoring
+TO DO
 
 ## Setup Details
 

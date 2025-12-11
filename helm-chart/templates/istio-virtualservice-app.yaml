@@ -15,18 +15,54 @@ spec:
   - {{ .Values.istio.gateway.name }}
   
   http:
+  {{- if .Values.istio.stickySession.enabled }}
+
   - match:
     - uri:
-        prefix: /sms/  
-    
+        prefix: /sms/
+      headers:
+        cookie:
+          regex: ".*{{ .Values.istio.stickySession.cookieName }}=v1.*"
     route:
     - destination:
         host: {{ .Values.app.service.name }}
         port:
           number: {{ .Values.app.service.port }}
-        subset: v1  
+        subset: v1
+      headers:
+        response:
+          add:
+            x-app-version: "v1"
+    timeout: 30s
+  
+  - match:
+    - uri:
+        prefix: /sms/
+      headers:
+        cookie:
+          regex: ".*{{ .Values.istio.stickySession.cookieName }}=v2.*"
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        port:
+          number: {{ .Values.app.service.port }}
+        subset: v2
+      headers:
+        response:
+          add:
+            x-app-version: "v2"
+    timeout: 30s
+  {{- end }}  
+  - match:
+    - uri:
+        prefix: /sms/
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        port:
+          number: {{ .Values.app.service.port }}
+        subset: v1
       weight: {{ .Values.istio.trafficSplit.stable }}
-      
       headers:
         response:
           add:
@@ -36,9 +72,8 @@ spec:
         host: {{ .Values.app.service.name }}
         port:
           number: {{ .Values.app.service.port }}
-        subset: v2  
+        subset: v2
       weight: {{ .Values.istio.trafficSplit.canary }}
-      
       headers:
         response:
           add:

@@ -34,7 +34,13 @@ Two files are responsible for the decision process of the routing:
 10% of users are routed to the canary group to test new features. We use Sticky Session to ensure consistent versioning for the entirety of the session (NOT IMPLEMENTED YET).
 
 ## Monitoring
-TO DO
+For observability purposes, we utilize Prometheus metrics and Grafana to visualize the patterns of the app usage.
+
+Prometheus scrapes metrics from the app service and exports them through \metrics endpoint. We currently export 5 metrics in total, of 3 different types (histogram, counter, gauge), mostly focusing on the requests and responses sent to/from model-service.
+
+We also utilize Alert Manager to trigger an alert if number of request exceed 15 requests per minute.
+
+We visualize the metrics in Grafana which allows us to compare the performance of different versions, supporting continuous experimentation.
 
 ## Setup Details
 

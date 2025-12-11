@@ -57,5 +57,14 @@ spec:
           number: {{ .Values.modelService.service.port }}
         subset: v1
     
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
+
     timeout: 60s
 {{- end }}

@@ -213,3 +213,36 @@ Reviewed:
 - [Helm Chart Implementation](https://github.com/doda25-team9/operation/pull/16)
 
 
+
+## Week Q2.5 (December 8+) Working on Assignment 4
+### **Medon**
+Implemented the traffic management with sticky sessions
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+
+Reviewed:
+
+### **Konstantina**
+Implemented Shadow Launch functionality for model-service
+using Istio traffic mirroring.
+- [Implement Shadow Launch with Istio for Model-Service #26](https://github.com/doda25-team9/operation/pull/26)
+- [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)
+
+Reviewed:
+
+### **Zosia**
+Documented the deployment process
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
+
+Reviewed:
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+
+### **Antonio**
+Researched and wrote the Extension Proposal
+- [Extension Proposal #27](https://github.com/doda25-team9/operation/pull/27)
+
+Reviewed:
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+- [Implement Shadow Launch with Istio for Model-Service #26](https://github.com/doda25-team9/operation/pull/26)
+- [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)

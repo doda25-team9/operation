@@ -98,3 +98,9 @@ versions:
     enabled: true
     replicas: 1
     imageTag: latest
+
+shadowLaunch:
+  enabled: true
+  replicas: 1
+  imageTag: latest
+  mirrorPercentage: 100.0

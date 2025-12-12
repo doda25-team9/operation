@@ -246,3 +246,11 @@ Reviewed:
 - [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
 - [Implement Shadow Launch with Istio for Model-Service #26](https://github.com/doda25-team9/operation/pull/26)
 - [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)
+
+### **Johan**
+I created diagrams to visualise the request flow:
+- [ Add diagrams to deployment document #29](https://github.com/doda25-team9/operation/pull/29)
+
+Reviewed:
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)

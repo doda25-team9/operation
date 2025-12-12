@@ -255,3 +255,11 @@ I created diagrams to visualise the request flow:
 Reviewed:
 - [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
 - [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
+
+### **Adomas**
+Planned the Continuous Experimentation Experiment (the change - using the SVM model, the hypothesis - predicted spam rates will drop significantly, the metric - prediction result metric, the dataset - ExAIS_SMS dataset)
+Implemented the change in model-service:
+- [Continuous Experimentation: change model #9](https://github.com/doda25-team9/model-service/pull/9)
+
+Reviewed:
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)

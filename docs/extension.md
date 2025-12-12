@@ -17,9 +17,7 @@ To fix this, we propose implementing **Mandatory Automated Validation** for all 
 
 We will replace manual verification with automated pipelines using **GitHub Actions**. We will enforce this using **GitHub Branch Protection Rules**, which will physically disable the "Merge" button until the specific checks for that repository pass.
 
-**Project Refactoring & Visualization**
-
-
+**Project Refactoring**
 
 We will create a new workflow file (`.github/workflows/verify-pr.yml`) in each repository with checks tailored to the specific content:
 

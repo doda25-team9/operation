@@ -1486,3 +1486,85 @@ kubectl logs <pod-name> -c istio-proxy
 7. Ensures version consistency throughout request lifecycle
 
 ---
+
+## Shadow Launch (Additional Use Case)
+
+We deploy a third model-service version (v3) that receives mirrored copies of all traffic from both the stable (v1) and canary (v2) versions, allowing us to evaluate the shadow version's performance using real user requests without exposing users to its responses. 
+Users only see results from v1/v2 while v3 silently processes the same requests and records metrics for comparison.
+
+### Prerequisites
+
+- Kubernetes cluster with Istio installed
+- Application deployed: `helm install sms-checker ./helm-chart`
+
+
+### Setup
+
+**1. Verify Pods Running**
+```bash
+kubectl get pods | grep -E "app-deployment|model-deployment"
+
+# Expected:
+# app-deployment-v1 (3 pods) - 2/2 Running
+# app-deployment-v2 (1 pod) - 2/2 Running
+# model-deployment-v1 (3 pods) - 2/2 Running
+# model-deployment-v2 (1 pod) - 2/2 Running
+# model-deployment-v3 (1 pod) - 2/2 Running  ← Shadow
+```
+
+---
+
+**2. Port-Forward Istio Gateway**
+
+Must access through Istio Gateway (not app-service directly).
+```bash
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+```
+
+**Keep this running.**
+
+
+### **Testing**
+
+**1. Send Test Requests**
+```bash
+# Send 100 requests through Gateway
+for i in {1..100}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Host: sms-checker.local" \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test message '$i'"}'
+  sleep 0.1
+done
+```
+
+
+**2. Verify Shadow Launch**
+
+Due to our implementation for canary deployment, the traffic is split 90/10 to v1 and v2, respectively. However, v3 mirrors both v1 and v2.
+
+```bash
+# Count model-v1 requests (should match app-v1)
+echo "model-v1 total:"
+for pod in $(kubectl get pods | grep model-deployment-v1 | awk '{print $1}'); do
+  kubectl logs $pod -c model | grep -c "POST /predict"
+done | awk '{s+=$1} END {print s}'
+
+# Count model-v2 requests (should match app-v2)
+echo "model-v2 total:"
+kubectl logs $(kubectl get pods | grep model-deployment-v2 | awk '{print $1}') -c model | grep -c "POST /predict"
+
+# Count model-v3 requests (should equal v1 + v2 = ~100, all traffic is mirrored)
+echo "model-v3 total (shadow):"
+kubectl logs $(kubectl get pods | grep model-deployment-v3 | awk '{print $1}') -c model | grep -c "POST /predict"
+```
+
+
+**3. Check Metrics**
+```bash
+# Port-forward model-v3 (shadow)
+kubectl port-forward $(kubectl get pods | grep model-deployment-v3 | awk '{print $1}') 8082:8081
+
+# Check v3 metrics (should match total traffic)
+curl http://localhost:8082/metrics | grep model_predictions_total
+```

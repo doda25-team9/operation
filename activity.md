@@ -229,6 +229,7 @@ using Istio traffic mirroring.
 - [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)
 
 Reviewed:
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
 
 ### **Zosia**
 Documented the deployment process

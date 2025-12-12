@@ -8,15 +8,13 @@ Our application is composed of a frontend (`app-service`) and a backend (`model-
 
 Moreover, we also deploy monitoring measures such as Prometheus and Grafana. More on that in the Monitoring section.
 
-ADD ADITIONAL USE CASE COMPONENT
-
 ## Data Flow
 
 The request follows the following path:
 
 1. **Istio Gateway**: Once a user sends a request to the cluster, it goes through the Istio Gateway, which acts as a single entry point for external traffic.
 2. **App (Frontend) Service**: The request is forwarded to the Virtual Service of the app, which routes the request to one of the deployed versions of the app service.
-3. **Model (Backend) Service**: When a prediction request is sent from the frontend, it flows to the backend service and is intercepted by the Virtual Service.
+3. **Model (Backend) Service**: When a prediction request is sent from the frontend, it flows to the backend service and is intercepted by the Virtual Service, which decides which version of the model service to route the request to, based on the sourceLabels set by the app service. Moreover, we have implemented Shadow Launch, which mirrors all requests to `v3` of the model service for testing purposes without affecting the user experience.
 
 Our application supports consistent versioning; thus, if a user request is handled by `v1` of the app service, the internal logic guarantees, through sourceLabels, that it will be handled by `v1` of the model service and not `v2`.
 
@@ -31,7 +29,7 @@ Two files are responsible for the decision process of the routing:
 
 ## Continuous Experimentation
 
-10% of users are routed to the canary group to test new features. We use Sticky Session to ensure consistent versioning for the entirety of the session (NOT IMPLEMENTED YET).
+10% of users are routed to the canary group to test new features. We use Sticky Session to ensure consistent versioning for the entirety of the session.
 
 ## Monitoring
 For observability purposes, we utilize Prometheus metrics and Grafana to visualize the patterns of the app usage.
@@ -53,3 +51,7 @@ The following configuration is required to access the deployment:
     * `/sms` Page allowing to enter sms messages
     * `/metrics` Page responsible for exporting metrics in Prometheus format
 
+## Configuration
+We use Kubernetes resources to configure the deployment:
+* **ConfigMap**: It is used to specify app port as well as model_host URL.
+* **Secrets**: Store sensitive information such as SMTP credentials.

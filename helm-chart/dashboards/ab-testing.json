@@ -1,0 +1,54 @@
+{
+  "uid": "sms-ab-dashboard",
+  "title": "SMS Checker - A/B Experiment Results",
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "refresh": "5s",
+  "templating": {
+    "list": [
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "1m,5m,10m,30m,1h",
+        "current": { "selected": true, "text": "1m", "value": "1m" },
+        "label": "Interval",
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Spam Detection Rate (%)",
+      "description": "Percentage of traffic identified as SPAM",
+      "id": 2,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(increase(predictions_result_total{result=\"spam\"}[$interval])) / sum(increase(predictions_result_total[$interval])) * 100",
+          "legendFormat": "Spam Rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "unit": "percent"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Prediction Trends over Time",
+      "id": 3,
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 14 },
+      "targets": [
+        {
+          "expr": "increase(predictions_result_total[$interval])",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

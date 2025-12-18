@@ -53,13 +53,15 @@ We can verify this design with a **"Rejection" Experiment**:
 2.  **Experiment Steps:**
     * **Case A (Operations):** Open a PR in `operations` where a numeric value in `values.yaml` is changed to a string (invalid K8s schema).
     * **Case B (Model-Service):** Open a PR in `model-service` with a valid Python script but a broken `Dockerfile` (e.g., referencing a non-existent base image).
-3.  **Success Metric:** In our current process, these might be merged if the reviewer is tired, not 100% focused, or if they somehow have an old setup running that they test the new PR with. In the new system, **Case A** must fail the `kubeconform` check, and **Case B** must fail the `docker build` check. In both cases, the PR merge button must be disabled automatically.
+    * **Case C (App - Linting):** Open a PR in `app` containing code that functions correctly but violates the defined style guide (e.g., incorrect indentation or unused imports).
+    * **Case D (Lib-Version - Compliation):** Open a PR in `lib-version` with a syntax error in the Java code (e.g., missing semicolon) that prevents compilation.
+3.  **Success Metric:** In our current process, these might be merged if the reviewer is tired, not 100% focused, or if they somehow have an old setup running that they test the new PR with. In the new system, **Case A** must fail the `kubeconform` check, and **Case B** must fail the `docker build` check. In both cases, the PR merge button must be disabled automatically. **Case C** must fail the `Checkstyle` step, and **Check D** must fail the `mvn compile` step. In all cases, the PR merge button must be disabled automatically by GitHub.
 
 ### 5. Reflection
 
 **Assumptions & Downsides:** 
 * **Wait Time:** Running these checks on every Pull Request will increase the time before we are able to merge. Since some of the assignments were designed to have tasks that depend on each other, it was crucial for our process that we work fast so we do not block the next person that will work. With the added waiting time for pipelines to run, it might be harder for everyone to start their tasks on time.
-* **Lack of Tests:** We currently do not have a series of test to make sure the previous assignments still work fine when we merge some new functionality. Since we don't have these set in place, this added pipeline can still oversee specific features from either older or newer assignments, which does not entirely get rid of the peer issues when running our code.
+* **Limited Functional Verification:** Another assumption we do is that syntax and build checks are sufficient to improve stability. But we do acknowledge that they are not a complete substitute for functional testing. We currently lack a comprehensive test suite to verify that features from previous assignments remain functional after new merges. While this proposed pipeline catches "hard" errors (broken builds, invalid manifests), it cannot detect logical bugs or regressions in the behavior of the application. So, while "works on my machine" issues will be reduced, they will not be entirely eliminated.
 
 ### 6. References
 

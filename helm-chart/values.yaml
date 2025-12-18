@@ -70,11 +70,15 @@ kube-prometheus-stack:
         namespace: default
         port: http-web
         scheme: http
-          
+  
+  defaultRules:
+    create: false  # Disable all default rules      
+  
   alertmanager:
     enabled: true
     alertmanagerSpec:
-      configSecret: alertmanager-prometheus-alertmanager
+      useExistingSecret: true
+      configSecret: alertmanager-custom-config
 
   grafana:
     enabled: true

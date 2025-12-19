@@ -287,3 +287,11 @@ Improved metrics by adding labels and added a few use cases of the Gauge metric.
 Reviewed:
 - [Fix for A3; Alert manager; Notification via email by konnaan-tud · Pull Request #31](https://github.com/doda25-team9/operation/pull/31)
 
+### **Johan**
+I updated the running instructions to reflect virtualbox as the minikube driver instead of docker to align with the rubric.
+- [Update minikube driver from docker to virtualbox #34 ](https://github.com/doda25-team9/operation/pull/34)
+
+Reviewed:
+- [Changed Grafana dashboards to have their own .json file, separate from .yaml](https://github.com/doda25-team9/operation/pull/30)
+- [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
+

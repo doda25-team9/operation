@@ -989,6 +989,8 @@ done
 
 This sends 2 requests per second (120 requests/minute), exceeding the 15 requests/minute threshold.
 
+**Note: Each pod is individually evaluated by Prometheus, and since we have 3 replicas, all 3 are receiving high traffic and trigger the alert.**
+
 ---
 
 ### Step 5: Monitor Alert in Prometheus

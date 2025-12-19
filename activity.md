@@ -264,7 +264,7 @@ Implemented the change in model-service:
 Reviewed:
 - [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
 
-## Week Q2.5 (December 15+) Working on Assignment 4 and Fixes/Additions for previous Assignments
+## Week Q2.6 (December 15+) Working on Assignment 4 and Fixes/Additions for previous Assignments
 
 ### **Konstantina**
 For Assignment 3 Alert Manager; Replaced webhook.site alerting (which was not working properly due to expirations) with Gmail SMTP email notifications
@@ -279,4 +279,11 @@ Changed Grafana dashboards to have their own .json file, separate from .yaml, ba
 
 Reviewed:
 - [Continuous Experimentation: change model #9](https://github.com/doda25-team9/model-service/pull/9)
+
+### **Zosia**
+Improved metrics by adding labels and added a few use cases of the Gauge metric.
+- [Improved Gauge usecase by ZofiaRT · Pull Request #11](https://github.com/doda25-team9/app/pull/11)
+
+Reviewed:
+- [Fix for A3; Alert manager; Notification via email by konnaan-tud · Pull Request #31](https://github.com/doda25-team9/operation/pull/31)
 

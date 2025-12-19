@@ -263,3 +263,13 @@ Implemented the change in model-service:
 
 Reviewed:
 - [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+
+## Week Q2.5 (December 15+) Working on Assignment 4 and Fixes/Additions for previous Assignments
+
+### **Konstantina**
+For Assignment 3 Alert Manager; Replaced webhook.site alerting (which was not working properly due to expirations) with Gmail SMTP email notifications
+- [Fix for A3; Alert manager; Notification via email #31](https://github.com/doda25-team9/operation/pull/31)
+
+Reviewed:
+- [Improved Gauge usecase #11](https://github.com/doda25-team9/app/pull/11)
+

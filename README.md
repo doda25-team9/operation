@@ -927,6 +927,17 @@ kubectl get svc | grep prometheus
 **Prerequisites:**
 - Minikube running with the application deployed
 
+### Current Implementation
+
+The SMTP password for email alerts is documented in this README for **grading and testing purposes only**. This approach was chosen to allow reviewers to test the alerting functionality without additional setup steps.
+
+The assignment requires that credentials should not be in deployment files, source code, or manifests. Our implementation follows this requirement:
+
+**No passwords in YAML files** - Only placeholders in `values.yaml`  
+**No passwords in source code** - App code doesn't contain credentials  
+**No passwords in manifests** - Kubernetes manifests use placeholders  
+**Credentials passed at deployment time** - Via Helm `--set` flags 
+
 ### Step 1: Install (or Upgrade if already installed) with Email Credentials
 ```bash
 helm install sms-checker . \

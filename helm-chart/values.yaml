@@ -50,6 +50,12 @@ secret:
   smtpUser: "placeholder-user"
   smtpPass: "placeholder-password"
 
+alertmanager:
+  smtp:
+    user: "doda.team9@gmail.com"
+    password: "PLACEHOLDER_REPLACE_WITH_GMAIL_APP_PASSWORD"
+  recipient: "PLACEHOLDER_REPLACE_WITH_YOUR_EMAIL"
+
 kube-prometheus-stack:
   fullnameOverride: "prometheus"
 
@@ -64,11 +70,15 @@ kube-prometheus-stack:
         namespace: default
         port: http-web
         scheme: http
-          
+  
+  defaultRules:
+    create: false  # Disable all default rules      
+  
   alertmanager:
     enabled: true
     alertmanagerSpec:
-      configSecret: alertmanager-prometheus-alertmanager
+      useExistingSecret: true
+      configSecret: alertmanager-custom-config
 
   grafana:
     enabled: true

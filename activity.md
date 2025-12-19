@@ -273,3 +273,10 @@ For Assignment 3 Alert Manager; Replaced webhook.site alerting (which was not wo
 Reviewed:
 - [Improved Gauge usecase #11](https://github.com/doda25-team9/app/pull/11)
 
+### **Antonio**
+Changed Grafana dashboards to have their own .json file, separate from .yaml, based on peer review suggestions.
+- [Changed Grafana dashboards to have their own .json file, separate from .yaml #30](https://github.com/doda25-team9/operation/pull/30)
+
+Reviewed:
+- [Continuous Experimentation: change model #9](https://github.com/doda25-team9/model-service/pull/9)
+

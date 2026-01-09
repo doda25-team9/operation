@@ -305,3 +305,10 @@ Changed the docker-compose.yaml file so it doesn't need the user to copy the out
 Reviewed:
 - [Continuous experimentation: Display model name and app version #12](https://github.com/doda25-team9/app/pull/12)
 
+### **Zosia**
+Implemented and configured a fully working MetalLB for Assignment 2.
+- [MetalLB implementation for Assignment 2](https://github.com/doda25-team9/operation/pull/36)
+
+Reviewed:
+- [Change ctrl and node IPs](https://github.com/doda25-team9/operation/pull/35)
+

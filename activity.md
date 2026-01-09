@@ -312,3 +312,9 @@ Implemented and configured a fully working MetalLB for Assignment 2.
 Reviewed:
 - [Change ctrl and node IPs](https://github.com/doda25-team9/operation/pull/35)
 
+### **Konstantina**
+Moved the  Maven compilation is from inside Docker (to avoid nested containers) to GitHub Actions runner. 
+Simplified Dockerfile from multi-stage to single-stage.
+- [Refactor: move Maven build outside Docker container #13](https://github.com/doda25-team9/app/pull/13)
+- [fix: use Java 25 to match GitHub Actions runner #14](https://github.com/doda25-team9/app/pull/14)
+- [fix: rename JAR to app.jar before Docker build #15](https://github.com/doda25-team9/app/pull/15) 

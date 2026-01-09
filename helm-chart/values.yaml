@@ -45,15 +45,16 @@ ingress:
 configMap:
   name: env-config-map
 
-secret:
-  name: secret
-  smtpUser: "placeholder-user"
-  smtpPass: "placeholder-password"
+secret: 
+  name: smtp-credentials 
+  smtpUserKey: SMTP_USER 
+  smtpPassKey: SMTP_PASS
 
 alertmanager:
   smtp:
-    user: "doda.team9@gmail.com"
-    password: "PLACEHOLDER_REPLACE_WITH_GMAIL_APP_PASSWORD"
+    secretName: alertmanager-smtp-secret 
+    userKey: SMTP_USER 
+    passwordKey: SMTP_PASS
   recipient: "PLACEHOLDER_REPLACE_WITH_YOUR_EMAIL"
 
 kube-prometheus-stack:
@@ -82,8 +83,10 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
-    adminUser: admin
-    adminPassword: admin123
+    admin: 
+      secretName: grafana-admin-secret 
+      userKey: admin-user 
+      passwordKey: admin-password
   
 istio:
   enabled: true

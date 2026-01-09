@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: alertmanager-custom-config
+  name: alertmanager-config
   labels:
     app: kube-prometheus-stack-alertmanager
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -12,9 +12,9 @@ stringData:
     global:
       resolve_timeout: 5m
       smtp_smarthost: 'smtp.gmail.com:587'
-      smtp_from: '{{ .Values.alertmanager.smtp.user }}'
-      smtp_auth_username: '{{ .Values.alertmanager.smtp.user }}'
-      smtp_auth_password: '{{ .Values.alertmanager.smtp.password }}'
+      smtp_from: '{{ .Values.alertmanager.smtp.from }}'
+      smtp_auth_username: '{{ .Values.alertmanager.smtp.userKey }}'
+      smtp_auth_password: '{{ .Values.alertmanager.smtp.passwordKey }}'
       smtp_require_tls: true
 
     route:

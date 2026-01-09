@@ -1,6 +1,6 @@
 ---
 - name: Finalization Playbook - Installing MetalLB, Nginx Ingress Controller
-  hosts: ctrl
+  hosts: all
   become: yes
   vars:
     metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"

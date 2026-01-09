@@ -56,9 +56,23 @@ misclassified_msgs.txt
 accuracy_scores.png
 ```
 
+These files must exist in:
+`model-service/output/`
+
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
-Once you have done that, you should have a folder called `model-service/output/`. Copy that output folder into `operation/output/`.
+#### Important:
+The `operation` and `model-service` repositories must be located in the same parent directory, because Docker Compose mounts the trained models from the `model-service repository`.
+
+Required folder structure:
+```
+your-folder/
+    app/
+    model-service/
+        output/
+    lib-version/
+    operation/
+```
 
 ### Configuration (.env)
 

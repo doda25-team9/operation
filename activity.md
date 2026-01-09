@@ -295,7 +295,7 @@ Reviewed:
 - [Changed Grafana dashboards to have their own .json file, separate from .yaml](https://github.com/doda25-team9/operation/pull/30)
 - [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
 
-## Week Q2.6 (January 5+) Working on Fixes/Additions for Previous Assignments
+## Week Q2.7 (January 5+) Working on Fixes/Additions for Previous Assignments
 
 ### **Antonio**
 Changed the docker-compose.yaml file so it doesn't need the user to copy the output folder from model-service repo to operation repo each time we retrain the model. Also added descriptions for the .env variables in operation repo to the README.

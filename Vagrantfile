@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     ctrl.vm.hostname = "ctrl"
 
     # Add private network with fixed IP
-    ctrl.vm.network "private_network", ip: "192.168.56.100"
+    ctrl.vm.network "private_network", ip: "192.168.56.50"
     
     # VirtualBox-specific configuration
     ctrl.vm.provider "virtualbox" do |vb|
@@ -53,8 +53,8 @@ Vagrant.configure("2") do |config|
       # Set hostname with number (node-1, node-2, etc.)
       node.vm.hostname = "node-#{i}"
       
-      # Add private network with sequential IPs (192.168.56.101, 102, etc.)
-      node.vm.network "private_network", ip: "192.168.56.#{100+i}"
+      # Add private network with sequential IPs (192.168.56.51, 52, etc.)
+      node.vm.network "private_network", ip: "192.168.56.#{50+i}"
 
       # VirtualBox-specific configuration
       node.vm.provider "virtualbox" do |vb|

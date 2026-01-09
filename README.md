@@ -166,6 +166,11 @@ vagrant halt
 vagrant destroy -f
 ```
 
+To run finalization playbook run this command:
+```bash
+ansible-playbook-u vagrant-i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+````
+
 #### Testing changes to Vagrantfile
 ```bash                
 vagrant destroy -f            # Delete old VMs

@@ -4,7 +4,7 @@
   hosts: ctrl
   become: yes
   vars:
-    controller_ip: "192.168.56.100"
+    controller_ip: "192.168.56.50"
     pod_network_cidr: "10.244.0.0/16"
     k8s_version: "1.32.4"
     flannel_version: "0.26.7"

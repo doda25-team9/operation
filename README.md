@@ -184,9 +184,9 @@ After changing variables, run `vagrant destroy -f && vagrant up` to recreate VMs
 ### VM Network Configuration
 
 Each VM has a private network IP for direct communication:
-- **ctrl**: `192.168.56.100`
-- **node-1**: `192.168.56.101`
-- **node-2**: `192.168.56.102`
+- **ctrl**: `192.168.56.50`
+- **node-1**: `192.168.56.51`
+- **node-2**: `192.168.56.52`
 
 ### Testing Network Connectivity
 
@@ -196,8 +196,8 @@ Each VM has a private network IP for direct communication:
 vagrant ssh ctrl
 
 # Ping worker nodes
-ping -c 3 192.168.56.101
-ping -c 3 192.168.56.102
+ping -c 3 192.168.56.51
+ping -c 3 192.168.56.52
 
 # Exit
 exit
@@ -206,15 +206,15 @@ exit
 **Test host-to-VM communication:**
 ```bash
 # From your Mac terminal, ping any VM
-ping -c 3 192.168.56.100    # Controller
-ping -c 3 192.168.56.101    # Worker 1
-ping -c 3 192.168.56.102    # Worker 2
+ping -c 3 192.168.56.50    # Controller
+ping -c 3 192.168.56.51    # Worker 1
+ping -c 3 192.168.56.52    # Worker 2
 ```
 
 **SSH directly via IP (alternative to `vagrant ssh`):**
 ```bash
 # SSH using IP address
-ssh vagrant@192.168.56.100
+ssh vagrant@192.168.56.50
 
 # Password: vagrant
 ```
@@ -362,7 +362,7 @@ The controller node is now configured as a fully functional Kubernetes cluster. 
 - **Helm**: Package manager for Kubernetes applications
 
 **What ctrl.yaml configures:**
-- **Step 13**: Initializes Kubernetes cluster with kubeadm (API server listens at 192.168.56.100:6443, pod network uses 10.244.0.0/16)
+- **Step 13**: Initializes Kubernetes cluster with kubeadm (API server listens at 192.168.56.50:6443, pod network uses 10.244.0.0/16)
 - **Step 14**: Sets up kubectl access for vagrant user (config at `/home/vagrant/.kube/config`) and copies kubeconfig to `/vagrant/kubeconfig` for host access
 - **Step 15**: Installs Flannel CNI for pod networking (configured to use eth1 interface, which is the host-only network adapter for cluster communication)
 - **Step 16**: Installs Helm 3 package manager using official installation script from GitHub

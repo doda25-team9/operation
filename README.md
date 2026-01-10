@@ -765,7 +765,7 @@ kubectl describe ingress app-ingress
 
 # Check configuration
 kubectl get configmap env-config-map -o yaml
-kubectl get secret secret
+kubectl get secrets
 
 # View all release resources
 kubectl get all -l app.kubernetes.io/instance=sms-checker
@@ -947,21 +947,11 @@ kubectl get svc | grep prometheus
 
 ### Current Implementation
 
-The Helm chart does not contain any `SMTP c`redentials and does not create Secrets with sensitive data.
+The Helm chart does not contain any SMTP credentials and does not create Secrets with sensitive data.
 
 Alertmanager reads its SMTP username and password from a pre‑existing Kubernetes Secret that must be created manually before installing the chart.
 
-### Step 1: Create the Alertmanager SMTP Secret
-```bash
-kubectl create secret generic alertmanager-smtp-secret \ 
-  --from-literal=SMTP_USER="your-alertmanager-email@example.com" \ 
-  --from-literal=SMTP_PASS="your-app-password"
-```
-
-Replace `your-email@example.com` with your actual email address.
----
-
-### Step 2: Install or Upgrade Helm
+### Step 1: Install or Upgrade Helm
 ```bash
 helm install sms-checker ./helm-chart \ 
   --set alertmanager.recipient="your-email@example.com"
@@ -975,7 +965,7 @@ helm upgrade sms-checker ./helm-chart \
 Replace `your-email@example.com` with your actual email address.
 ---
 
-### Step 3: Verify SMTP Configuration
+### Step 2: Verify SMTP Configuration
 ```bash
 kubectl get secret alertmanager-custom-config -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d | grep smtp
 ```
@@ -983,7 +973,7 @@ kubectl get secret alertmanager-custom-config -o jsonpath='{.data.alertmanager\.
 Should show that SMTP authentication fields are present and referencing the mounted Secret.
 ---
 
-### Step 4: Port-Forward Istio Gateway
+### Step 3: Port-Forward Istio Gateway
 ```bash
 kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
@@ -992,7 +982,7 @@ Keep this terminal running.
 
 ---
 
-### Step 5: Generate High Traffic
+### Step 4: Generate High Traffic
 
 Open a new terminal and send requests:
 ```bash
@@ -1012,7 +1002,7 @@ This sends 2 requests per second (120 requests/minute), exceeding the 15 request
 
 ---
 
-### Step 6: Monitor Alert in Prometheus
+### Step 5: Monitor Alert in Prometheus
 
 In another terminal:
 ```bash
@@ -1028,7 +1018,7 @@ Watch `HighRequestRate` alert progress:
 
 ---
 
-### Step 7: Check AlertManager
+### Step 6: Check AlertManager
 
 In another terminal:
 ```bash
@@ -1041,7 +1031,7 @@ You should see the `HighRequestRate` alert when it starts firing.
 
 ---
 
-### Step 8: Receive Email
+### Step 7: Receive Email
 
 After the alert starts firing:
 
@@ -1092,11 +1082,7 @@ kubectl port-forward svc/sms-checker-grafana 3000:80
 
 **Login to Grafana:**
 
-Grafana will prompt for credentials in the browser (they are configured through the Helm chart)
-
-Username: `admin`
-
-Password: `admin123`
+Grafana will prompt for credentials in the browser. These were set in the kubernetes secrets. 
 
 ---
 

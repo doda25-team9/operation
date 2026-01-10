@@ -76,7 +76,7 @@ your-folder/
 
 ### Configuration (.env)
 
-The compose setup uses a `.env` file:
+The Docker Compose setup uses a `.env` file located in the `operation` repository, which contains, for example:
 
 ```
 APP_PORT=8080
@@ -85,7 +85,24 @@ APP_IMAGE=ghcr.io/doda25-team9/app:latest
 MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 ```
 
-You can change ports or image versions here.
+#### Variable overview:
+- `APP_PORT`:
+Port on the host machine where the web application will be exposed. After startup, the app is accessible at:
+`http://localhost:<APP_PORT>/sms`
+
+- `MOEL_PORT`:
+Internal port used by the model-service container.
+The app communicates with the model-service over the Docker network using this port.
+
+- `APP_IMAGE`:
+Docker image for web application.
+You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+
+- `MODEL_IMAGE`:
+Docker image for the model-service.
+You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+
+You can adjust ports or change image versions by editing this file before running `docker compose up`.
 
 ### Running the Full Application
 

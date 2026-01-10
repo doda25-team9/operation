@@ -592,6 +592,9 @@ The Helm chart provides a streamlined way to deploy the complete SMS Checker app
 - Helm 3.x installed
 - kubectl configured to access your cluster
 - Nginx Ingress Controller installed
+- SMTP secret for app and model service set
+- SMTP secret for Alertmanager
+- Grafana secret set
 
 For Minikube:
 ```bash
@@ -605,8 +608,32 @@ kubectl wait --namespace ingress-nginx \
   --timeout=120s
 ```
 
-### Quick Start
+For each step below replace the placeholder values with your own values.
 
+SMTP credentials for app and model service
+```bash
+kubectl create secret generic smtp-credentials \
+  --from-literal=SMTP_USER="user" \
+  --from-literal=SMTP_PASS="password"
+```
+
+Alertmanager SMTP credentials
+```bash
+kubectl create secret generic alertmanager-smtp-secret \
+  --from-literal=SMTP_USER="user@example.com" \
+  --from-literal=SMTP_PASS="password"
+```
+
+Grafana admin credentials
+```bash
+kubectl create secret generic grafana-admin-secret \
+  --from-literal=admin-user="user" \
+  --from-literal=admin-password="password"
+```
+
+
+
+### Quick Start
 Deploy the complete application:
 ```bash
 cd operation
@@ -619,7 +646,6 @@ This deploys:
 - Services (app-service, model-service)
 - Ingress (sms-checker.local)
 - ConfigMap (environment variables)
-- Secret (SMTP credentials)
 
 ### Verify Deployment
 ```bash
@@ -631,7 +657,7 @@ kubectl get ingress
 Expected output:
 - 3 app pods: Running
 - 2 model-service pods: Running
-- 2 services, 1 ingress, 1 configmap, 1 secret
+- 2 services, 1 ingress, 1 configmap
 
 All pods should be in Running state once images are pulled from the registry.
 
@@ -661,12 +687,6 @@ helm install sms-checker ./helm-chart --set ingress.host=myapp.local
 
 # Disable ingress
 helm install sms-checker ./helm-chart --set ingress.enabled=false
-
-
-# Provide SMTP credentials
-helm install sms-checker ./helm-chart \
-  --set secret.smtpUser=real@email.com \
-  --set secret.smtpPass=realpassword
 
 # Use custom values file
 helm install sms-checker ./helm-chart -f my-values.yaml
@@ -706,8 +726,6 @@ Key values (see `helm-chart/values.yaml` for complete list):
 | `modelService.replicas` | Number of model-service pods | `2` |
 | `ingress.enabled` | Enable/disable Ingress | `true` |
 | `ingress.host` | Hostname for accessing app | `sms-checker.local` |
-| `secret.smtpUser` | SMTP username | `placeholder-user` |
-| `secret.smtpPass` | SMTP password | `placeholder-password` |
 
 ### Testing
 
@@ -929,42 +947,43 @@ kubectl get svc | grep prometheus
 
 ### Current Implementation
 
-The SMTP password for email alerts is documented in this README for **grading and testing purposes only**. This approach was chosen to allow reviewers to test the alerting functionality without additional setup steps.
+The Helm chart does not contain any `SMTP c`redentials and does not create Secrets with sensitive data.
 
-The assignment requires that credentials should not be in deployment files, source code, or manifests. Our implementation follows this requirement:
+Alertmanager reads its SMTP username and password from a pre‑existing Kubernetes Secret that must be created manually before installing the chart.
 
-**No passwords in YAML files** - Only placeholders in `values.yaml`  
-**No passwords in source code** - App code doesn't contain credentials  
-**No passwords in manifests** - Kubernetes manifests use placeholders  
-**Credentials passed at deployment time** - Via Helm `--set` flags 
-
-### Step 1: Install (or Upgrade if already installed) with Email Credentials
+### Step 1: Create the Alertmanager SMTP Secret
 ```bash
-helm install sms-checker . \
-  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
+kubectl create secret generic alertmanager-smtp-secret \ 
+  --from-literal=SMTP_USER="your-alertmanager-email@example.com" \ 
+  --from-literal=SMTP_PASS="your-app-password"
+```
+
+Replace `your-email@example.com` with your actual email address.
+---
+
+### Step 2: Install or Upgrade Helm
+```bash
+helm install sms-checker ./helm-chart \ 
   --set alertmanager.recipient="your-email@example.com"
 ```
-or
+or 
 ```bash
-helm upgrade sms-checker . \
-  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
+helm upgrade sms-checker ./helm-chart \ 
   --set alertmanager.recipient="your-email@example.com"
 ```
 
 Replace `your-email@example.com` with your actual email address.
-
 ---
 
-### Step 2: Verify SMTP Configuration
+### Step 3: Verify SMTP Configuration
 ```bash
 kubectl get secret alertmanager-custom-config -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d | grep smtp
 ```
 
-Should show SMTP server and credentials configured.
-
+Should show that SMTP authentication fields are present and referencing the mounted Secret.
 ---
 
-### Step 3: Port-Forward Istio Gateway
+### Step 4: Port-Forward Istio Gateway
 ```bash
 kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
@@ -973,7 +992,7 @@ Keep this terminal running.
 
 ---
 
-### Step 4: Generate High Traffic
+### Step 5: Generate High Traffic
 
 Open a new terminal and send requests:
 ```bash
@@ -993,7 +1012,7 @@ This sends 2 requests per second (120 requests/minute), exceeding the 15 request
 
 ---
 
-### Step 5: Monitor Alert in Prometheus
+### Step 6: Monitor Alert in Prometheus
 
 In another terminal:
 ```bash
@@ -1009,7 +1028,7 @@ Watch `HighRequestRate` alert progress:
 
 ---
 
-### Step 6: Check AlertManager
+### Step 7: Check AlertManager
 
 In another terminal:
 ```bash
@@ -1022,7 +1041,7 @@ You should see the `HighRequestRate` alert when it starts firing.
 
 ---
 
-### Step 7: Receive Email
+### Step 8: Receive Email
 
 After the alert starts firing:
 

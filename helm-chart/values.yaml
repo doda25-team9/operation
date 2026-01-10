@@ -55,6 +55,7 @@ alertmanager:
     secretName: alertmanager-smtp-secret 
     userKey: SMTP_USER 
     passwordKey: SMTP_PASS
+    from: "your-email@example.com"
   recipient: "PLACEHOLDER_REPLACE_WITH_YOUR_EMAIL"
 
 kube-prometheus-stack:
@@ -75,10 +76,10 @@ kube-prometheus-stack:
   defaultRules:
     create: false  # Disable all default rules      
   
-  alertmanager:
-    enabled: true
-    alertmanagerSpec:
-      useExistingSecret: true
+  alertmanager: 
+    enabled: true 
+    alertmanagerSpec: 
+      useExistingSecret: true 
       configSecret: alertmanager-custom-config
 
   grafana:

@@ -3,6 +3,7 @@
 - name: Setup Kubernetes controller
   hosts: ctrl
   become: yes
+  gather_facts: false
   vars:
     controller_ip: "192.168.56.100"
     pod_network_cidr: "10.244.0.0/16"

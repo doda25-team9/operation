@@ -3,6 +3,7 @@
 - name: Setup worker nodes
   hosts: node-*
   become: yes
+  gather_facts: false
   tasks:
     # Step 18: Generate Join Command
     - name: Check if node is already joined

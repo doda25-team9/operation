@@ -295,3 +295,26 @@ Reviewed:
 - [Changed Grafana dashboards to have their own .json file, separate from .yaml](https://github.com/doda25-team9/operation/pull/30)
 - [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
 
+## Week Q2.7 (January 5+) Working on Fixes/Additions for Previous Assignments
+
+### **Antonio**
+Changed the docker-compose.yaml file so it doesn't need the user to copy the output folder from model-service repo to operation repo each time we retrain the model. Also added descriptions for the .env variables in operation repo to the README.
+- [Remove need to copy over output/ folder from model-service to operation repo. #37](https://github.com/doda25-team9/operation/pull/37)
+- [Added some descriptions for the .env variables in operation repository #38](https://github.com/doda25-team9/operation/pull/38)
+
+Reviewed:
+- [Continuous experimentation: Display model name and app version #12](https://github.com/doda25-team9/app/pull/12)
+
+### **Zosia**
+Implemented and configured a fully working MetalLB for Assignment 2.
+- [MetalLB implementation for Assignment 2](https://github.com/doda25-team9/operation/pull/36)
+
+Reviewed:
+- [Change ctrl and node IPs](https://github.com/doda25-team9/operation/pull/35)
+
+### **Konstantina**
+Moved the  Maven compilation is from inside Docker (to avoid nested containers) to GitHub Actions runner. 
+Simplified Dockerfile from multi-stage to single-stage.
+- [Refactor: move Maven build outside Docker container #13](https://github.com/doda25-team9/app/pull/13)
+- [fix: use Java 25 to match GitHub Actions runner #14](https://github.com/doda25-team9/app/pull/14)
+- [fix: rename JAR to app.jar before Docker build #15](https://github.com/doda25-team9/app/pull/15) 

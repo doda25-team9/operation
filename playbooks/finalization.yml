@@ -35,10 +35,6 @@
       ansible.builtin.command: kubectl apply -f /tmp/metallb-config.yaml
       environment:
           KUBECONFIG: "{{ kubeconfig_path }}"
-      register: result
-      until: result.rc == 0
-      retries: 5
-      delay: 10
 
     # Step 21: Install Nginx Ingress Controller
     - name: Add Helm repository

@@ -1,0 +1,37 @@
+---
+- name: Finalization Playbook - Installing MetalLB, Nginx Ingress Controller
+  hosts: all
+  become: yes
+  vars:
+    metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"
+    kubeconfig_path: "/etc/kubernetes/admin.conf"
+
+  tasks:
+    # Step 20: Install MetalLB and configure it
+    - name: Apply MetalLB manifest
+      ansible.builtin.command: kubectl apply -f {{ metallb_url }}
+      environment:
+          KUBECONFIG: "{{ kubeconfig_path }}"
+      register: metallb_install
+      changed_when: "'created' in metallb_install.stdout or 'configured' in metallb_install.stdout"
+
+    - name: Wait for MetalLB controller to be ready
+      ansible.builtin.command: >
+        kubectl wait -n metallb-system
+        -l app=metallb,component=controller
+        --for=condition=ready pod
+        --timeout=60s
+      environment:
+          KUBECONFIG: "{{ kubeconfig_path }}"
+      changed_when: false
+
+    - name: Copy MetalLB configuration file
+      ansible.builtin.copy:
+        src: metallb-config.yaml
+        dest: /tmp/metallb-config.yaml
+        mode: "0644"
+
+    - name: Apply MetalLB configuration
+      ansible.builtin.command: kubectl apply -f /tmp/metallb-config.yaml
+      environment:
+          KUBECONFIG: "{{ kubeconfig_path }}"

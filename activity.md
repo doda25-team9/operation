@@ -318,3 +318,14 @@ Simplified Dockerfile from multi-stage to single-stage.
 - [Refactor: move Maven build outside Docker container #13](https://github.com/doda25-team9/app/pull/13)
 - [fix: use Java 25 to match GitHub Actions runner #14](https://github.com/doda25-team9/app/pull/14)
 - [fix: rename JAR to app.jar before Docker build #15](https://github.com/doda25-team9/app/pull/15) 
+
+## Week Q2.8 (January 12+) Working on Fixes/Additions for Previous Assignments
+### **Zosia**
+Implemented Ingress controller for A2, added self-signed certificates and keys to fulfill Excellent requirements.
+Worked on speeding up the provisioning.
+- [A2 - Add self-signed certificates to Ingress Controller #42](https://github.com/doda25-team9/operation/pull/42)
+- [A2 Step 21 Ingress Controller #41](https://github.com/doda25-team9/operation/pull/41)
+- [Speed up Provisioning - Branch](https://github.com/doda25-team9/operation/tree/improvement/speeding-up-provisioning)
+
+Reviewed:
+- [Change ctrl and worker IPs #35](https://github.com/doda25-team9/operation/pull/35)

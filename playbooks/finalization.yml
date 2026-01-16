@@ -35,3 +35,28 @@
       ansible.builtin.command: kubectl apply -f /tmp/metallb-config.yaml
       environment:
           KUBECONFIG: "{{ kubeconfig_path }}"
+
+    # Step 21: Install Nginx Ingress Controller
+    - name: Add Helm repository
+      kubernetes.core.helm_repository:
+        name: ingress-nginx
+        repo_url: https://kubernetes.github.io/ingress-nginx
+      environment:
+          KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Install chart
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: ingress-nginx
+        create_namespace: true
+        values:
+          controller:
+            ingressClassResource:
+              name: nginx
+              enabled: true
+              default: true
+            service:
+              loadBalancerIP: "192.168.56.99"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"

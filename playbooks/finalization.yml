@@ -80,7 +80,7 @@
         name: ingress-nginx
         chart_ref: ingress-nginx/ingress-nginx
         release_namespace: ingress-nginx
-        create_namespace: true
+        create_namespace: false
         values:
           controller:
             ingressClassResource:

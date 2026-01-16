@@ -44,7 +44,34 @@
       environment:
           KUBECONFIG: "{{ kubeconfig_path }}"
 
-    - name: Install chart
+    - name: Create namespace for Ingress controller (for secrets)
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: ingress-nginx
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Copy certificate and key files to VM
+      ansible.builtin.copy:
+        src: "certificates/{{ item }}"
+        dest: "/tmp/{{ item }}"
+        mode: "0644"
+      with_items:
+          - tls.crt
+          - tls.key
+
+    - name: Create TLS secret for Ingress controller
+      ansible.builtin.shell: |
+        kubectl create secret tls self-signed-certificate-tls \
+        --key=/tmp/tls.key \
+        --cert=/tmp/tls.crt \
+        -n ingress-nginx \
+        --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Install Ingress chart
       kubernetes.core.helm:
         name: ingress-nginx
         chart_ref: ingress-nginx/ingress-nginx
@@ -58,5 +85,7 @@
               default: true
             service:
               loadBalancerIP: "192.168.56.99"
+            extraArgs:
+              default-ssl-certificate: "ingress-nginx/self-signed-certificate-tls"
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"

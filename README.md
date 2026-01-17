@@ -166,7 +166,7 @@ vagrant --version
 VBoxManage --version
 ```
 
-Otherwise instill by running:
+Otherwise install by running:
 ```sudo apt update
 wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
@@ -264,6 +264,9 @@ VMs are automatically configured using Ansible playbooks during `vagrant up`:
 - **playbooks/general.yaml** - Runs on all VMs (shared configuration)
 - **playbooks/ctrl.yaml** - Runs only on controller
 - **playbooks/node.yaml** - Runs only on workers
+
+Furthermore, we have another playbook that can be run from the host to perform final installation steps
+- **playbooks/finalization.yaml** - Can be run manually from the host
 
 ### General.yaml
 

@@ -329,3 +329,11 @@ Worked on speeding up the provisioning.
 
 Reviewed:
 - [Change ctrl and worker IPs #35](https://github.com/doda25-team9/operation/pull/35)
+
+### **Konstantina**
+
+Added my SSH public key. Implemented auto-generated Ansible inventory.cfg based on active VMs and dynamic /etc/hosts generation entries for all cluster nodes.
+-[A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)
+
+Reviewed:
+-[Implementation of MetalLB #36](https://github.com/doda25-team9/operation/pull/36)

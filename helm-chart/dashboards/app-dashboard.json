@@ -88,30 +88,60 @@
       ]
     },
     {
-      "type": "heatmap",
-      "title": "Request Duration Histogram (seconds)",
+      "type": "bargauge",
+      "title": "Request Duration (Distribution over $interval)",
       "id": 6,
-      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 12 },
+      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
-          "expr": "sum by (le)(increase(request_duration_bucket[$interval]))",
-          "format": "heatmap",
+          "expr": "sum by (le) (increase(request_duration_bucket[$interval]))",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "{{le}} s",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "displayMode": "basic",
+        "orientation": "vertical",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "text": { "valueSize": 20 }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "min": 0
+        }
+      }
     },
     {
-      "type": "heatmap",
-      "title": "SMS Length Histogram (characters)",
+      "type": "bargauge",
+      "title": "SMS Length (Distribution over $interval)",
       "id": 7,
-      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 12 },
+      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
-          "expr": "sum by (le)(increase(sms_length_bucket[$interval]))",
-          "format": "heatmap",
+          "expr": "sum by (le) (increase(sms_length_bucket[$interval]))",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "{{le}} chars",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "displayMode": "basic",
+        "orientation": "vertical",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "text": { "valueSize": 20 }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "min": 0
+        }
+      }
     }
   ]
 }

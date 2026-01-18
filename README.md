@@ -197,11 +197,6 @@ vagrant halt
 vagrant destroy -f
 ```
 
-To run finalization playbook run this command:
-```bash
-ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
-````
-
 #### Testing changes to Vagrantfile
 ```bash                
 vagrant destroy -f            # Delete old VMs
@@ -264,6 +259,14 @@ VMs are automatically configured using Ansible playbooks during `vagrant up`:
 - **playbooks/general.yaml** - Runs on all VMs (shared configuration)
 - **playbooks/ctrl.yaml** - Runs only on controller
 - **playbooks/node.yaml** - Runs only on workers
+
+Furthermore, we have another playbook that can be run from the host to perform final installation steps
+- **playbooks/finalization.yaml** - Needs to be run manually from the host
+
+To run finalization playbook run this command:
+```bash
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+```
 
 ### General.yaml
 
@@ -651,6 +654,30 @@ curl http://sms-checker.local:54471/sms/
 - Port changes each time you restart the tunnel - check the output for the current port
 - The tunnel must stay running while you use the app
 - Stop with `Ctrl+C` in the tunnel terminal
+
+### Accessing the dashboard (Step 22)
+
+First, make sure that you applied the `finalization.yml` playbook (instructions above). 
+
+Then, add the Nginx Ingress controller to the known hosts (you only need to do this once):
+```
+echo "192.168.56.99 dashboard.local" | sudo tee -a /etc/hosts
+```
+
+From now on, the dashboard can be accessed on:
+https://dashboard.local
+
+Then SSH into the ctrl VM:
+```
+vagrant ssh ctrl
+```
+
+In the VM, generate a token for the your dashboard user:
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+
+Make sure to connect using HTTPS as HTTP will give you 401 when trying to log in with the token.
 
 
 ## Helm Chart Deployment (Assignment 3)

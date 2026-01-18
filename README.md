@@ -901,7 +901,7 @@ done
 |--------|------|-------------|
 | `sms_requests_total` | Counter | Total SMS prediction requests |
 | `predictions_result_total` | Counter | Predictions by result (spam/ham) |
-| `active_users` | Gauge | Current active users |
+| `inflight_requests` | Gauge | Current requests being processed |
 | `request_duration` | Histogram | Request duration distribution (seconds) |
 | `sms_length` | Histogram | SMS message length distribution |
 

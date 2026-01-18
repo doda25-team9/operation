@@ -624,10 +624,13 @@ curl http://sms-checker.local:54471/sms/
 
 First, make sure that you applied the `finalization.yml` playbook (instructions above). 
 
-Then, add the ctrl VM to the known hosts (you only need to do this once):
+Then, add the Nginx Ingress controller to the known hosts (you only need to do this once):
 ```
-echo "192.168.56.100 dashboard.local" | sudo tee -a /etc/hosts
+echo "192.168.56.99 dashboard.local" | sudo tee -a /etc/hosts
 ```
+
+From now on, the dashboard can be accessed on:
+https://dashboard.local
 
 Then SSH into the ctrl VM:
 ```
@@ -638,20 +641,6 @@ In the VM, generate a token for the your dashboard user:
 ```
 kubectl -n kubernetes-dashboard create token admin-user
 ```
-
-To fin the dashboard URL, you have to find the port by running:
-```
-kubectl get svc -n ingress-nginx
-```
-Sample output:
-```
-NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
-ingress-nginx-controller             LoadBalancer   10.98.102.240   192.168.56.99   80:32349/TCP,443:31449/TCP   50m
-ingress-nginx-controller-admission   ClusterIP      10.102.70.36    <none>          443/TCP                      50m
-```
-
-Take the `ingress-nginx-controller` port that is associated with 443. In this example it is 31449. Use it to connect to the dashboard like:
-https://dashboard.local:31449/
 
 Make sure to connect using HTTPS as HTTP will give you 401 when trying to log in with the token.
 

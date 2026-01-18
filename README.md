@@ -475,11 +475,40 @@ vagrant ssh ctrl -c "kubectl get nodes"
 
 Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.
 
-## Running the kubernetes cluster (Assignment 3)
+## One-Time Setup of the kubernetes cluster (Assignment 3)
 
-First, start the minikube cluster 
+Prerequisites:
+- VirtualBox
+
+Ensure you are starting with a fresh cluster by running:
 ```
-minikube start --driver=docker
+minikube delete
+```
+
+Create a shared folder:
+```
+mkdir -p ~/k8s-shared/models
+```
+
+Add the folder to the VM:
+```
+VBoxManage sharedfolder add "minikube" \
+  --name shared \
+  --hostpath /home/<your-user>/k8s-shared \
+  --automount
+```
+
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
+```
+
+Mount the folder in the VM (commands are to be run inside the VM):
+```
+minikube ssh
+sudo mkdir -p /mnt/shared
+sudo mount -t vboxsf shared /mnt/shared
+exit
 ```
 
 Then enable the ingress addon:
@@ -487,10 +516,16 @@ Then enable the ingress addon:
 minikube addons enable ingress
 ```
 
-To start the app and model-service using kubernetes, run:
+To start the app and model-service or apply changes using kubernetes, run:
 
 ```
 kubectl apply -f k8s -R
+```
+
+## Start the Kubernetes cluster
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
 ```
 
 ### Access Application

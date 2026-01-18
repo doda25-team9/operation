@@ -140,9 +140,13 @@
         KUBECONFIG: "{{ kubeconfig_path }}"
 
     # Step 23: Install Istio
+    - name: Set Istio Arch suffix
+      set_fact:
+        istio_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
     - name: Download Istio 1.25.2
       ansible.builtin.get_url:
-        url: https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz
+        url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-{{ istio_arch }}.tar.gz"
         dest: /tmp/istio.tar.gz
         mode: '0644'
 

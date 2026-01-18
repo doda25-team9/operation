@@ -24,7 +24,7 @@
       "gridPos": { "x": 0, "y": 0, "w": 16, "h": 8 },
       "targets": [
         {
-          "expr": "increase(sms_requests_total[$interval])",
+          "expr": "sum(increase(sms_requests_total[$interval]))",
           "legendFormat": "requests",
           "refId": "A"
         }
@@ -45,12 +45,12 @@
     {
       "type": "timeseries",
       "title": "Avg Request Duration (seconds)",
-      "description": "Calculated as Rate(Sum) / Rate(Count)",
+      "description": "Calculated as Sum(Rate(Sum)) / Sum(Rate(Count))",
       "id": 3,
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(request_duration_sum[$interval]) / rate(request_duration_count[$interval])",
+          "expr": "sum(rate(request_duration_sum[$interval])) / sum(rate(request_duration_count[$interval]))",
           "legendFormat": "avg duration",
           "refId": "A"
         }
@@ -64,7 +64,7 @@
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(sms_requests_total[$interval])",
+          "expr": "sum(rate(sms_requests_total[$interval]))",
           "legendFormat": "req/s",
           "refId": "A"
         }
@@ -81,66 +81,52 @@
       },
       "targets": [
         {
-          "expr": "increase(predictions_result_total[$interval])",
+          "expr": "sum by (result) (increase(predictions_result_total[$interval]))",
           "legendFormat": "{{result}}",
           "refId": "A"
         }
       ]
     },
     {
-      "type": "bargauge",
-      "title": "Request Duration (Distribution over $interval)",
+      "type": "histogram",
+      "title": "Request Duration (Frequency Distribution)",
       "id": 6,
       "gridPos": { "x": 0, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
           "expr": "sum by (le) (increase(request_duration_bucket[$interval]))",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "{{le}} s",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
           "refId": "A"
         }
       ],
       "options": {
-        "displayMode": "basic",
-        "orientation": "vertical",
-        "showUnfilled": true,
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "text": { "valueSize": 20 }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "min": 0
-        }
+        "bucketOffset": 0,
+        "combine": false,
+        "showPercentiles": true,
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
       }
     },
     {
-      "type": "bargauge",
-      "title": "SMS Length (Distribution over $interval)",
+      "type": "histogram",
+      "title": "SMS Length (Frequency Distribution)",
       "id": 7,
       "gridPos": { "x": 12, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
           "expr": "sum by (le) (increase(sms_length_bucket[$interval]))",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "{{le}} chars",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
           "refId": "A"
         }
       ],
       "options": {
-        "displayMode": "basic",
-        "orientation": "vertical",
-        "showUnfilled": true,
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "text": { "valueSize": 20 }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "min": 0
-        }
+        "bucketOffset": 0,
+        "combine": false,
+        "showPercentiles": true,
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
       }
     }
   ]

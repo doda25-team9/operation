@@ -128,3 +128,34 @@
       ansible.builtin.shell: "kubectl apply -f /tmp/manifests/dashboard-ingress.yml"
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
+
+    # Step 23: Install Istio
+    - name: Download Istio 1.25.2
+      ansible.builtin.get_url:
+        url: https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz
+        dest: /tmp/istio.tar.gz
+        mode: '0644'
+
+    - name: Unpack Istio
+      ansible.builtin.unarchive:
+        src: /tmp/istio.tar.gz
+        dest: /opt/
+        remote_src: yes
+        creates: /opt/istio-1.25.2
+
+    - name: Add istioctl to global PATH
+      ansible.builtin.file:
+        src: /opt/istio-1.25.2/bin/istioctl
+        dest: /usr/local/bin/istioctl
+        state: link
+
+    - name: Copy Istio configuration to VM
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../manifests/istio-config.yml"
+        dest: /tmp/istio-config.yml
+        mode: '0644'
+
+    - name: Install Istio using istioctl
+      ansible.builtin.shell: "istioctl install -y -f /tmp/istio-config.yml"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"

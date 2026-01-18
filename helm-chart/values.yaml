@@ -102,7 +102,7 @@ versions:
   v1:
     enabled: true
     replicas: 3
-    imageTag: latest
+    imageTag: "0.2.0"
   
   v2:
     enabled: true

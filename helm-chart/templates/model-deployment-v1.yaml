@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: model
-        image: "{{ .Values.modelService.image.repository }}:{{ .Values.versions.v1.imageTag }}"
+        image: "{{ .Values.modelService.image.repository }}:{{ .Values.versions.v1.modelImageTag }}"
         imagePullPolicy: {{ .Values.modelService.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.modelService.service.port }}

@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: "{{ .Values.app.image.repository }}:{{ .Values.versions.v1.imageTag }}"
+        image: "{{ .Values.app.image.repository }}:{{ .Values.versions.v1.appImageTag }}"
         imagePullPolicy: {{ .Values.app.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.app.service.port }}

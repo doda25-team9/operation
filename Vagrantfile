@@ -10,6 +10,12 @@ CONTROLLER_CPUS = 2          # Controller CPU cores
 WORKER_MEMORY = 6144         # Worker RAM in MB (6GB)
 WORKER_CPUS = 2              # Worker CPU cores
 
+
+# Network configuration (easily change IPs here!)
+CONTROL_IP = "192.168.56.100"
+WORKER_IP_BASE = "192.168.56"
+WORKER_IP_START = 101
+
 # Vagrant configuration
 # This block configures all VMs for the Kubernetes cluster
 
@@ -23,7 +29,7 @@ Vagrant.configure("2") do |config|
     ctrl.vm.hostname = "ctrl"
 
     # Add private network with fixed IP
-    ctrl.vm.network "private_network", ip: "192.168.56.100"
+    ctrl.vm.network "private_network", ip: CONTROL_IP
     
     # VirtualBox-specific configuration
     ctrl.vm.provider "virtualbox" do |vb|
@@ -35,6 +41,12 @@ Vagrant.configure("2") do |config|
     # Ansible provisioning for controller
     ctrl.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/general.yaml"
+      ansible.extra_vars = {
+        num_workers: NUM_WORKERS,
+        control_ip: CONTROL_IP,
+        worker_ip_base: WORKER_IP_BASE,
+        worker_ip_start: WORKER_IP_START
+      }
     end
     ctrl.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/ctrl.yaml"
@@ -54,7 +66,7 @@ Vagrant.configure("2") do |config|
       node.vm.hostname = "node-#{i}"
       
       # Add private network with sequential IPs (192.168.56.101, 102, etc.)
-      node.vm.network "private_network", ip: "192.168.56.#{100+i}"
+      node.vm.network "private_network", ip: "#{WORKER_IP_BASE}.#{WORKER_IP_START + i - 1}"
 
       # VirtualBox-specific configuration
       node.vm.provider "virtualbox" do |vb|
@@ -66,6 +78,12 @@ Vagrant.configure("2") do |config|
       # Ansible provisioning for workers
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbooks/general.yaml"
+        ansible.extra_vars = {
+          num_workers: NUM_WORKERS,
+          control_ip: CONTROL_IP,
+          worker_ip_base: WORKER_IP_BASE,
+          worker_ip_start: WORKER_IP_START
+        }
       end
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbooks/node.yaml"
@@ -85,14 +103,14 @@ Vagrant.configure("2") do |config|
           # Generated: #{Time.now}
           
           [control]
-          ctrl ansible_host=192.168.56.100 ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/id_ed25519
+          ctrl ansible_host=#{CONTROL_IP} ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/id_ed25519
 
           [workers]
         INVENTORY
         
         # Add workers dynamically
         (1..NUM_WORKERS).each do |i|
-          inventory_content += "node-#{i} ansible_host=192.168.56.#{100+i} ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/id_ed25519\n"
+          inventory_content += "node-#{i} ansible_host=#{WORKER_IP_BASE}.#{WORKER_IP_START + i - 1} ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/id_ed25519\n"
         end
         
         inventory_content += <<~INVENTORY

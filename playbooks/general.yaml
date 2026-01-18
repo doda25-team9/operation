@@ -57,11 +57,20 @@
       ansible.builtin.command: sysctl --system
       changed_when: false
 
-    # Step 8: Configure /etc/hosts
-    - name: Configure /etc/hosts for cluster node name resolution
-      copy:
-        src: "{{ playbook_dir }}/hosts"
-        dest: /etc/hosts
+    # Step 8: Configure /etc/hosts dynamically
+    - name: Ensure /etc/hosts has localhost entry
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.0\.1'
+        line: '127.0.0.1   localhost'
+        state: present
+        create: yes
+
+    - name: Add Kubernetes cluster nodes to /etc/hosts using template
+      ansible.builtin.blockinfile:
+        path: /etc/hosts
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - K8S CLUSTER"
+        block: "{{ lookup('template', 'templates/hosts.j2') }}"
         owner: root
         group: root
         mode: "0644"

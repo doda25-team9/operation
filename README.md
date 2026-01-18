@@ -1100,6 +1100,16 @@ To generate traffic that appears in Grafana:
 
 Leave this terminal running. You can send requests so that the grafana dashboards will update in real time. 
 
+There is a traffic simulation script in the `operation/` repo called `simulate-traffic.sh`. That is supposed to continuously send traffic to our /sms app, which will then be captured in the Grafana dashboards. 
+
+To run it, use the following in a separate terminal:
+
+```
+cd operation
+chmod +x simulate-traffic.sh
+sh simulate-traffic.sh
+```
+
 **Port-forward Grafana:**
 ```
 kubectl port-forward svc/sms-checker-grafana 3000:80

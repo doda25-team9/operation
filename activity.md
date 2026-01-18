@@ -337,6 +337,7 @@ Added my SSH public key. Implemented auto-generated Ansible inventory.cfg based 
 
 Reviewed:
 - [Implementation of MetalLB #36](https://github.com/doda25-team9/operation/pull/36)
+- [Step 22-23: Install Kubernetes Dashboard, Istio #11](https://github.com/doda25-team9/operation/pull/11)
 
 ### **Antonio**
 

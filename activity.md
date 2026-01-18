@@ -337,3 +337,12 @@ Added my SSH public key. Implemented auto-generated Ansible inventory.cfg based 
 
 Reviewed:
 - [Implementation of MetalLB #36](https://github.com/doda25-team9/operation/pull/36)
+
+### **Antonio**
+
+Fixed histogram charts in Grafana for meeting the requirements. Created a continuous traffic script to observe the changes in the dashboard a bit easier.
+- [Fixing histogram dashboards in Grafana #46](https://github.com/doda25-team9/operation/pull/46)
+
+Reviewed:
+- [Fixes: add automated release and pre-release workflows #5](https://github.com/doda25-team9/lib-version/pull/5)
+- [A2 - Add self-signed certificates to Ingress Controller #42](https://github.com/doda25-team9/operation/pull/42)

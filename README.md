@@ -485,11 +485,6 @@ Ensure you are starting with a fresh cluster by running:
 minikube delete
 ```
 
-Start the minikube cluster:
-```
-minikube start --driver=virtualbox
-```
-
 Create a shared folder:
 ```
 mkdir -p ~/k8s-shared/models
@@ -503,11 +498,17 @@ VBoxManage sharedfolder add "minikube" \
   --automount
 ```
 
-Mount the folder in the VM:
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
+```
+
+Mount the folder in the VM (commands are to be run inside the VM):
 ```
 minikube ssh
 sudo mkdir -p /mnt/shared
 sudo mount -t vboxsf shared /mnt/shared
+exit
 ```
 
 Then enable the ingress addon:

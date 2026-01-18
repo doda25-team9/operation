@@ -92,6 +92,16 @@
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
 
+    - name: Wait for NGINX Controller pods to be ready
+      ansible.builtin.command: >
+        kubectl wait --namespace ingress-nginx
+        --for=condition=ready pod
+        --selector=app.kubernetes.io/component=controller
+        --timeout=120s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      changed_when: false
+
     # Step 22: Install Kubernetes Dashboard
     - name: Install Kubernetes Python library
       ansible.builtin.apt:

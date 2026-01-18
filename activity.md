@@ -358,6 +358,6 @@ Reviewed:
 ### **Johan**
 Changed name of metric for Gauge:
 - [Edit name of Gauge metric](https://github.com/doda25-team9/app/pull/16)
-- [Edit name of Gauge metric]()
+- [Edit name of Gauge metric](https://github.com/doda25-team9/operation/pull/48)
 Reviewed:
 - [A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)

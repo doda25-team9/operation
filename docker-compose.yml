@@ -1,15 +1,19 @@
 services:
   model-service:
+    build: ../model-service
     image: "${MODEL_IMAGE}"
     volumes:
       - ../model-service/output:/app/output
     environment:
       MODEL_PORT: "${MODEL_PORT}"
+      MODEL_VERSION: "${MODEL_VERSION:-v0.2.0}"
+      MODEL_DIR: "/app/output"
     expose:
       - "${MODEL_PORT}"
     restart: unless-stopped
 
   app:
+    build: ../app
     image: "${APP_IMAGE}"
     depends_on:
       - model-service

@@ -61,6 +61,25 @@ These files must exist in:
 
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
+### Updating the ML Model
+
+Models are versioned separately from service code.
+
+1. **Release model files** as GitHub Release (e.g., v0.2.0)
+2. **Update** `operation/.env`:
+```bash
+   MODEL_VERSION=v0.2.0
+```
+3. **Restart**:
+```bash
+   docker-compose restart model-service
+```
+
+The service downloads the new model automatically.
+
+**Note:** Model version is independent of service version.
+
+
 #### Important:
 The `operation` and `model-service` repositories must be located in the same parent directory, because Docker Compose mounts the trained models from the `model-service repository`.
 

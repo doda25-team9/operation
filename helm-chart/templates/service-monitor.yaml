@@ -12,6 +12,8 @@ spec:
     matchLabels:
       app: {{ .Values.app.labels.app }}
       component: {{ .Values.app.labels.component }}
+  podTargetLabels:
+    - version
   endpoints:
     - port: http
       path: /metrics

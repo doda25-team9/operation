@@ -20,12 +20,12 @@
     {
       "type": "stat",
       "title": "Spam Detection Rate (%)",
-      "description": "Percentage of traffic identified as SPAM",
+      "description": "Percentage of traffic identified as SPAM (Version 2 only)",
       "id": 2,
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 6 },
       "targets": [
         {
-          "expr": "sum(increase(predictions_result_total{result=\"spam\"}[$interval])) / sum(increase(predictions_result_total[$interval])) * 100",
+          "expr": "sum(increase(predictions_result_total{result=\"spam\", version=\"v2\"}[$interval])) / sum(increase(predictions_result_total{version=\"v2\"}[$interval])) * 100",
           "legendFormat": "Spam Rate",
           "refId": "A"
         }
@@ -44,7 +44,7 @@
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 14 },
       "targets": [
         {
-          "expr": "increase(predictions_result_total[$interval])",
+          "expr": "increase(predictions_result_total{version=\"v2\"}[$interval])",
           "legendFormat": "{{result}}",
           "refId": "A"
         }

@@ -38,7 +38,7 @@ spec:
         
         env:
         - name: MODEL_VERSION
-          value: "v2"
+          value: "{{ .Values.versions.v2.modelVersion }}"
         
         volumeMounts:
         - name: model-storage

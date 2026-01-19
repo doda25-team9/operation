@@ -61,6 +61,25 @@ These files must exist in:
 
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
+### Updating the ML Model
+
+Models are versioned separately from service code.
+
+1. **Release model files** as GitHub Release (e.g., v0.2.0)
+2. **Update** `operation/.env`:
+```bash
+   MODEL_VERSION=v0.2.0
+```
+3. **Restart**:
+```bash
+   docker-compose restart model-service
+```
+
+The service downloads the new model automatically.
+
+**Note:** Model version is independent of service version.
+
+
 #### Important:
 The `operation` and `model-service` repositories must be located in the same parent directory, because Docker Compose mounts the trained models from the `model-service repository`.
 
@@ -139,6 +158,12 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 | **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
 
+
+### Multi-Stages Dockerfile in model-service
+
+A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
+
+![Image MB reduction](image.png)
 
 ## VM Infrastructure (Assignment 2)
 

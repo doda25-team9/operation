@@ -620,8 +620,8 @@ kubectl create secret generic smtp-credentials \
 Alertmanager SMTP credentials
 ```bash
 kubectl create secret generic alertmanager-smtp-secret \
-  --from-literal=SMTP_USER="user@example.com" \
-  --from-literal=SMTP_PASS="password"
+  --from-literal=SMTP_USER="doda.team9@gmail.com" \
+  --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
 ```
 
 Grafana admin credentials

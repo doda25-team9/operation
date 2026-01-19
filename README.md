@@ -140,6 +140,12 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
 
 
+### Multi-Stages Dockerfile in model-service
+
+A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
+
+![Image MB reduction](image.png)
+
 ## VM Infrastructure (Assignment 2)
 
 This section provisions virtual machines using Vagrant for infrastructure automation.

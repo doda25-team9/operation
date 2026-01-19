@@ -1,6 +1,5 @@
 services:
   model-service:
-    build: ../model-service
     image: "${MODEL_IMAGE}"
     volumes:
       - ../model-service/output:/app/output
@@ -13,7 +12,6 @@ services:
     restart: unless-stopped
 
   app:
-    build: ../app
     image: "${APP_IMAGE}"
     depends_on:
       - model-service

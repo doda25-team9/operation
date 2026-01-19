@@ -5,7 +5,7 @@ services:
       - ../model-service/output:/app/output
     environment:
       MODEL_PORT: "${MODEL_PORT}"
-      MODEL_VERSION: "${MODEL_VERSION:-v0.2.0}"
+      MODEL_VERSION: "${MODEL_VERSION:-v0.1.0}"
       MODEL_DIR: "/app/output"
     expose:
       - "${MODEL_PORT}"

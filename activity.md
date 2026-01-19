@@ -213,3 +213,137 @@ Reviewed:
 - [Helm Chart Implementation](https://github.com/doda25-team9/operation/pull/16)
 
 
+
+## Week Q2.5 (December 8+) Working on Assignment 4
+### **Medon**
+Implemented the traffic management with sticky sessions
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+
+Reviewed:
+
+### **Konstantina**
+Implemented Shadow Launch functionality for model-service
+using Istio traffic mirroring.
+- [Implement Shadow Launch with Istio for Model-Service #26](https://github.com/doda25-team9/operation/pull/26)
+- [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)
+
+Reviewed:
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
+
+### **Zosia**
+Documented the deployment process
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
+
+Reviewed:
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+
+### **Antonio**
+Researched and wrote the Extension Proposal
+- [Extension Proposal #27](https://github.com/doda25-team9/operation/pull/27)
+
+Reviewed:
+- [Implementation of sticky session for traffic management #25](https://github.com/doda25-team9/operation/pull/25)
+- [Implement Shadow Launch with Istio for Model-Service #26](https://github.com/doda25-team9/operation/pull/26)
+- [Istio Shadow Launch; New metrics and metrics endpoint #8](https://github.com/doda25-team9/model-service/pull/8)
+
+### **Johan**
+I created diagrams to visualise the request flow:
+- [ Add diagrams to deployment document #29](https://github.com/doda25-team9/operation/pull/29)
+
+Reviewed:
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+- [Initial version of deployment.md #24](https://github.com/doda25-team9/operation/pull/24)
+
+### **Adomas**
+Planned the Continuous Experimentation Experiment (the change - using the SVM model, the hypothesis - predicted spam rates will drop significantly, the metric - prediction result metric, the dataset - ExAIS_SMS dataset)
+Implemented the change in model-service:
+- [Continuous Experimentation: change model #9](https://github.com/doda25-team9/model-service/pull/9)
+
+Reviewed:
+- [Implementation of the traffic management #23](https://github.com/doda25-team9/operation/pull/23)
+
+## Week Q2.6 (December 15+) Working on Assignment 4 and Fixes/Additions for previous Assignments
+
+### **Konstantina**
+For Assignment 3 Alert Manager; Replaced webhook.site alerting (which was not working properly due to expirations) with Gmail SMTP email notifications
+- [Fix for A3; Alert manager; Notification via email #31](https://github.com/doda25-team9/operation/pull/31)
+
+Reviewed:
+- [Improved Gauge usecase #11](https://github.com/doda25-team9/app/pull/11)
+
+### **Antonio**
+Changed Grafana dashboards to have their own .json file, separate from .yaml, based on peer review suggestions.
+- [Changed Grafana dashboards to have their own .json file, separate from .yaml #30](https://github.com/doda25-team9/operation/pull/30)
+
+Reviewed:
+- [Continuous Experimentation: change model #9](https://github.com/doda25-team9/model-service/pull/9)
+
+### **Zosia**
+Improved metrics by adding labels and added a few use cases of the Gauge metric.
+- [Improved Gauge usecase by ZofiaRT · Pull Request #11](https://github.com/doda25-team9/app/pull/11)
+
+Reviewed:
+- [Fix for A3; Alert manager; Notification via email by konnaan-tud · Pull Request #31](https://github.com/doda25-team9/operation/pull/31)
+
+### **Johan**
+I updated the running instructions to reflect virtualbox as the minikube driver instead of docker to align with the rubric.
+- [Update minikube driver from docker to virtualbox #34 ](https://github.com/doda25-team9/operation/pull/34)
+
+Reviewed:
+- [Changed Grafana dashboards to have their own .json file, separate from .yaml](https://github.com/doda25-team9/operation/pull/30)
+- [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
+
+## Week Q2.7 (January 5+) Working on Fixes/Additions for Previous Assignments
+
+### **Antonio**
+Changed the docker-compose.yaml file so it doesn't need the user to copy the output folder from model-service repo to operation repo each time we retrain the model. Also added descriptions for the .env variables in operation repo to the README.
+- [Remove need to copy over output/ folder from model-service to operation repo. #37](https://github.com/doda25-team9/operation/pull/37)
+- [Added some descriptions for the .env variables in operation repository #38](https://github.com/doda25-team9/operation/pull/38)
+
+Reviewed:
+- [Continuous experimentation: Display model name and app version #12](https://github.com/doda25-team9/app/pull/12)
+
+### **Zosia**
+Implemented and configured a fully working MetalLB for Assignment 2.
+- [MetalLB implementation for Assignment 2](https://github.com/doda25-team9/operation/pull/36)
+
+Reviewed:
+- [Change ctrl and node IPs](https://github.com/doda25-team9/operation/pull/35)
+
+### **Konstantina**
+Moved the  Maven compilation is from inside Docker (to avoid nested containers) to GitHub Actions runner. 
+Simplified Dockerfile from multi-stage to single-stage.
+- [Refactor: move Maven build outside Docker container #13](https://github.com/doda25-team9/app/pull/13)
+- [fix: use Java 25 to match GitHub Actions runner #14](https://github.com/doda25-team9/app/pull/14)
+- [fix: rename JAR to app.jar before Docker build #15](https://github.com/doda25-team9/app/pull/15) 
+
+## Week Q2.8 (January 12+) Working on Fixes/Additions for Previous Assignments
+### **Zosia**
+Implemented Ingress controller for A2, added self-signed certificates and keys to fulfill Excellent requirements.
+Worked on speeding up the provisioning.
+- [A2 - Add self-signed certificates to Ingress Controller #42](https://github.com/doda25-team9/operation/pull/42)
+- [A2 Step 21 Ingress Controller #41](https://github.com/doda25-team9/operation/pull/41)
+- [Speed up Provisioning - Branch](https://github.com/doda25-team9/operation/tree/improvement/speeding-up-provisioning)
+
+Reviewed:
+- [Change ctrl and worker IPs #35](https://github.com/doda25-team9/operation/pull/35)
+
+### **Konstantina**
+
+Added my SSH public key. Implemented auto-generated Ansible inventory.cfg based on active VMs and dynamic /etc/hosts generation entries for all cluster nodes.
+- [A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)
+
+Reviewed:
+- [Implementation of MetalLB #36](https://github.com/doda25-team9/operation/pull/36)
+- [Step 22-23: Install Kubernetes Dashboard, Istio #11](https://github.com/doda25-team9/operation/pull/11)
+
+### **Antonio**
+
+Fixed histogram charts in Grafana for meeting the requirements. Created a continuous traffic script to observe the changes in the dashboard a bit easier.
+- [Fixing histogram dashboards in Grafana #46](https://github.com/doda25-team9/operation/pull/46)
+
+Reviewed:
+- [Fixes: add automated release and pre-release workflows #5](https://github.com/doda25-team9/lib-version/pull/5)
+- [A2 - Add self-signed certificates to Ingress Controller #42](https://github.com/doda25-team9/operation/pull/42)

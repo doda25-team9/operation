@@ -56,13 +56,46 @@ misclassified_msgs.txt
 accuracy_scores.png
 ```
 
+These files must exist in:
+`model-service/output/`
+
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
-Once you have done that, you should have a folder called `model-service/output/`. Copy that output folder into `operation/output/`.
+### Updating the ML Model
+
+Models are versioned separately from service code.
+
+1. **Release model files** as GitHub Release (e.g., v0.2.0)
+2. **Update** `operation/.env`:
+```bash
+   MODEL_VERSION=v0.2.0
+```
+3. **Restart**:
+```bash
+   docker-compose restart model-service
+```
+
+The service downloads the new model automatically.
+
+**Note:** Model version is independent of service version.
+
+
+#### Important:
+The `operation` and `model-service` repositories must be located in the same parent directory, because Docker Compose mounts the trained models from the `model-service repository`.
+
+Required folder structure:
+```
+your-folder/
+    app/
+    model-service/
+        output/
+    lib-version/
+    operation/
+```
 
 ### Configuration (.env)
 
-The compose setup uses a `.env` file:
+The Docker Compose setup uses a `.env` file located in the `operation` repository, which contains, for example:
 
 ```
 APP_PORT=8080
@@ -71,7 +104,24 @@ APP_IMAGE=ghcr.io/doda25-team9/app:latest
 MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 ```
 
-You can change ports or image versions here.
+#### Variable overview:
+- `APP_PORT`:
+Port on the host machine where the web application will be exposed. After startup, the app is accessible at:
+`http://localhost:<APP_PORT>/sms`
+
+- `MOEL_PORT`:
+Internal port used by the model-service container.
+The app communicates with the model-service over the Docker network using this port.
+
+- `APP_IMAGE`:
+Docker image for web application.
+You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+
+- `MODEL_IMAGE`:
+Docker image for the model-service.
+You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+
+You can adjust ports or change image versions by editing this file before running `docker compose up`.
 
 ### Running the Full Application
 
@@ -108,6 +158,12 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 | **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
 
+
+### Multi-Stages Dockerfile in model-service
+
+A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
+
+![Image MB reduction](image.png)
 
 ## VM Infrastructure (Assignment 2)
 
@@ -228,6 +284,14 @@ VMs are automatically configured using Ansible playbooks during `vagrant up`:
 - **playbooks/general.yaml** - Runs on all VMs (shared configuration)
 - **playbooks/ctrl.yaml** - Runs only on controller
 - **playbooks/node.yaml** - Runs only on workers
+
+Furthermore, we have another playbook that can be run from the host to perform final installation steps
+- **playbooks/finalization.yaml** - Needs to be run manually from the host
+
+To run finalization playbook run this command:
+```bash
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+```
 
 ### General.yaml
 
@@ -439,11 +503,40 @@ vagrant ssh ctrl -c "kubectl get nodes"
 
 Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.
 
-## Running the kubernetes cluster (Assignment 3)
+## One-Time Setup of the kubernetes cluster (Assignment 3)
 
-First, start the minikube cluster 
+Prerequisites:
+- VirtualBox
+
+Ensure you are starting with a fresh cluster by running:
 ```
-minikube start --driver=docker
+minikube delete
+```
+
+Create a shared folder:
+```
+mkdir -p ~/k8s-shared/models
+```
+
+Add the folder to the VM:
+```
+VBoxManage sharedfolder add "minikube" \
+  --name shared \
+  --hostpath /home/<your-user>/k8s-shared \
+  --automount
+```
+
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
+```
+
+Mount the folder in the VM (commands are to be run inside the VM):
+```
+minikube ssh
+sudo mkdir -p /mnt/shared
+sudo mount -t vboxsf shared /mnt/shared
+exit
 ```
 
 Then enable the ingress addon:
@@ -451,10 +544,16 @@ Then enable the ingress addon:
 minikube addons enable ingress
 ```
 
-To start the app and model-service using kubernetes, run:
+To start the app and model-service or apply changes using kubernetes, run:
 
 ```
 kubectl apply -f k8s -R
+```
+
+## Start the Kubernetes cluster
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
 ```
 
 ### Access Application
@@ -580,6 +679,30 @@ curl http://sms-checker.local:54471/sms/
 - Port changes each time you restart the tunnel - check the output for the current port
 - The tunnel must stay running while you use the app
 - Stop with `Ctrl+C` in the tunnel terminal
+
+### Accessing the dashboard (Step 22)
+
+First, make sure that you applied the `finalization.yml` playbook (instructions above). 
+
+Then, add the Nginx Ingress controller to the known hosts (you only need to do this once):
+```
+echo "192.168.56.99 dashboard.local" | sudo tee -a /etc/hosts
+```
+
+From now on, the dashboard can be accessed on:
+https://dashboard.local
+
+Then SSH into the ctrl VM:
+```
+vagrant ssh ctrl
+```
+
+In the VM, generate a token for the your dashboard user:
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+
+Make sure to connect using HTTPS as HTTP will give you 401 when trying to log in with the token.
 
 
 ## Helm Chart Deployment (Assignment 3)
@@ -913,197 +1036,130 @@ kubectl get svc | grep prometheus
 # Use the one with port 9090/TCP (not "operated")
 ```
 
+## Email Alerting System
 
-## Testing Alerting System
+### Alert Details
 
-### Prerequisites
+- **Threshold:** 15 requests per minute
+- **Duration:** Must exceed threshold for 2 continuous minutes
+- **Email From:** doda.team9@gmail.com (team Gmail account)
+- **Email To:** Address provided during installation
 
+### How to Test
+
+**Prerequisites:**
 - Minikube running with the application deployed
-- Prometheus and AlertManager installed (included in Helm chart)
 
----
+### Current Implementation
 
-### Step 1: Access Webhook.site Dashboard
+The SMTP password for email alerts is documented in this README for **grading and testing purposes only**. This approach was chosen to allow reviewers to test the alerting functionality without additional setup steps.
 
-**Open the webhook dashboard to monitor incoming alerts:**
+The assignment requires that credentials should not be in deployment files, source code, or manifests. Our implementation follows this requirement:
 
-https://webhook.site/#!/view/5606ba46-85fe-438f-95b4-2fe8ba53dd0e/e63c2e7f-a5f8-42aa-b267-19740778e341/1
+**No passwords in YAML files** - Only placeholders in `values.yaml`  
+**No passwords in source code** - App code doesn't contain credentials  
+**No passwords in manifests** - Kubernetes manifests use placeholders  
+**Credentials passed at deployment time** - Via Helm `--set` flags 
 
-**Keep this browser tab open** - alerts will appear here in real-time.
-
----
-
-### Step 2: Port-Forward to Application
+### Step 1: Install (or Upgrade if already installed) with Email Credentials
 ```bash
-kubectl port-forward svc/app-service 8080:8080
+helm install sms-checker . \
+  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
+  --set alertmanager.recipient="your-email@example.com"
+```
+or
+```bash
+helm upgrade sms-checker . \
+  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
+  --set alertmanager.recipient="your-email@example.com"
 ```
 
-**Keep this terminal running.**
+Replace `your-email@example.com` with your actual email address.
 
 ---
 
-### Step 3: Generate High Traffic to Trigger Alert
-
-**Open a new terminal and run:**
+### Step 2: Verify SMTP Configuration
 ```bash
-# Send requests continuously
+kubectl get secret alertmanager-custom-config -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d | grep smtp
+```
+
+Should show SMTP server and credentials configured.
+
+---
+
+### Step 3: Port-Forward Istio Gateway
+```bash
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+```
+
+Keep this terminal running.
+
+---
+
+### Step 4: Generate High Traffic
+
+Open a new terminal and send requests:
+```bash
 for i in {1..500}; do
   curl -X POST http://localhost:8080/sms/ \
+    -H "Host: sms-checker.local" \
     -H "Content-Type: application/json" \
-    -d '{"sms":"Test alert message"}' 
+    -d '{"sms":"Alert test '$i'"}'
   echo "Request $i sent"
   sleep 0.5
 done
 ```
 
-**This sends 2 request per second (60 requests/minute), which exceeds the threshold of 15 requests/minute we have set.**
+This sends 2 requests per second (120 requests/minute), exceeding the 15 requests/minute threshold.
+
+**Note: Each pod is individually evaluated by Prometheus, and since we have 3 replicas, all 3 are receiving high traffic and trigger the alert.**
 
 ---
 
-### Step 4: Monitor Alert Status in Prometheus
+### Step 5: Monitor Alert in Prometheus
 
-**In another terminal:**
+In another terminal:
 ```bash
 kubectl port-forward svc/prometheus-prometheus 9090:9090
 ```
 
-**Open browser:** http://localhost:9090
+Open browser: http://localhost:9090/alerts
 
-**Navigate to:** Alerts tab (top menu)
-
-**Watch the `HighRequestRate` alert progress:** Refresh every approximately 30 seconds to see the HighRequestRate changing status.
-
-| Time | Status | Color | Description |
-|------|--------|-------|-------------|
-| 0-30 seconds | Inactive | Green | Normal state, no alert |
-| 30 seconds - 2 minutes | Pending | Orange | Condition met, waiting for `for` duration |
-| After 2 minutes | **FIRING** | Red | Alert active and sent to AlertManager |
+Watch `HighRequestRate` alert progress:
+- **0-1 min:** Inactive (green)
+- **1-3 min:** Pending (yellow) - waiting for 2-minute duration
+- **After 3 min:** Firing (red) - email will be sent
 
 ---
 
-### Step 5: Check Webhook for Alert Notifications
+### Step 6: Check AlertManager
 
-**Go back to your webhook.site tab**
-You will receive 2 POST requests:
-
-### 1. Firing Notification (when alert triggers)
-
-**After the alert enters `Firing` state (2+ minutes), you'll see:**
-```json
-{
-  "receiver": "webhook-notifications",
-  "status": "firing",
-  "alerts": [
-    {
-      "status": "firing",
-      "labels": {
-        "alertname": "HighRequestRate",
-        "severity": "warning",
-        "container": "app",
-        "endpoint": "http",
-        "job": "app-service",
-        "namespace": "default"
-      },
-      "annotations": {
-        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
-        "summary": "High request rate on SMS Checker"
-      },
-      "startsAt": "2025-12-05T10:52:03.472Z"
-    }
-  ]
-}
-```
-
-
-### 2. Resolved Notification (when alert clears)
-
-**After you stop the traffic and the alert resolves, you'll see:**
-```json
-{
-  "receiver": "webhook-notifications",
-  "status": "resolved",
-  "alerts": [
-    {
-      "status": "resolved",
-      "labels": {
-        "alertname": "HighRequestRate",
-        ...
-        "severity": "warning"
-      },
-      "annotations": {
-        "description": "The application is receiving X requests per second (>15 per minute) for more than 2 minutes.",
-        "summary": "High request rate on SMS Checker"
-      },
-      "startsAt": "2025-12-05T10:52:03.472Z",
-      "endsAt": "2025-12-05T10:56:03.472Z"
-    }
-  ]
-}
-```
-
-**Note:** The `Resolved` notification is sent because we configured `send_resolved: true` in the AlertManager webhook configuration.
-
----
-
-## Alert Configuration
-
-**Alert Rule:** `HighRequestRate`
-
-**Condition:** `rate(sms_requests_total[1m]) > 0.25`
-- Triggers when request rate exceeds 0.25 requests/second (15 requests/minute)
-
-**Duration:** `for: 2m`
-- Alert must be active for 2 continuous minutes before firing
-
-**Severity:** `warning`
-
-**Notification Channel:** Webhook (webhook.site)
-
----
-
-## Stopping the Test
-
-**To stop generating traffic:**
-- Press `Ctrl+C` in the terminal running the curl loop
-
-**To stop port-forwards:**
-- Press `Ctrl+C` in each port-forward terminal
-
-**The alert will automatically resolve** once traffic drops below the threshold and will send a "resolved" notification to webhook.site.
-
----
-
-## Troubleshooting
-
-### Alert not appearing in Prometheus
+In another terminal:
 ```bash
-# Check if PrometheusRule exists
-kubectl get prometheusrule app-alerts
-
-# Check Prometheus logs
-kubectl logs prometheus-prometheus-prometheus-0 -c prometheus --tail=50
-```
-
-### Alert not reaching webhook.site
-```bash
-# Check AlertManager logs
-kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager --tail=100
-
-# Verify AlertManager config
-kubectl get secret alertmanager-prometheus-alertmanager -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d
-```
-
-### Alert firing but no webhook POST
-```bash
-# Check AlertManager is receiving alerts
 kubectl port-forward svc/prometheus-alertmanager 9093:9093
-# Open http://localhost:9093 and verify alert is listed
-
-# Check for errors in AlertManager logs
-kubectl logs alertmanager-prometheus-alertmanager-0 -c alertmanager | grep -i error
 ```
 
+Open browser: http://localhost:9093
+
+You should see the `HighRequestRate` alert when it starts firing.
+
 ---
+
+### Step 7: Receive Email
+
+After the alert starts firing:
+
+**Check your inbox for email from:** `doda.team9@gmail.com`
+
+**Subject:** `[ALERT] HighRequestRate - SMS Checker`
+
+**Note:** Check spam folder if not in inbox.
+
+When you stop sending requests, you'll receive a second email confirming the alert resolved.
+
+
+---
+
 
 ## Grafana Dashboards
 
@@ -1520,3 +1576,109 @@ kubectl logs <pod-name> -c istio-proxy
 ```
 
 ---
+---
+
+### Implementation Details
+
+**Components:**
+- **Gateway:** Entry point for external traffic, listens on port 80 for sms-checker.local
+- **VirtualService (app):** Routes external traffic with 90/10 split to app-service subsets
+- **VirtualService (model):** Routes internal traffic based on caller version (sourceLabels matching)
+- **DestinationRule (app):** Defines v1/v2 subsets, selects pods by version label
+- **DestinationRule (model):** Defines v1/v2 subsets for model-service
+- **Deployments:** Separate deployments for v1 (3 replicas) and v2 (1 replica) of each service
+
+**How it works:**
+1. User request hits Istio IngressGateway
+2. Gateway accepts traffic for sms-checker.local
+3. Routes to app-virtualservice
+4. VirtualService applies 90/10 weight: randomly selects v1 or v2
+5. DestinationRule filters pods: subset v1 → version=v1 pods, subset v2 → version=v2 pods
+6. When app calls model-service internally:
+   - model-virtualservice checks sourceLabels (caller's version label)
+   - Routes app v1 → model v1, app v2 → model v2
+7. Ensures version consistency throughout request lifecycle
+
+---
+
+## Shadow Launch (Additional Use Case)
+
+We deploy a third model-service version (v3) that receives mirrored copies of all traffic from both the stable (v1) and canary (v2) versions, allowing us to evaluate the shadow version's performance using real user requests without exposing users to its responses. 
+Users only see results from v1/v2 while v3 silently processes the same requests and records metrics for comparison.
+
+### Prerequisites
+
+- Kubernetes cluster with Istio installed
+- Application deployed: `helm install sms-checker ./helm-chart`
+
+
+### Setup
+
+**1. Verify Pods Running**
+```bash
+kubectl get pods | grep -E "app-deployment|model-deployment"
+
+# Expected:
+# app-deployment-v1 (3 pods) - 2/2 Running
+# app-deployment-v2 (1 pod) - 2/2 Running
+# model-deployment-v1 (3 pods) - 2/2 Running
+# model-deployment-v2 (1 pod) - 2/2 Running
+# model-deployment-v3 (1 pod) - 2/2 Running  ← Shadow
+```
+
+---
+
+**2. Port-Forward Istio Gateway**
+
+Must access through Istio Gateway (not app-service directly).
+```bash
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+```
+
+**Keep this running.**
+
+
+### **Testing**
+
+**1. Send Test Requests**
+```bash
+# Send 100 requests through Gateway
+for i in {1..100}; do
+  curl -X POST http://localhost:8080/sms/ \
+    -H "Host: sms-checker.local" \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Test message '$i'"}'
+  sleep 0.1
+done
+```
+
+
+**2. Verify Shadow Launch**
+
+Due to our implementation for canary deployment, the traffic is split 90/10 to v1 and v2, respectively. However, v3 mirrors both v1 and v2.
+
+```bash
+# Count model-v1 requests (should match app-v1)
+echo "model-v1 total:"
+for pod in $(kubectl get pods | grep model-deployment-v1 | awk '{print $1}'); do
+  kubectl logs $pod -c model | grep -c "POST /predict"
+done | awk '{s+=$1} END {print s}'
+
+# Count model-v2 requests (should match app-v2)
+echo "model-v2 total:"
+kubectl logs $(kubectl get pods | grep model-deployment-v2 | awk '{print $1}') -c model | grep -c "POST /predict"
+
+# Count model-v3 requests (should equal v1 + v2 = ~100, all traffic is mirrored)
+echo "model-v3 total (shadow):"
+kubectl logs $(kubectl get pods | grep model-deployment-v3 | awk '{print $1}') -c model | grep -c "POST /predict"
+```
+
+
+**3. Check Metrics**
+```bash
+# Port-forward model-v3 (shadow)
+kubectl port-forward $(kubectl get pods | grep model-deployment-v3 | awk '{print $1}') 8082:8081
+
+# Check v3 metrics (should match total traffic)
+curl http://localhost:8082/metrics | grep model_predictions_total
+```

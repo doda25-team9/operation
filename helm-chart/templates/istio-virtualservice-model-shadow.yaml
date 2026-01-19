@@ -1,8 +1,8 @@
-{{- if and .Values.istio.enabled (not .Values.shadowLaunch.enabled) }}
+{{- if and .Values.istio.enabled .Values.shadowLaunch.enabled }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: model-virtualservice
+  name: model-virtualservice-shadow
   labels:
     app: {{ .Values.modelService.labels.app }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -21,11 +21,15 @@ spec:
         port:
           number: {{ .Values.modelService.service.port }}
         subset: v1
-      
-      headers:
-        response:
-          add:
-            x-model-version: "v1"
+    
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
   
   - match:
     - sourceLabels:
@@ -36,11 +40,15 @@ spec:
         port:
           number: {{ .Values.modelService.service.port }}
         subset: v2
-      
-      headers:
-        response:
-          add:
-            x-model-version: "v2"
+    
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
   
   - route:
     - destination:
@@ -49,5 +57,14 @@ spec:
           number: {{ .Values.modelService.service.port }}
         subset: v1
     
-    timeout: 60s  
+    mirror:
+      host: {{ .Values.modelService.service.name }}
+      port:
+        number: {{ .Values.modelService.service.port }}
+      subset: v3
+    
+    mirrorPercentage:
+      value: {{ .Values.shadowLaunch.mirrorPercentage }}
+
+    timeout: 60s
 {{- end }}

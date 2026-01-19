@@ -1256,11 +1256,30 @@ app-service v1 → VirtualService (model-virtualservice) → model-service v1
 app-service v2 → VirtualService (model-virtualservice) → model-service v2
 ```
 
+**Sticky Sessions:**
+
+Sticky sessions ensure users consistently see the same version throughout their session:
+```
+First Request (no cookie):
+- User → IngressGateway
+- 90/10 split applies
+- Randomly assigned to v1 or v2
+- Istio sets cookie: user-session=<hash>
+
+Subsequent Requests (with cookie):
+- User → IngressGateway (sends cookie)
+- Consistent hash: cookie → same version
+- User always sees v1 OR always sees v2
+- No version flipping during session
+```
+
+**Result:** 90% of users consistently see v1, 10% consistently see v2.
+
 **Key Features:**
 - **90/10 Canary Split:** 90% of traffic routes to stable v1, 10% to canary v2
+- **Sticky Sessions:** Users consistently see the same version throughout their session (via consistent hash on cookies)
 - **Version Consistency:** App v1 always calls model v1, app v2 always calls model v2 (enforced by sourceLabels)
 - **Configurable:** All settings (gateway name, hostname, traffic split) adjustable via values.yaml
-
 ---
 
 ### Prerequisites
@@ -1394,6 +1413,44 @@ kubectl get pods -l app=model-service -o jsonpath='{range .items[*]}{.metadata.n
 - Subsets v1 and v2 defined in DestinationRule
 - No validation issues from istioctl
 
+
+---
+
+#### Test 3: Verify Sticky Sessions
+
+Test that users consistently see the same version:
+```bash
+# Get IngressGateway endpoint
+INGRESS_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}')
+
+# Create test pod
+kubectl run sticky-test --image=curlimages/curl:latest --restart=Never -- sleep 300
+kubectl wait --for=condition=ready pod sticky-test --timeout=30s
+
+# Test: All requests should return same version
+kubectl exec sticky-test -- sh -c "curl -s -c /tmp/c.txt -I http://$INGRESS_IP:80/sms/ -H 'Host: sms-checker.local' | grep x-app; for i in 1 2 3 4 5; do curl -s -b /tmp/c.txt -I http://$INGRESS_IP:80/sms/ -H 'Host: sms-checker.local' | grep x-app; done"
+
+# Cleanup
+kubectl delete pod sticky-test
+```
+
+**Expected output:**
+```
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+```
+
+All 6 requests return the same version (either all v1 or all v2).
+
+**What this proves:**
+- Cookie-based consistent hashing working
+- Users don't experience version flipping mid-session
+- 90% of users get consistent v1 experience, 10% get consistent v2 experience
+
 ---
 
 ### Configuration
@@ -1518,6 +1575,7 @@ istioctl analyze
 kubectl logs <pod-name> -c istio-proxy
 ```
 
+---
 ---
 
 ### Implementation Details

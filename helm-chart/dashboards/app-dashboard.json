@@ -32,14 +32,14 @@
     },
     {
       "type": "gauge",
-      "title": "Active Users",
+      "title": "Inflight Requests",
       "id": 2,
       "gridPos": { "x": 16, "y": 0, "w": 8, "h": 8 },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
       },
       "targets": [
-        { "expr": "sum(active_users)", "refId": "A" }
+        { "expr": "sum(inflight_requests)", "refId": "A" }
       ]
     },
     {

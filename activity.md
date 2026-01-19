@@ -319,6 +319,13 @@ Simplified Dockerfile from multi-stage to single-stage.
 - [fix: use Java 25 to match GitHub Actions runner #14](https://github.com/doda25-team9/app/pull/14)
 - [fix: rename JAR to app.jar before Docker build #15](https://github.com/doda25-team9/app/pull/15) 
 
+### **Johan**
+Changed the deployment files to not contain any secrets and instead input them from the command line:
+- [Remove secrets from files](https://github.com/doda25-team9/operation/pull/40)
+Reviewed
+- [Remove need to copy over output/ folder from model-service to operation repo.](https://github.com/doda25-team9/operation/pull/37)
+- [Added some descriptions for the .env variables in operation repository](https://github.com/doda25-team9/operation/pull/38)
+
 ## Week Q2.8 (January 12+) Working on Fixes/Additions for Previous Assignments
 ### **Zosia**
 Implemented Ingress controller for A2, added self-signed certificates and keys to fulfill Excellent requirements.
@@ -347,3 +354,10 @@ Fixed histogram charts in Grafana for meeting the requirements. Created a contin
 Reviewed:
 - [Fixes: add automated release and pre-release workflows #5](https://github.com/doda25-team9/lib-version/pull/5)
 - [A2 - Add self-signed certificates to Ingress Controller #42](https://github.com/doda25-team9/operation/pull/42)
+
+### **Johan**
+Changed name of metric for Gauge:
+- [Edit name of Gauge metric](https://github.com/doda25-team9/app/pull/16)
+- [Edit name of Gauge metric](https://github.com/doda25-team9/operation/pull/48)
+Reviewed:
+- [A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)

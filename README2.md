@@ -119,8 +119,13 @@ More on deploying your own cluster can be found in [Assignment 2 Documentation](
 
 ---
 ## Secrets
-
-NEED HELP HERE
+1. Secret to setup alerting via mails
+```bash
+helm install sms-checker ./helm-chart \
+   --set secret.smtpUser=real@email.com \
+   --set secret.smtpPass=realpassword
+```
+2. NEED HELP HERE
 
 ---
 ## Monitoring & Metrics

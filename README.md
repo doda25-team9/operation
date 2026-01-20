@@ -1219,7 +1219,7 @@ kubectl port-forward svc/sms-checker-grafana 3000:80
 
 **Login to Grafana:**
 
-afana will prompt for credentials in the browser. These were set in the kubernetes secrets. The default values are:
+Grafana will prompt for credentials in the browser. These were set in the kubernetes secrets. The default values are:
 Username: `user`
 Password: `password`
 

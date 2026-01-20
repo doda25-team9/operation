@@ -36,7 +36,7 @@ spec:
       volumes:
         - name: model-storage
           hostPath:
-            path: /mnt/shared/models
+            path: /mnt/shared/output 
             type: DirectoryOrCreate
 ---
 apiVersion: v1

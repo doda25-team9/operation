@@ -48,7 +48,7 @@ spec:
         
         volumeMounts:
         - name: model-storage
-          mountPath: /models
+          mountPath: /mnt/shared-volume
         
         resources:
           requests:

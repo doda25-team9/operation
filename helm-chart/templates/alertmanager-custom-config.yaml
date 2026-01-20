@@ -13,8 +13,8 @@ stringData:
       resolve_timeout: 5m
       smtp_smarthost: 'smtp.gmail.com:587'
       smtp_from: '{{ .Values.alertmanager.smtp.from }}'
-      smtp_auth_username: /etc/alertmanager/secrets/{{ .Values.alertmanager.smtp.secretName }}/{{ .Values.alertmanager.smtp.userKey }}
-      smtp_auth_password: /etc/alertmanager/secrets/{{ .Values.alertmanager.smtp.secretName }}/{{ .Values.alertmanager.smtp.passwordKey }}
+      smtp_auth_username: '{{ .Values.alertmanager.smtp.user }}'
+      smtp_auth_password: '{{ .Values.alertmanager.smtp.password }}'
       smtp_require_tls: true
 
     route:

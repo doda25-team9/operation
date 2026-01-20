@@ -34,7 +34,7 @@ modelService:
     app: model-service
   
   volume:
-    hostPath: /mnt/shared/models
+    hostPath: /mnt/shared/output 
 
 ingress:
   enabled: true
@@ -74,12 +74,14 @@ kube-prometheus-stack:
         scheme: http
   
   defaultRules:
-    create: false  # Disable all default rules      
+    create: false 
   
   alertmanager: 
     enabled: true 
     alertmanagerSpec: 
-      useExistingSecret: true 
+      useExistingSecret: true
+      secrets: 
+        - alertmanager-smtp-secret
       configSecret: alertmanager-custom-config
 
   grafana:

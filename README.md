@@ -503,7 +503,7 @@ vagrant ssh ctrl -c "kubectl get nodes"
 
 Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.
 
-## One-Time Setup of the kubernetes cluster (Assignment 3)
+## One-Time Setup of the minikube cluster (Assignment 3)
 
 Prerequisites:
 - VirtualBox
@@ -513,22 +513,31 @@ Ensure you are starting with a fresh cluster by running:
 minikube delete
 ```
 
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox --cpus=8 --memory=16384
+```
+
+Stop the minikube cluster:
+```
+minikube stop
+```
+
 Create a shared folder:
 ```
-mkdir -p ~/k8s-shared/models
+mkdir -p ~/k8s-shared/output
 ```
 
 Add the folder to the VM:
 ```
 VBoxManage sharedfolder add "minikube" \
   --name shared \
-  --hostpath /home/<your-user>/k8s-shared \
-  --automount
+  --hostpath "$HOME/k8s-shared"
 ```
 
 Start the minikube cluster:
 ```
-minikube start --driver=virtualbox
+minikube start 
 ```
 
 Mount the folder in the VM (commands are to be run inside the VM):
@@ -544,16 +553,15 @@ Then enable the ingress addon:
 minikube addons enable ingress
 ```
 
-To start the app and model-service or apply changes using kubernetes, run:
-
-```
-kubectl apply -f k8s -R
-```
-
 ## Start the Kubernetes cluster
 Start the minikube cluster:
 ```
-minikube start --driver=virtualbox
+minikube start 
+```
+
+To start the app and model-service or apply changes using kubernetes, run:
+```
+kubectl apply -f k8s -R
 ```
 
 ### Access Application
@@ -711,7 +719,9 @@ The Helm chart provides a streamlined way to deploy the complete SMS Checker app
 
 ### Prerequisites
 
+- Minikube One-Time setup completed
 - Kubernetes cluster running (Minikube or provisioned cluster)
+- Istio installed
 - Helm 3.x installed
 - kubectl configured to access your cluster
 - Nginx Ingress Controller installed
@@ -719,7 +729,7 @@ The Helm chart provides a streamlined way to deploy the complete SMS Checker app
 - SMTP secret for Alertmanager
 - Grafana secret set
 
-For Minikube:
+For Minikube ensure you have completed the One-Time Setup and run:
 ```bash
 minikube start
 minikube addons enable ingress
@@ -1077,11 +1087,13 @@ Alertmanager reads its SMTP username and password from a pre‑existing Kubernet
 ### Step 1: Install or Upgrade Helm
 ```bash
 helm install sms-checker ./helm-chart \ 
+  --set alertmanager.smtp.from="doda.team9@gmail.com"
   --set alertmanager.recipient="your-email@example.com"
 ```
 or 
 ```bash
 helm upgrade sms-checker ./helm-chart \ 
+  --set alertmanager.smtp.from="doda.team9@gmail.com"
   --set alertmanager.recipient="your-email@example.com"
 ```
 

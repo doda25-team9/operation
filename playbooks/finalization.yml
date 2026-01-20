@@ -152,12 +152,24 @@
         dest: /opt/
         remote_src: yes
         creates: /opt/istio-1.25.2
+        owner: root
+        group: root
+
+    - name: Ensure Istio dir and all contents are accessible and executable
+      ansible.builtin.file:
+        path: /opt/istio-1.25.2
+        state: directory
+        recurse: yes
+        owner: root
+        group: root
+        mode: 'u=rwX,g=rX,o=rX'
 
     - name: Add istioctl to global PATH
       ansible.builtin.file:
         src: /opt/istio-1.25.2/bin/istioctl
         dest: /usr/local/bin/istioctl
         state: link
+        force: yes
 
     - name: Copy Istio configuration to VM
       ansible.builtin.copy:
@@ -166,6 +178,18 @@
         mode: '0644'
 
     - name: Install Istio using istioctl
-      ansible.builtin.shell: "istioctl install -y -f /tmp/istio-config.yml"
+      ansible.builtin.shell: "/usr/local/bin/istioctl install -y -f /tmp/istio-config.yml"
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Display Istio installation status
+      ansible.builtin.shell: |
+        kubectl get pods -n istio-system
+        kubectl get svc -n istio-system
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      register: istio_status
+
+    - name: Show Istio status
+      ansible.builtin.debug:
+        var: istio_status.stdout_lines

@@ -157,4 +157,4 @@ There is a known networking limitation with VirtualBox on ARM-based Macs.
 
 ### 2. Linux Host "Join" Issues
 On some Linux hosts, the Ansible task that runs the `kubeadm join` command on workers may fail due to timeout or network interface mismatch.
-* **Status:** Tested and working on macOS/Intel and Windows. If you encounter this on Linux, please manually join the nodes or verify firewall settings.
+Try opening you VirtualBox application and disabling DHCP server.

@@ -16,22 +16,26 @@ The project is split across four repositories:
 Here is a reference architecture diagram illustrating the system components and their interactions:
 ![Architecture Diagram](./docs/images/reference_architecture.png)
 
+> **_NOTE:_**  As the operation repository contains lots of information and features we decided to split README into multiple files.
+> The file you are currently reading - "main" README - contains the most important information to get you started. 
+> For detailed information on each of the assignments (configuration, specifics of the implementation, etc.) please refer to the respective files in the `docs/assignments` folder.
+
 ---
 ## Prerequisites
 
 Before starting, ensure you have the following installed on your host machine:
 
-| Tool               | Version (Recommended) | Purpose                                    |
-|:-------------------|:----------------------|:-------------------------------------------|
-| **VirtualBox**     | 7.0+                  | Hypervisor for VMs (Required for Vagrant). |
-| **Vagrant**        | 2.4+                  | VM management automation.                  |
-| **Ansible**        | 2.16+                 | Configuration management.                  |
-| **Helm**           | 3.x                   | Kubernetes package manager.                |
-| **kubectl**        | 1.32+                 | Kubernetes command-line tool.              |
-| **Minikube**       | Latest                | For local Kubernetes testing.              |
-| **istioctl**       | 1.25.2+               | CLI for managing Istio Service Mesh.       |
-| **Docker**         | 20.10+                | For local Docker Compose testing.          |
-| **Docker Compose** | 2.0+                  | For local multi-container orchestration.   |
+| Tool               | Purpose                                    |
+|:-------------------|:-------------------------------------------|
+| **VirtualBox**     | Hypervisor for VMs (Required for Vagrant). |
+| **Vagrant**        | VM management automation.                  |
+| **Ansible**        | Configuration management.                  |
+| **Helm**           | Kubernetes package manager.                |
+| **kubectl**        | Kubernetes command-line tool.              |
+| **Minikube**       | For local Kubernetes testing.              |
+| **istioctl**       | CLI for managing Istio Service Mesh.       |
+| **Docker**         | For local Docker Compose testing.          |
+| **Docker Compose** | For local multi-container orchestration.   |
 
 Moreover, please clone this repository and all related repositories to have the complete project setup. It should look like this:
 ```
@@ -64,8 +68,6 @@ Best for quick testing on your personal machine.
     ```bash
     helm install sms-checker ./helm-chart
     ```
-4.  **Access:**
-    ADD THIS!!!!
 
 ### Option B: Production Cluster (Vagrant VMs)
 Simulates a real-world bare-metal cluster with 3 VMs.
@@ -85,6 +87,24 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     helm install sms-checker ./helm-chart
     ```
 ---
+## Dashboard & App Access Table
+
+Once deployed, you need to forward ingress-gateway using the following command:
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+```
+
+Then you can access the components of our deployment using the addresses below.
+
+| Component | URL                                                  | Login / Details                                                             |
+| :--- |:-----------------------------------------------------|:----------------------------------------------------------------------------|
+| **Web Application** | [http://sms-checker.local](http://sms-checker.local) | Main user interface.                                                        |
+| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)   | Token required (see *Credentials*).                                         |
+| **Grafana** | [http://localhost:3000](http://localhost:3000)       | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*. |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090)       | *(Requires port-forward)*.                                                  |
+| **AlertManager** | [http://localhost:9093](http://localhost:9093)       | *(Requires port-forward)*.                                                  |
+
+
 ## Troubleshooting
 1. It is possible that on running `vagrant up`, you encounter:
    `Stderr: VBoxManage: error: VirtualBox can't operate in VMX root mode.` This happens because VirtualBox conflicts with KVM. Run the following to solve this error:
@@ -92,26 +112,15 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 sudo modprobe -r kvm_intel
 sudo modprobe -r kvm
 ```
+2. On some Linux hosts, the Ansible task that runs the `kubeadm join` command on workers during `vagrant up` may fail due to timeout or network interface mismatch.
+   Try opening you VirtualBox application and disabling DHCP server.
+
+More on deploying your own cluster can be found in [Assignment 2 Documentation](./docs/assignments/a2-instructions.md) and [Assignment 3 Documentation](./docs/assignments/a3-instructions.md).
 
 ---
 ## Secrets
 
-
----
-
-## Dashboard & App Access Table
-
-Once deployed, access the components using the addresses below.
-
-**Important:** You must map the **Ingress IP** to these hostnames in your `/etc/hosts` file first (see *Host Configuration* below).
-
-| Component | URL                                                  | Login / Details                                                                             |
-| :--- |:-----------------------------------------------------|:--------------------------------------------------------------------------------------------|
-| **Web Application** | [http://sms-checker.local](http://sms-checker.local) | Main user interface.                                                                        |
-| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)   | Token required (see *Credentials*).                                                         |
-| **Grafana** | [http://localhost:3000](http://localhost:3000)       | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*. |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090)       | *(Requires port-forward)*.                                                                  |
-| **AlertManager** | [http://localhost:9093](http://localhost:9093)                            | *(Requires port-forward)*.                                                                  |
+NEED HELP HERE
 
 ---
 ## Monitoring & Metrics
@@ -126,10 +135,17 @@ We collect the following custom metrics:
 | `request_duration` | **Histogram** | Distribution of request processing time (seconds). |
 | `sms_length` | **Histogram** | Distribution of the character length of submitted SMS messages. |
 
+More on monitoring, dashboards, and alerting can be found in [Assignment 3 Documentation](./docs/assignments/a3-instructions.md).
+
 ---
-## Documentation
+## Local Development with Docker Compose
+For quick local testing and development, you can run the application using Docker Compose.
+As the instructions are quite detailed, please refer to the [Assignment 1 Documentation](./docs/assignments/a1-instructions.md) for step-by-step guidance.
+
+---
+## Documentation - Assignment 4 and Additional Resources
 The `\docs` folder contains additional documentation:
 - `continuous-experimentation.md`
 - `deployment.md`
 - `extension.md`
-- `\assignments` - folder that contains detailed instructions on testing each assignment.
+- `\assignments` - folder that contains detailed instructions on testing and implementation of each assignment.

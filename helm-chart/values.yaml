@@ -85,10 +85,11 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
-    admin: 
-      secretName: grafana-admin-secret 
-      userKey: admin-user 
+    admin:
+      existingSecret: grafana-admin-secret
+      userKey: admin-user
       passwordKey: admin-password
+
   
 istio:
   enabled: true

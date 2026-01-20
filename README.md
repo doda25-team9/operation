@@ -1090,13 +1090,11 @@ Alertmanager reads its SMTP username and password from a pre‑existing Kubernet
 ### Step 1: Install or Upgrade Helm
 ```bash
 helm install sms-checker ./helm-chart \ 
-  --set alertmanager.smtp.from="doda.team9@gmail.com"
   --set alertmanager.recipient="your-email@example.com"
 ```
 or
 ```bash
 helm upgrade sms-checker . \
-  --set alertmanager.smtp.from="doda.team9@gmail.com"
   --set alertmanager.recipient="your-email@example.com"
 ```
 

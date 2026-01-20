@@ -24,11 +24,11 @@ spec:
               name: app-secrets
         volumeMounts:
           - name: model-storage
-            mountPath: /models
+            mountPath: /mnt/shared-volume
       volumes:
         - name: model-storage
           hostPath:
-            path: /mnt/shared/models
+            path: /mnt/shared/output
             type: DirectoryOrCreate
 ---
 apiVersion: v1

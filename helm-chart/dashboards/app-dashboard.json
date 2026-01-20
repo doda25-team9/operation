@@ -42,7 +42,7 @@
     {
       "type": "timeseries",
       "title": "Avg Request Duration (seconds)",
-      "description": "Calculated as Rate(Sum) / Rate(Count)",
+      "description": "Calculated as Sum(Rate(Sum)) / Sum(Rate(Count))",
       "id": 3,
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
@@ -85,30 +85,46 @@
       ]
     },
     {
-      "type": "heatmap",
-      "title": "Request Duration Histogram (seconds)",
+      "type": "histogram",
+      "title": "Request Duration (Frequency Distribution)",
       "id": 6,
-      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 12 },
+      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
           "expr": "sum by (le)(increase(request_duration_bucket{version=\"v1\"}[$interval]))",
           "format": "heatmap",
+          "legendFormat": "{{le}}",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "bucketOffset": 0,
+        "combine": false,
+        "showPercentiles": true,
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
     },
     {
-      "type": "heatmap",
-      "title": "SMS Length Histogram (characters)",
+      "type": "histogram",
+      "title": "SMS Length (Frequency Distribution)",
       "id": 7,
-      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 12 },
+      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 10 },
       "targets": [
         {
           "expr": "sum by (le)(increase(sms_length_bucket{version=\"v1\"}[$interval]))",
           "format": "heatmap",
+          "legendFormat": "{{le}}",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "bucketOffset": 0,
+        "combine": false,
+        "showPercentiles": true,
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
     },
     {
       "type": "stat",

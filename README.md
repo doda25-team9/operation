@@ -505,8 +505,6 @@ Vagrant automatically shares your host's `operation/` directory with all VMs at 
 
 ## One-Time Setup of the kubernetes cluster (Assignment 3)
 
-## One-Time Setup of the minikube cluster (Assignment 3)
-
 Prerequisites:
 - VirtualBox
 
@@ -515,32 +513,22 @@ Ensure you are starting with a fresh cluster by running:
 minikube delete
 ```
 
-
-Start the minikube cluster:
-```
-minikube start --driver=virtualbox --cpus=8 --memory=16384
-```
-
-Stop the minikube cluster:
-```
-minikube stop
-```
-
 Create a shared folder:
 ```
-mkdir -p ~/k8s-shared/output
+mkdir -p ~/k8s-shared/models
 ```
 
 Add the folder to the VM:
 ```
 VBoxManage sharedfolder add "minikube" \
   --name shared \
-  --hostpath "$HOME/k8s-shared"
+  --hostpath /home/<your-user>/k8s-shared \
+  --automount
 ```
 
 Start the minikube cluster:
 ```
-minikube start 
+minikube start --driver=virtualbox
 ```
 
 Mount the folder in the VM (commands are to be run inside the VM):
@@ -556,16 +544,16 @@ Then enable the ingress addon:
 minikube addons enable ingress
 ```
 
-## Start the Kubernetes cluster
-Start the minikube cluster:
-```
-minikube start --driver=virtualbox
-```
-
 To start the app and model-service or apply changes using kubernetes, run:
 
 ```
 kubectl apply -f k8s -R
+```
+
+## Start the Kubernetes cluster
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
 ```
 
 ### Access Application

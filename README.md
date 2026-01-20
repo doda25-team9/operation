@@ -61,6 +61,25 @@ These files must exist in:
 
 If you don't have these output files yet, follow the training instructions in `model-service/README.md`.
 
+### Updating the ML Model
+
+Models are versioned separately from service code.
+
+1. **Release model files** as GitHub Release (e.g., v0.2.0)
+2. **Update** `operation/.env`:
+```bash
+   MODEL_VERSION=v0.2.0
+```
+3. **Restart**:
+```bash
+   docker-compose restart model-service
+```
+
+The service downloads the new model automatically.
+
+**Note:** Model version is independent of service version.
+
+
 #### Important:
 The `operation` and `model-service` repositories must be located in the same parent directory, because Docker Compose mounts the trained models from the `model-service repository`.
 
@@ -140,6 +159,12 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
 
 
+### Multi-Stages Dockerfile in model-service
+
+A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
+
+![Image MB reduction](image.png)
+
 ## VM Infrastructure (Assignment 2)
 
 This section provisions virtual machines using Vagrant for infrastructure automation.
@@ -196,11 +221,6 @@ vagrant halt
 # Completely remove all VMs (frees disk space)
 vagrant destroy -f
 ```
-
-To run finalization playbook run this command:
-```bash
-ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
-````
 
 #### Testing changes to Vagrantfile
 ```bash                
@@ -264,6 +284,14 @@ VMs are automatically configured using Ansible playbooks during `vagrant up`:
 - **playbooks/general.yaml** - Runs on all VMs (shared configuration)
 - **playbooks/ctrl.yaml** - Runs only on controller
 - **playbooks/node.yaml** - Runs only on workers
+
+Furthermore, we have another playbook that can be run from the host to perform final installation steps
+- **playbooks/finalization.yaml** - Needs to be run manually from the host
+
+To run finalization playbook run this command:
+```bash
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+```
 
 ### General.yaml
 
@@ -475,11 +503,40 @@ vagrant ssh ctrl -c "kubectl get nodes"
 
 Vagrant automatically shares your host's `operation/` directory with all VMs at `/vagrant/`. Any file you create in the operation folder on your host is immediately accessible inside the VMs at `/vagrant/`. This is useful for deploying Kubernetes manifests without manual file copying.
 
-## Running the kubernetes cluster (Assignment 3)
+## One-Time Setup of the kubernetes cluster (Assignment 3)
 
-First, start the minikube cluster 
+Prerequisites:
+- VirtualBox
+
+Ensure you are starting with a fresh cluster by running:
 ```
-minikube start --driver=docker
+minikube delete
+```
+
+Create a shared folder:
+```
+mkdir -p ~/k8s-shared/models
+```
+
+Add the folder to the VM:
+```
+VBoxManage sharedfolder add "minikube" \
+  --name shared \
+  --hostpath /home/<your-user>/k8s-shared \
+  --automount
+```
+
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
+```
+
+Mount the folder in the VM (commands are to be run inside the VM):
+```
+minikube ssh
+sudo mkdir -p /mnt/shared
+sudo mount -t vboxsf shared /mnt/shared
+exit
 ```
 
 Then enable the ingress addon:
@@ -487,10 +544,16 @@ Then enable the ingress addon:
 minikube addons enable ingress
 ```
 
-To start the app and model-service using kubernetes, run:
+To start the app and model-service or apply changes using kubernetes, run:
 
 ```
 kubectl apply -f k8s -R
+```
+
+## Start the Kubernetes cluster
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
 ```
 
 ### Access Application
@@ -616,6 +679,30 @@ curl http://sms-checker.local:54471/sms/
 - Port changes each time you restart the tunnel - check the output for the current port
 - The tunnel must stay running while you use the app
 - Stop with `Ctrl+C` in the tunnel terminal
+
+### Accessing the dashboard (Step 22)
+
+First, make sure that you applied the `finalization.yml` playbook (instructions above). 
+
+Then, add the Nginx Ingress controller to the known hosts (you only need to do this once):
+```
+echo "192.168.56.99 dashboard.local" | sudo tee -a /etc/hosts
+```
+
+From now on, the dashboard can be accessed on:
+https://dashboard.local
+
+Then SSH into the ctrl VM:
+```
+vagrant ssh ctrl
+```
+
+In the VM, generate a token for the your dashboard user:
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+
+Make sure to connect using HTTPS as HTTP will give you 401 when trying to log in with the token.
 
 
 ## Helm Chart Deployment (Assignment 3)
@@ -901,7 +988,7 @@ done
 |--------|------|-------------|
 | `sms_requests_total` | Counter | Total SMS prediction requests |
 | `predictions_result_total` | Counter | Predictions by result (spam/ham) |
-| `active_users` | Gauge | Current active users |
+| `inflight_requests` | Gauge | Current requests being processed |
 | `request_duration` | Histogram | Request duration distribution (seconds) |
 | `sms_length` | Histogram | SMS message length distribution |
 
@@ -1179,11 +1266,30 @@ app-service v1 → VirtualService (model-virtualservice) → model-service v1
 app-service v2 → VirtualService (model-virtualservice) → model-service v2
 ```
 
+**Sticky Sessions:**
+
+Sticky sessions ensure users consistently see the same version throughout their session:
+```
+First Request (no cookie):
+- User → IngressGateway
+- 90/10 split applies
+- Randomly assigned to v1 or v2
+- Istio sets cookie: user-session=<hash>
+
+Subsequent Requests (with cookie):
+- User → IngressGateway (sends cookie)
+- Consistent hash: cookie → same version
+- User always sees v1 OR always sees v2
+- No version flipping during session
+```
+
+**Result:** 90% of users consistently see v1, 10% consistently see v2.
+
 **Key Features:**
 - **90/10 Canary Split:** 90% of traffic routes to stable v1, 10% to canary v2
+- **Sticky Sessions:** Users consistently see the same version throughout their session (via consistent hash on cookies)
 - **Version Consistency:** App v1 always calls model v1, app v2 always calls model v2 (enforced by sourceLabels)
 - **Configurable:** All settings (gateway name, hostname, traffic split) adjustable via values.yaml
-
 ---
 
 ### Prerequisites
@@ -1317,6 +1423,44 @@ kubectl get pods -l app=model-service -o jsonpath='{range .items[*]}{.metadata.n
 - Subsets v1 and v2 defined in DestinationRule
 - No validation issues from istioctl
 
+
+---
+
+#### Test 3: Verify Sticky Sessions
+
+Test that users consistently see the same version:
+```bash
+# Get IngressGateway endpoint
+INGRESS_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}')
+
+# Create test pod
+kubectl run sticky-test --image=curlimages/curl:latest --restart=Never -- sleep 300
+kubectl wait --for=condition=ready pod sticky-test --timeout=30s
+
+# Test: All requests should return same version
+kubectl exec sticky-test -- sh -c "curl -s -c /tmp/c.txt -I http://$INGRESS_IP:80/sms/ -H 'Host: sms-checker.local' | grep x-app; for i in 1 2 3 4 5; do curl -s -b /tmp/c.txt -I http://$INGRESS_IP:80/sms/ -H 'Host: sms-checker.local' | grep x-app; done"
+
+# Cleanup
+kubectl delete pod sticky-test
+```
+
+**Expected output:**
+```
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+x-app-version: v1
+```
+
+All 6 requests return the same version (either all v1 or all v2).
+
+**What this proves:**
+- Cookie-based consistent hashing working
+- Users don't experience version flipping mid-session
+- 90% of users get consistent v1 experience, 10% get consistent v2 experience
+
 ---
 
 ### Configuration
@@ -1441,6 +1585,7 @@ istioctl analyze
 kubectl logs <pod-name> -c istio-proxy
 ```
 
+---
 ---
 
 ### Implementation Details

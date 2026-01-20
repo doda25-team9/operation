@@ -1,0 +1,7 @@
+# Control node
+{{ control_ip }}  ctrl
+
+# Worker nodes
+{% for i in range(1, num_workers + 1) %}
+{{ worker_ip_base }}.{{ worker_ip_start + i - 1 }}  node-{{ i }}
+{% endfor %}

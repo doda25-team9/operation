@@ -18,14 +18,19 @@ The request follows the following path:
 
 Our application supports consistent versioning; thus, if a user request is handled by `v1` of the app service, the internal logic guarantees, through sourceLabels, that it will be handled by `v1` of the model service and not `v2`.
 
-DIAGRAM WOULD BE GOOD HERE
-
+![Kubernetes diagram](kubernetes-diagram.png)
+Figure 1: Diagram in Kubernetes-style detailing request path
 ## Routing Decision Process
 
 Two files are responsible for the decision process of the routing:
 
 * **Virtual Service of the app**: Here, we define the ratio of the requests sent to versions 1 and 2. We currently route 90% of the traffic to the stable version (`v1`) and 10 % to the canary release (`v2`) used for testing.
 * **Destination Rule**: This file defines the subset of pods based on Kubernetes labels. Subset `v1` is routed to version 1 pods, and accordingly for version 2.
+
+The resulting request flow can be seen in Kiali from which the diagram below was made. We see requests to app-service split into request for `v1` and `v2` and for model-service into v1`, `v2` and `v3`. The request flow for the metric collection is also visible in the diagram, where Prometheus, Grafana and kube-state-metrics poll Kubernetes for metrics. 
+
+![Istio request flow](Istio-request-flow.png)
+Figure 2: Diagram from Kiali showing the request flow in practice 
 
 ## Continuous Experimentation
 
@@ -39,6 +44,9 @@ Prometheus scrapes metrics from the app service and exports them through \metric
 We also utilize Alert Manager to trigger an alert if number of request exceed 15 requests per minute.
 
 We visualize the metrics in Grafana which allows us to compare the performance of different versions, supporting continuous experimentation.
+
+![Monitoring stack](monitoring-stack.png)
+Figure 3: Diagram detailing the request flow for monitoring
 
 ## Setup Details
 

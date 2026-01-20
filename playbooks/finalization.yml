@@ -44,12 +44,37 @@
       environment:
           KUBECONFIG: "{{ kubeconfig_path }}"
 
-    - name: Install chart
+    - name: Create namespace for Ingress controller (for secrets)
+      ansible.builtin.shell: |
+        kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Copy certificate and key files to VM
+      ansible.builtin.copy:
+        src: "certificates/{{ item }}"
+        dest: "/tmp/{{ item }}"
+        mode: "0644"
+      with_items:
+          - tls.crt
+          - tls.key
+
+    - name: Create TLS secret for Ingress controller
+      ansible.builtin.shell: |
+        kubectl create secret tls self-signed-certificate-tls \
+        --key=/tmp/tls.key \
+        --cert=/tmp/tls.crt \
+        -n ingress-nginx \
+        --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Install Ingress chart
       kubernetes.core.helm:
         name: ingress-nginx
         chart_ref: ingress-nginx/ingress-nginx
         release_namespace: ingress-nginx
-        create_namespace: true
+        create_namespace: false
         values:
           controller:
             ingressClassResource:
@@ -58,5 +83,89 @@
               default: true
             service:
               loadBalancerIP: "192.168.56.99"
+            extraArgs:
+              default-ssl-certificate: "ingress-nginx/self-signed-certificate-tls"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Wait for NGINX Controller pods to be ready
+      ansible.builtin.command: >
+        kubectl wait --namespace ingress-nginx
+        --for=condition=ready pod
+        --selector=app.kubernetes.io/component=controller
+        --timeout=120s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      changed_when: false
+
+    # Step 22: Install Kubernetes Dashboard
+    - name: Install Kubernetes Python library
+      ansible.builtin.apt:
+        name: python3-kubernetes
+        state: present
+        update_cache: yes
+
+    - name: Add Kubernetes Dashboard Helm repo
+      kubernetes.core.helm_repository:
+        name: kubernetes-dashboard
+        repo_url: "https://kubernetes.github.io/dashboard/"
+
+    - name: Install Kubernetes Dashboard
+      kubernetes.core.helm:
+        name: kubernetes-dashboard
+        chart_ref: kubernetes-dashboard/kubernetes-dashboard
+        release_namespace: kubernetes-dashboard
+        create_namespace: true
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Copy dashboard manifests to the controller VM
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../manifests/"
+        dest: "/tmp/manifests/"
+        mode: '0644'
+
+    - name: Apply admin-user ServiceAccount and RBAC
+      ansible.builtin.shell: "kubectl apply -f /tmp/manifests/dashboard-admin-user.yml"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Create Ingress for Kubernetes Dashboard
+      ansible.builtin.shell: "kubectl apply -f /tmp/manifests/dashboard-ingress.yml"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    # Step 23: Install Istio
+    - name: Set Istio Arch suffix
+      set_fact:
+        istio_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+    - name: Download Istio 1.25.2
+      ansible.builtin.get_url:
+        url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-{{ istio_arch }}.tar.gz"
+        dest: /tmp/istio.tar.gz
+        mode: '0644'
+
+    - name: Unpack Istio
+      ansible.builtin.unarchive:
+        src: /tmp/istio.tar.gz
+        dest: /opt/
+        remote_src: yes
+        creates: /opt/istio-1.25.2
+
+    - name: Add istioctl to global PATH
+      ansible.builtin.file:
+        src: /opt/istio-1.25.2/bin/istioctl
+        dest: /usr/local/bin/istioctl
+        state: link
+
+    - name: Copy Istio configuration to VM
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../manifests/istio-config.yml"
+        dest: /tmp/istio-config.yml
+        mode: '0644'
+
+    - name: Install Istio using istioctl
+      ansible.builtin.shell: "istioctl install -y -f /tmp/istio-config.yml"
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"

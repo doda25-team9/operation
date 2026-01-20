@@ -86,7 +86,12 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     ```
 ---
 ## Troubleshooting
-
+1. It is possible that on running `vagrant up`, you encounter:
+   `Stderr: VBoxManage: error: VirtualBox can't operate in VMX root mode.` This happens because VirtualBox conflicts with KVM. Run the following to solve this error:
+```bash
+sudo modprobe -r kvm_intel
+sudo modprobe -r kvm
+```
 
 ---
 ## Secrets

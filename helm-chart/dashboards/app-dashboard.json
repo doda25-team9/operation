@@ -24,7 +24,7 @@
       "gridPos": { "x": 0, "y": 0, "w": 16, "h": 8 },
       "targets": [
         {
-          "expr": "increase(sms_requests_total{version=\"v1\"}[$interval])",
+          "expr": "sum(increase(sms_requests_total{version=\"v1\"}[$interval]))",
           "legendFormat": "requests",
           "refId": "A"
         }
@@ -35,9 +35,6 @@
       "title": "Active Users",
       "id": 2,
       "gridPos": { "x": 16, "y": 0, "w": 8, "h": 8 },
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
-      },
       "targets": [
         { "expr": "sum(active_users{version=\"v1\"})", "refId": "A" }
       ]
@@ -50,7 +47,7 @@
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(request_duration_sum{version=\"v1\"}[$interval]) / rate(request_duration_count{version=\"v1\"}[$interval])",
+          "expr": "sum(rate(request_duration_sum{version=\"v1\"}[$interval])) / sum(rate(request_duration_count{version=\"v1\"}[$interval]))",
           "legendFormat": "avg duration",
           "refId": "A"
         }
@@ -64,7 +61,7 @@
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(sms_requests_total{version=\"v1\"}[$interval])",
+          "expr": "sum(rate(sms_requests_total{version=\"v1\"}[$interval]))",
           "legendFormat": "req/s",
           "refId": "A"
         }
@@ -81,7 +78,7 @@
       },
       "targets": [
         {
-          "expr": "increase(predictions_result_total{version=\"v1\"}[$interval])",
+          "expr": "sum by (result) (increase(predictions_result_total{version=\"v1\"}[$interval]))",
           "legendFormat": "{{result}}",
           "refId": "A"
         }

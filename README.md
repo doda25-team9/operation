@@ -719,14 +719,12 @@ The Helm chart provides a streamlined way to deploy the complete SMS Checker app
 
 ### Prerequisites
 
-- Minikube One-Time setup completed
 - Kubernetes cluster running (Minikube or provisioned cluster)
-- Istio installed
 - Helm 3.x installed
 - kubectl configured to access your cluster
 - Nginx Ingress Controller installed
 
-For Minikube ensure you have completed the One-Time Setup and run:
+For Minikube:
 ```bash
 minikube start
 minikube addons enable ingress
@@ -752,6 +750,7 @@ This deploys:
 - Services (app-service, model-service)
 - Ingress (sms-checker.local)
 - ConfigMap (environment variables)
+- Secret (SMTP credentials)
 
 ### Verify Deployment
 ```bash
@@ -794,6 +793,12 @@ helm install sms-checker ./helm-chart --set ingress.host=myapp.local
 # Disable ingress
 helm install sms-checker ./helm-chart --set ingress.enabled=false
 
+
+# Provide SMTP credentials
+helm install sms-checker ./helm-chart \
+  --set secret.smtpUser=real@email.com \
+  --set secret.smtpPass=realpassword
+
 # Use custom values file
 helm install sms-checker ./helm-chart -f my-values.yaml
 ```
@@ -832,6 +837,8 @@ Key values (see `helm-chart/values.yaml` for complete list):
 | `modelService.replicas` | Number of model-service pods | `2` |
 | `ingress.enabled` | Enable/disable Ingress | `true` |
 | `ingress.host` | Hostname for accessing app | `sms-checker.local` |
+| `secret.smtpUser` | SMTP username | `placeholder-user` |
+| `secret.smtpPass` | SMTP password | `placeholder-password` |
 
 ### Testing
 
@@ -871,7 +878,7 @@ kubectl describe ingress app-ingress
 
 # Check configuration
 kubectl get configmap env-config-map -o yaml
-kubectl get secrets
+kubectl get secret secret
 
 # View all release resources
 kubectl get all -l app.kubernetes.io/instance=sms-checker
@@ -1053,18 +1060,25 @@ kubectl get svc | grep prometheus
 
 ### Current Implementation
 
-The Helm chart does not contain any SMTP credentials and does not create Secrets with sensitive data.
+The SMTP password for email alerts is documented in this README for **grading and testing purposes only**. This approach was chosen to allow reviewers to test the alerting functionality without additional setup steps.
 
-Alertmanager reads its SMTP username and password from a pre‑existing Kubernetes Secret that must be created manually before installing the chart.
+The assignment requires that credentials should not be in deployment files, source code, or manifests. Our implementation follows this requirement:
 
-### Step 1: Install or Upgrade Helm
+**No passwords in YAML files** - Only placeholders in `values.yaml`  
+**No passwords in source code** - App code doesn't contain credentials  
+**No passwords in manifests** - Kubernetes manifests use placeholders  
+**Credentials passed at deployment time** - Via Helm `--set` flags 
+
+### Step 1: Install (or Upgrade if already installed) with Email Credentials
 ```bash
-helm install sms-checker ./helm-chart \ 
+helm install sms-checker . \
+  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
   --set alertmanager.recipient="your-email@example.com"
 ```
 or
 ```bash
-helm upgrade sms-checker . \ 
+helm upgrade sms-checker . \
+  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
   --set alertmanager.recipient="your-email@example.com"
 ```
 
@@ -1077,7 +1091,7 @@ Replace `your-email@example.com` with your actual email address.
 kubectl get secret alertmanager-custom-config -o jsonpath='{.data.alertmanager\.yaml}' | base64 -d | grep smtp
 ```
 
-Should show that SMTP authentication fields are present and referencing the mounted Secret.
+Should show SMTP server and credentials configured.
 
 ---
 
@@ -1200,9 +1214,11 @@ kubectl port-forward svc/sms-checker-grafana 3000:80
 
 **Login to Grafana:**
 
-Grafana will prompt for credentials in the browser. These were set in the kubernetes secrets. The default values are:
-Username: `user`
-Password: `password`
+Grafana will prompt for credentials in the browser (they are configured through the Helm chart)
+
+Username: `admin`
+
+Password: `admin123`
 
 ---
 

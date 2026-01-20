@@ -123,7 +123,7 @@
       },
       "targets": [
         {
-          "expr": "last_sms_length_characters",
+          "expr": "last_sms_length_characters{version=\"v1\"}",
           "refId": "A"
         }
       ]
@@ -142,7 +142,7 @@
       },
       "targets": [
         {
-          "expr": "last_request_duration_ms",
+          "expr": "last_request_duration_ms{version=\"v1\"}",
           "refId": "A"
         }
       ]

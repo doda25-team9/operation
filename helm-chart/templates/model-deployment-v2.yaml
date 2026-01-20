@@ -46,7 +46,7 @@ spec:
               key: {{ .Values.secret.smtpPassKey }}
         volumeMounts:
         - name: model-storage
-          mountPath: /mnt/shared-volume
+          mountPath: /models
         
         resources:
           requests:

@@ -26,15 +26,14 @@ spec:
     spec:
       containers:
       - name: model
-        image: "{{ .Values.modelService.image.repository }}:{{ .Values.shadowLaunch.imageTag }}"
+        image: "{{ .Values.modelService.image.repository }}:{{ .Values.shadowLaunch.modelImageTag }}"
         imagePullPolicy: {{ .Values.modelService.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.modelService.service.port }}
-          name: http
-        
+          name: http  
         env:
         - name: MODEL_VERSION
-          value: "v3"
+          value: "{{ .Values.shadowLaunch.modelVersion }}"
         - name: SMTP_USER 
           valueFrom: 
             secretKeyRef: 

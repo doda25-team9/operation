@@ -4,7 +4,7 @@ This guide explains how to run the **SMS Checker** application locally using Doc
 
 ## Prerequisites
 
-WHAT KONNA SAID
+TODO: Add text from Konas PR about getting the model.
 
 ---
 

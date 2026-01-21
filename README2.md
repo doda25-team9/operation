@@ -100,7 +100,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 
 Once deployed, you need to forward ingress-gateway using the following command:
 ```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
 
 Then you can access the components of our deployment using the addresses below.

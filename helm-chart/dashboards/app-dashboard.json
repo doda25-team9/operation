@@ -125,6 +125,43 @@
         "tooltip": { "mode": "single", "sort": "none" },
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
       }
+    },
+    {
+      "type": "stat",
+      "title": "Last SMS Length (Characters)",
+      "description": "The character count of the most recently processed SMS",
+      "id": 8,
+      "gridPos": { "x": 0, "y": 38, "w": 12, "h": 6 },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "last_sms_length_characters{version=\"v1\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Last Request Duration (ms)",
+      "description": "How long the specific last request took in milliseconds",
+      "id": 9,
+      "gridPos": { "x": 12, "y": 38, "w": 12, "h": 6 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "unit": "ms"
+      },
+      "targets": [
+        {
+          "expr": "last_request_duration_ms{version=\"v1\"}",
+          "refId": "A"
+        }
+      ]
     }
   ]
 }

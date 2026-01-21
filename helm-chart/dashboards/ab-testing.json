@@ -17,12 +17,45 @@
     ]
   },
   "panels": [
+        {
+      "type": "stat",
+      "title": "Spam Detection Rate (%)",
+      "description": "Percentage of traffic identified as SPAM for version A",
+      "id": 0,
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 12 },
+      "targets": [
+        {
+          "expr": "sum(increase(predictions_result_total{result=\"spam\", version=\"v1\"}[$interval])) / sum(increase(predictions_result_total{version=\"v1\"}[$interval])) * 100",
+          "legendFormat": "Spam Rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "unit": "percent"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Prediction trends over time for version A",
+      "id": 1,
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 12 },
+      "targets": [
+        {
+          "expr": "sum by (result) (increase(predictions_result_total{version=\"v1\"}[$interval]))",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ]
+    },
     {
       "type": "stat",
       "title": "Spam Detection Rate (%)",
-      "description": "Percentage of traffic identified as SPAM",
+      "description": "Percentage of traffic identified as SPAM for version B",
       "id": 2,
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 6 },
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 12 },
       "targets": [
         {
           "expr": "sum(increase(predictions_result_total{result=\"spam\", version=\"v2\"}[$interval])) / sum(increase(predictions_result_total{version=\"v2\"}[$interval])) * 100",
@@ -39,9 +72,9 @@
     },
     {
       "type": "timeseries",
-      "title": "Prediction Trends over Time",
+      "title": "Prediction trends over time for version B",
       "id": 3,
-      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 14 },
+      "gridPos": { "x": 6, "y": 12, "w": 18, "h": 12 },
       "targets": [
         {
           "expr": "increase(predictions_result_total{version=\"v2\"}[$interval])",

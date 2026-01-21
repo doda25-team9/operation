@@ -2,9 +2,9 @@
 
 ## Introduction
 
-We want to evaluate and compare a different model for spam prediction. According to the creators of the SMS Spam Collection Dataset, which was used to train our models, SVM performed the best baseline performance out of their evaluated models [[1]](#1). Further analysis that included more models still had the same conclusion [[2]](#2). Thus, we chose to compare our initial model, a decision tree, against a SVC that is available in the `model-service` repository.
+We want to evaluate and compare a different model for spam prediction. According to the creators of the SMS Spam Collection Dataset, which was used to train our models, SVM had the best baseline performance out of their evaluated models [[1]](#1). Further analysis that included more models still had the same conclusion [[2]](#2). Thus, we chose to compare our initial model, a decision tree, against a SVM that is available in the `model-service` repository.
  
-However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Since we want the transition between the different versions to be smooth, we will evaluate the differences in predictions. Hence, our hypothesis is the following.
+However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in predictions. Hence, our hypothesis is the following.
 
 H0: The spam prediction rates of the new version will not differ significantly.
 
@@ -38,11 +38,46 @@ Since in a Standard Normal Distribution 95% of data is within 1.96 standard devi
 
 ### Metrics
 
-To measure the outcomes we created `predictions_result_total` metric in Prometheus to track the counts of predictions by result (spam/ham). For each of the versions, we had a separate Grafana dashboard. Decision tree results can be found in `SMS Checker - Application Metrics` graph, and `SMS Checker - A/B Experiment Results` contains the SVM results.
+To measure the outcomes we created the `predictions_result_total` metric in `app-service` to track the counts of predictions by result (spam/ham). For each of the versions, we had a separate Grafana dashboard. Decision tree results can be found in `SMS Checker - Application Metrics` graph, and `SMS Checker - A/B Experiment Results` contains the SVM results.
 
-### Execution
+### Running the experiment
 
-After starting the cluster as described in the README.md, we used ingress port-forward to connect to the cluster. Then from the `experimentation` folder we ran `send_requests.py` which sent 4981 messages to our cluster.
+The experement was run with this configuration in `helm-chart/values.yaml`
+
+```
+versions:
+  v1:
+    enabled: true
+    replicas: 3
+    appImageTag: "0.0.8-SNAPSHOT"
+    modelImageTag: "0.2.0"
+    modelVersion: "v0.1.0"
+  
+  v2:
+    enabled: true
+    replicas: 1
+    appImageTag: "0.0.9-SNAPSHOT"
+    modelImageTag: "0.3.0-SNAPSHOT"
+    modelVersion: "v0.2.0"
+
+shadowLaunch:
+  enabled: true
+  replicas: 1
+  modelImageTag: latest
+  modelVersion: "v0.1.0"
+  mirrorPercentage: 100.0
+```
+
+0. (Optional) Change the values if you want to evaluate different image versions
+1. Start the cluster as described in the README.
+1. Port-forward ingress to connect to the cluster as described in the README. 
+1. From the `experimentation` folder run `send_requests.py` which snds 4981 messages to the cluster.
+1. Port-forward the Grafana dashboard, log in (instructions in the README) and open the `SMS Checker - A/B Experiment Results` dashboard. You should see the results there
+1. To reach the versions separately, run the following commands in separate terminals:
+```
+kubectl port-forward deployment/app-deployment-v1 8082:8080
+kubectl port-forward deployment/app-deployment-v2 8083:8080
+```
 
 ## Result
 
@@ -56,7 +91,7 @@ Screenshot of Grafana results for the SVM:
 
 `No data` is caused by the model having no spams to calculate the metric. 
 
-The value of $Z$ is 10.0697. The value of p is < .00001. Therefore, the result is significant at p < .05.
+The value of our test metric $Z$ is 10.0697. The value of p is < .00001. Therefore, the result is significant at p < .05. The dashboard supports this decision as it shows version B classifying everything as ham.   
 
 ## Analysis
 
@@ -71,7 +106,7 @@ To obtain a more complete overview, we can compare the F1 scores: SVM had an aby
 
 ## Conclusion
 
-The outputs of model v0.2.0 (SVM) significantly differs from model v0.1.0 (decision tree). Moreover, SVM is currently unsuitable for deployment as in our experiment it did not flag anything as spam. Therefore, we keep using decision tree until SVM is trained differently and achieves better performance.
+The outputs of model v0.2.0 (SVM) significantly differ from model v0.1.0 (decision tree). Moreover, the SVM is currently unsuitable for deployment as in our experiment it did not flag anything as spam. Therefore, we will keep using decision tree until the SVM is trained differently and achieves better performance.
 
 ## References
 

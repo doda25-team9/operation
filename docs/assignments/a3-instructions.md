@@ -107,6 +107,19 @@ Dashboards:
 3. Select SMS Checker - Application Metrics for stable version metrics
 4. Select SMS Checker - A/B Testing for metrics used for Continuous Experimentation.
 
+**To make changes to the dashboards:**
+
+1. Make the changes in the `.json` files from `helm-chart/dashboards/`
+2. Run the following commands:
+    ```
+    helm upgrade sms-checker ./helm-chart
+
+    kubectl delete pod $(kubectl get pod | grep grafana | awk '{print $1}')
+
+    kubectl port-forward svc/sms-checker-grafana 3000:80     
+    ```
+3. Refresh Grafana website.
+
 ## AlertManager
 We use AlertManager to send emails if traffic exceeds 15 requests/minute for 2 minutes.
 

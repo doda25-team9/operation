@@ -105,13 +105,13 @@ kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 
 Then you can access the components of our deployment using the addresses below.
 
-| Component | URL                                                  | Login / Details                                                             |
-| :--- |:-----------------------------------------------------|:----------------------------------------------------------------------------|
-| **Web Application** | [http://sms-checker.local](http://sms-checker.local) | Main user interface.                                                        |
-| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)   | Token required (see *Credentials*).                                         |
-| **Grafana** | [http://localhost:3000](http://localhost:3000)       | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*. |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090)       | *(Requires port-forward)*.                                                  |
-| **AlertManager** | [http://localhost:9093](http://localhost:9093)       | *(Requires port-forward)*.                                                  |
+| Component | URL                                                          | Login / Details                                                             |
+| :--- |:-------------------------------------------------------------|:----------------------------------------------------------------------------|
+| **Web Application** | [http://sms-checker.local/sms](http://sms-checker.local/sms) | Main user interface.                                                        |
+| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)           | Token required (see *Credentials*).                                         |
+| **Grafana** | [http://localhost:3000](http://localhost:3000)               | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*. |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090)               | *(Requires port-forward)*.                                                  |
+| **AlertManager** | [http://localhost:9093](http://localhost:9093)               | *(Requires port-forward)*.                                                  |
 
 
 ## Troubleshooting

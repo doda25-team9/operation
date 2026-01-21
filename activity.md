@@ -322,6 +322,7 @@ Simplified Dockerfile from multi-stage to single-stage.
 ### **Johan**
 Changed the deployment files to not contain any secrets and instead input them from the command line:
 - [Remove secrets from files](https://github.com/doda25-team9/operation/pull/40)
+
 Reviewed
 - [Remove need to copy over output/ folder from model-service to operation repo.](https://github.com/doda25-team9/operation/pull/37)
 - [Added some descriptions for the .env variables in operation repository](https://github.com/doda25-team9/operation/pull/38)
@@ -359,5 +360,6 @@ Reviewed:
 Changed name of metric for Gauge:
 - [Edit name of Gauge metric](https://github.com/doda25-team9/app/pull/16)
 - [Edit name of Gauge metric](https://github.com/doda25-team9/operation/pull/48)
+
 Reviewed:
 - [A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)

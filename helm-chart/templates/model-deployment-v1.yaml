@@ -42,7 +42,7 @@ spec:
         
         volumeMounts:
         - name: model-storage
-          mountPath: /mnt/shared-volume
+          mountPath: /mnt/shared
         
         resources:
           requests:

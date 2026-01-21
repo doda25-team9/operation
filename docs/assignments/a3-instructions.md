@@ -30,6 +30,54 @@ Best for quick testing on your personal machine.
 
 TODO: Once we test compatibility of A3 and A2 we need to fill this section with instructions to deploy on the Vagrant cluster.
 
+## Deployment Step 1: Option C: Virtualbox shared folder
+
+If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps.
+
+Prerequisites:
+- VirtualBox
+Ensure you are starting with a fresh cluster by running:
+```
+minikube delete
+```
+
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox --cpus=8 --memory=1638
+```
+
+Stop the minikube cluster:
+```
+minikube stop
+```
+
+Create a shared folder:
+```
+mkdir -p ~/k8s-shared/models
+mkdir -p ~/k8s-shared/output
+```
+
+Add the folder to the VM:
+```
+VBoxManage sharedfolder add "minikube" \
+  --name shared \
+  --hostpath /home/<your-user>/k8s-shared \
+  --automount
+  --hostpath "$HOME/k8s-shared"
+```
+
+Start the minikube cluster:
+```
+minikube start --driver=virtualbox
+```
+
+Mount the folder in the VM (commands are to be run inside the VM):
+```
+minikube ssh
+sudo mkdir -p /mnt/shared
+sudo mount -t vboxsf shared /mnt/shared
+exit
+```
 
 ---
 

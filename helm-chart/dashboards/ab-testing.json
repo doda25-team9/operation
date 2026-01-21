@@ -19,7 +19,7 @@
   "panels": [
         {
       "type": "stat",
-      "title": "Spam Detection Rate (%)",
+      "title": "Spam Detection Rate (%) for version A",
       "description": "Percentage of traffic identified as SPAM for version A",
       "id": 0,
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 12 },
@@ -52,7 +52,7 @@
     },
     {
       "type": "stat",
-      "title": "Spam Detection Rate (%)",
+      "title": "Spam Detection Rate (%) for version B",
       "description": "Percentage of traffic identified as SPAM for version B",
       "id": 2,
       "gridPos": { "x": 0, "y": 12, "w": 6, "h": 12 },

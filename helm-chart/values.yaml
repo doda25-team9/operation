@@ -88,6 +88,8 @@ kube-prometheus-stack:
 istio:
   enabled: true
   host: sms-checker.local
+  stableHost: stable.sms-checker.local
+  canaryHost: canary.sms-checker.local
   
   gateway:
     name: sms-gateway

@@ -32,7 +32,7 @@ TODO: Once we test compatibility of A3 and A2 we need to fill this section with 
 
 ## Deployment Step 1: Option C: Virtualbox shared folder
 
-If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps.
+If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps. This option will not work on MacBook's with Apple Silicon chips. 
 
 Prerequisites:
 - VirtualBox
@@ -43,8 +43,9 @@ minikube delete
 
 Start the minikube cluster:
 ```
-minikube start --driver=virtualbox --cpus=8 --memory=1638
+minikube start --driver=virtualbox
 ```
+You can change the resources allocated by setting flags like --cpus=8 and --memory=16384.
 
 Stop the minikube cluster:
 ```
@@ -61,22 +62,27 @@ Add the folder to the VM:
 ```
 VBoxManage sharedfolder add "minikube" \
   --name shared \
-  --hostpath /home/<your-user>/k8s-shared \
+  --hostpath "$HOME/k8s-shared" \
   --automount
-  --hostpath "$HOME/k8s-shared"
 ```
 
-Start the minikube cluster:
+Start the minikube cluster again:
 ```
-minikube start --driver=virtualbox
+minikube start
 ```
 
-Mount the folder in the VM (commands are to be run inside the VM):
+Mount the folder in the VM:
 ```
-minikube ssh
-sudo mkdir -p /mnt/shared
-sudo mount -t vboxsf shared /mnt/shared
-exit
+minikube ssh "sudo mkdir -p /mnt/shared && \
+  echo 'shared /mnt/shared vboxsf defaults 0 0' | \
+  sudo tee -a /etc/fstab && \
+  sudo systemctl daemon-reload && \
+  sudo mount -a"
+```
+
+Verify the mount:
+```
+minikube ssh "ls -la /mnt/shared"
 ```
 
 ---

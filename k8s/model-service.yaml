@@ -24,7 +24,7 @@ spec:
               name: app-secrets
         volumeMounts:
           - name: model-storage
-            mountPath: /mnt/shared-volume
+            mountPath: /mnt/shared
       volumes:
         - name: model-storage
           hostPath:

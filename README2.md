@@ -51,14 +51,20 @@ your-folder/
 
 Choose one of the following deployment paths depending on your environment.
 
-### Option A: Local Kubernetes (Minikube)
+### Option A: Minikube Cluster
 Best for quick testing on your personal machine.
 
 1.  **Start Minikube:**
     ```bash
-    minikube start --driver=docker
+    minikube start \
+    --driver=docker \
+    --memory=4096 \
+    --cpus=3
     minikube addons enable ingress
     ```
+    Note: You can adjust memory and CPU based on your system capabilities. This is the minimum recommended for smooth operation.
+    Note: For this driver to work, ensure Docker Desktop is running on your host machine.
+
 2.  **Install Istio:**
     ```bash
     istioctl install --set profile=demo -y
@@ -66,6 +72,9 @@ Best for quick testing on your personal machine.
     ```
 3.  **Deploy Application:**
     ```bash
+    cd helm-chart
+    helm dependency update
+    cd ..
     helm install sms-checker ./helm-chart
     ```
 

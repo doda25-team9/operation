@@ -130,6 +130,11 @@ kubectl create secret generic grafana-admin-secret \
   --from-literal=admin-password="password"
 ```
 
+If you deploy secrets after the Helm chart is already installed, apply them with:
+```bash
+helm upgrade sms-checker ./helm-chart
+```
+
 ## 4. Verify
 ```bash
 helm status sms-checker

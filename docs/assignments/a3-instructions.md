@@ -99,14 +99,38 @@ You can override default values during installation using `--set` or a custom va
 | `modelService.replicas` | Number of backend pods | `2` |
 | `ingress.enabled` | Enable external access | `true` |
 | `ingress.host` | Hostname for the app | `sms-checker.local` |
-| `secret.smtpUser` | SMTP Username for alerts | `placeholder` |
 
 For example:
 ```bash
 helm install sms-checker ./helm-chart --set app.replicas=5 --set ingress.host=myapp.local
 ```
 
-## 3. Verify
+
+## 3. Deploy secrets
+The application uses the following secrets for SMTP and admin credentials. You can create them before installing the chart, or deploy them later and run `helm upgrade` to apply the changes.
+
+SMTP credentials for app and model service
+```bash
+kubectl create secret generic smtp-credentials \
+  --from-literal=SMTP_USER="user" \
+  --from-literal=SMTP_PASS="password"
+```
+
+Alertmanager SMTP credentials
+```bash
+kubectl create secret generic alertmanager-smtp-secret \
+  --from-literal=SMTP_USER="doda.team9@gmail.com" \
+  --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
+```
+
+Grafana admin credentials
+```bash
+kubectl create secret generic grafana-admin-secret \
+  --from-literal=admin-user="user" \
+  --from-literal=admin-password="password"
+```
+
+## 4. Verify
 ```bash
 helm status sms-checker
 kubectl get pods
@@ -144,7 +168,7 @@ We collect the following metrics from the app:
 ## Grafana
 - Command: `kubectl port-forward svc/sms-checker-grafana 3000:80`
 - Access: [http://localhost:3000](http://localhost:3000)
-- Credentials: User: `admin` | Pass: `admin123`
+- Credentials: User: `user` | Pass: `password`
 
 Dashboards:
 1. Login to Grafana.

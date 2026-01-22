@@ -20,6 +20,8 @@ WORKER_IP_START = 101
 # This block configures all VMs for the Kubernetes cluster
 
 Vagrant.configure("2") do |config|
+  # Shared storage for all VMs
+  config.vm.synced_folder "./shared", "/mnt/shared"
   
   # Controller VM (ctrl)
   

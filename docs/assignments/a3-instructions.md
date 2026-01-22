@@ -211,13 +211,13 @@ helm upgrade sms-checker ./helm-chart \
 ```bash
 # Send 500 requests (approx 2 req/sec)
 for i in {1..500}; do
-curl -X POST http://localhost:8080/sms/ \
+curl -X POST http://sms-checker.local/sms/ \
 -H "Host: sms-checker.local" \
 -H "Content-Type: application/json" \
 -d '{"sms":"Alert test"}'
-sleep 0.5
+sleep 0.1
 done
 ```
 3. Verify
-- Prometheus:Check Alerts tab > HighRequestRate should turn Pending to Firing.
+- Prometheus: Check Alerts tab > HighRequestRate should turn Pending to Firing.
 - Email: Check the inbox of the recipient address configured above.

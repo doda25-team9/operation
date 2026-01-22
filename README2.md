@@ -118,7 +118,6 @@ Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in y
 | **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)             | To access it you need to follow additional steps in [A3 Instructions](./docs/a3-instructions.md) |
 | **Grafana** | [http://localhost:3000](http://localhost:3000)                 | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*.                      |
 | **Prometheus** | [http://localhost:9090](http://localhost:9090)                 | *(Requires port-forward)*.                                                                       |
-| **AlertManager** | [http://localhost:9093](http://localhost:9093)                 | *(Requires port-forward)*.                                                                       |
 
 
 ## Troubleshooting

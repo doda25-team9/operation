@@ -34,7 +34,7 @@ modelService:
     app: model-service
   
   volume:
-    hostPath: /mnt/shared/models
+    hostPath: /mnt/shared
 
 ingress:
   enabled: true

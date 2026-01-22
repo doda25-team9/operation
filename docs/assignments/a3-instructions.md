@@ -197,14 +197,18 @@ Dashboards:
 ## AlertManager
 We use AlertManager to send emails if traffic exceeds 15 requests/minute for 2 minutes.
 
-1. Configure Credentials
-   Update your deployment with the SMTP credentials.
+1. Deploy Secrets according to instructions in #3
+2. Update your deployment with the recipient email.
 ```bash
 helm upgrade sms-checker ./helm-chart \
---set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
 --set alertmanager.recipient="your-email@example.com"
 ```
-2. Trigger an Alert (Test)
+3. Forward port:
+```bash
+kubectl port-forward svc/prometheus-alertmanager 9093:9093
+```
+4. Access: [http://localhost:9093](http://localhost:9093)
+5. Trigger an Alert (Test)
    Run this loop to generate artificial traffic spikes:
 ```bash
 # Send 500 requests (approx 2 req/sec)

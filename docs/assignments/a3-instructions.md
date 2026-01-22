@@ -34,18 +34,10 @@ TODO: Once we test compatibility of A3 and A2 we need to fill this section with 
 
 If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps. This option will not work on MacBook's with Apple Silicon chips. 
 
-Prerequisites:
-- VirtualBox
-Ensure you are starting with a fresh cluster by running:
-```
-minikube delete
-```
-
-Start the minikube cluster:
+Start the Minikube cluster using the command below. You can adjust resources with flags such as `--cpus=8` and `--memory=16384`.
 ```
 minikube start --driver=virtualbox
 ```
-You can change the resources allocated by setting flags like --cpus=8 and --memory=16384.
 
 Stop the minikube cluster:
 ```

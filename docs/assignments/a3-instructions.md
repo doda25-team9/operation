@@ -209,15 +209,15 @@ helm upgrade sms-checker ./helm-chart \
 2. Trigger an Alert (Test)
    Run this loop to generate artificial traffic spikes:
 ```bash
-# Send 500 requests (approx 2 req/sec)
-for i in {1..500}; do
-curl -X POST http://sms-checker.local/sms/ \
--H "Host: sms-checker.local" \
--H "Content-Type: application/json" \
--d '{"sms":"Alert test"}'
-sleep 0.1
+for i in {1..100}; do
+  curl -X POST http://sms-checker.local/sms/ \
+    -H "Host: sms-checker.local" \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Alert test"}'
+  echo "Request $i sent"
+  sleep 0.2
 done
 ```
 3. Verify
-- Prometheus: Check Alerts tab > HighRequestRate should turn Pending to Firing.
+- Prometheus: Check Alerts tab > HighRequestRate should turn Pending to Firing (in appx. 1 minute).
 - Email: Check the inbox of the recipient address configured above.

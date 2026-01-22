@@ -11,10 +11,10 @@ spec:
     interval: 30s
     rules:
     - alert: HighRequestRate
-      expr: rate(sms_requests_total[1m]) > 0.25
-      for: 2m
+      expr: rate(sms_requests_total[1m]) > 0.08
+      for: 30s
       labels:
         severity: warning
       annotations:
         summary: "High request rate on SMS Checker"
-        description: "The application is receiving {{ "{{" }} $value | humanize {{ "}}" }} requests per second (>15 per minute) for more than 2 minutes."
+        description: "The application is receiving {{ "{{" }} $value | humanize {{ "}}" }} requests per second (>5 per minute)."

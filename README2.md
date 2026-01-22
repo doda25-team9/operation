@@ -83,7 +83,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 1.  **Provision Infrastructure:**
     Creates Controller + 2 Workers and installs K8s, MetalLB, Ingress, and Istio.
     ```bash
-    # 1. Start VMs (approx. 5-10 mins)
+    # 1. Start VMs (approx. 3-5 mins)
     vagrant up
 
     # 2. Finalize setup (Installs MetalLB, Ingress, Dashboard, Istio)
@@ -92,7 +92,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 2.  **Deploy Application:**
     ```bash
     export KUBECONFIG=$(pwd)/kubeconfig
-    helm install sms-checker ./helm-chart
+    helm install sms-checker ./helm-chart --dependency-update
     ```
 ---
 ## Dashboard & App Access Table

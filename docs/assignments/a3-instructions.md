@@ -131,7 +131,7 @@ To access the application via the hostname `sms-checker.local`, we need to map t
 **For Vagrant Cluster:** Map the hostname to the Ingress Controller's fixed IP (`192.168.56.95`).
 ```bash
 echo "192.168.56.95 sms-checker.local" | sudo tee -a /etc/hosts
-```
+``` 
 Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your browser.
 
 **For Minikube:** Map the hostname to `127.0.0.1` and use port-forwarding.

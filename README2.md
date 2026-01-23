@@ -83,34 +83,42 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 1.  **Provision Infrastructure:**
     Creates Controller + 2 Workers and installs K8s, MetalLB, Ingress, and Istio.
     ```bash
-    # 1. Start VMs (approx. 5-10 mins)
+    # 1. Start VMs (approx. 3-5 mins)
     vagrant up
 
     # 2. Finalize setup (Installs MetalLB, Ingress, Dashboard, Istio)
-    ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+    ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml 
     ```
 2.  **Deploy Application:**
     ```bash
     export KUBECONFIG=$(pwd)/kubeconfig
-    helm install sms-checker ./helm-chart
+    helm install sms-checker ./helm-chart --dependency-update
     ```
 ---
 ## Dashboard & App Access Table
 
-Once deployed, you need to forward ingress-gateway using the following command:
+To access the application via the hostname `sms-checker.local`, we need to map the hostname to cluster's Ingress IP.
+
+**For Vagrant Cluster:** Map the hostname to the Ingress Controller's fixed IP (`192.168.56.95`).
 ```bash
-kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+echo "192.168.56.95 sms-checker.local" | sudo tee -a /etc/hosts
 ```
+Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your browser.
 
-Then you can access the components of our deployment using the addresses below.
+**For Minikube:** Map the hostname to `127.0.0.1` and use port-forwarding.
+```bash
+echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+```
+Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
 
-| Component | URL                                                          | Login / Details                                                             |
-| :--- |:-------------------------------------------------------------|:----------------------------------------------------------------------------|
-| **Web Application** | [http://sms-checker.local/sms](http://sms-checker.local/sms) | Main user interface.                                                        |
-| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)           | Token required (see *Credentials*).                                         |
-| **Grafana** | [http://localhost:3000](http://localhost:3000)               | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*. |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090)               | *(Requires port-forward)*.                                                  |
-| **AlertManager** | [http://localhost:9093](http://localhost:9093)               | *(Requires port-forward)*.                                                  |
+| Component | URL                                                            | Login / Details                                                                                  |
+| :--- |:---------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
+| **Web Application** | [http://sms-checker.local/sms/](http://sms-checker.local/sms/) | Main user interface.                                                                             |
+| **Kubernetes Dashboard** | [https://dashboard.local](https://dashboard.local)             | To access it you need to follow additional steps in [A3 Instructions](./docs/a3-instructions.md) |
+| **Grafana** | [http://localhost:3000](http://localhost:3000)                 | **User:** `admin` <br> **Pass:** `admin123` <br> *(Requires port-forward)*.                      |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090)                 | *(Requires port-forward)*.                                                                       |
+| **AlertManager** | [http://localhost:9093](http://localhost:9093)                 | *(Requires port-forward)*.                                                                       |
 
 
 ## Troubleshooting

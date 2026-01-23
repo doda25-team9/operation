@@ -295,6 +295,17 @@ Reviewed:
 - [Changed Grafana dashboards to have their own .json file, separate from .yaml](https://github.com/doda25-team9/operation/pull/30)
 - [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
 
+### **Adomas**
+Continued the experiment setup by triggering the creation of the model-service v0.2.0 Docker image, and creating a pr for a new version of app:
+- [ Continuous experimentation: Display model name and app version #12 ](https://github.com/doda25-team9/app/pull/12)
+Worked on the experimentation document:
+- [ Continuous Experimentation: Add experiment design #32 ](https://github.com/doda25-team9/operation/pull/32)
+
+Reviewed:
+- [ Extension proposal #27 ](https://github.com/doda25-team9/operation/pull/27)
+- [ Add diagrams to deployment document #29 ](https://github.com/doda25-team9/operation/pull/29)
+
+
 ## Week Q2.7 (January 5+) Working on Fixes/Additions for Previous Assignments
 
 ### **Antonio**
@@ -326,6 +337,15 @@ Changed the deployment files to not contain any secrets and instead input them f
 Reviewed
 - [Remove need to copy over output/ folder from model-service to operation repo.](https://github.com/doda25-team9/operation/pull/37)
 - [Added some descriptions for the .env variables in operation repository](https://github.com/doda25-team9/operation/pull/38)
+
+### **Adomas**
+Continued on Continuous Experimentation.
+Fixed a bug that was causing errors for Ubuntu users when running vagrant up.
+- [ Change ctrl and worker IPs #35 ](https://github.com/doda25-team9/operation/pull/35)
+
+Reviewed:
+- [ Update minikube driver from docker to virtualbox #34 ](https://github.com/doda25-team9/operation/pull/34)
+
 
 ## Week Q2.8 (January 12+) Working on Fixes/Additions for Previous Assignments
 ### **Zosia**
@@ -363,3 +383,28 @@ Changed name of metric for Gauge:
 
 Reviewed:
 - [A2 Features: Automate inventory generation and dynamic /etc/hosts, addition of my pub key](https://github.com/doda25-team9/operation/pull/45)
+
+### **Adomas**
+Worked on finishing cont experimentation. The setup for which also included creating a new model-service image with another model baked in:
+- [ Finish continuous experimentation #43 ](https://github.com/doda25-team9/operation/pull/43)
+- [ Change the baseline model #10 ](https://github.com/doda25-team9/model-service/pull/10)
+
+Reviewed:
+- [ Implementation of MetalLB #36 ](https://github.com/doda25-team9/operation/pull/36)
+
+
+## Week Q2.9 (January 19+) Working on Fixes/Additions for Previous Assignments
+
+### **Adomas**
+Modify Helm configuration to solve some issues and enable us to specify model and image versions. Fix a problem with istioctl in vagrant
+- [ Have a stable default model for the cluster #47 ](https://github.com/doda25-team9/operation/pull/47)
+- [ Enable executable access to istio in vagrant #55 ](https://github.com/doda25-team9/operation/pull/55)
+
+Reviewed:
+- [ Fix model loading efficiency and add default port handling #13 ](https://github.com/doda25-team9/model-service/pull/13)
+- [ Remove secrets from deployment files #54 ](https://github.com/doda25-team9/operation/pull/54)
+- [ Removed v from version #50 ](https://github.com/doda25-team9/operation/pull/50)
+- [ A1; F5 & F10; Multi-stages & model is not hardcoded #11 ](https://github.com/doda25-team9/model-service/pull/11)
+- [ Update Kubernetes instructions and mount path #57 ](https://github.com/doda25-team9/operation/pull/57)
+
+

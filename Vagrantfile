@@ -21,7 +21,7 @@ WORKER_IP_START = 101
 
 Vagrant.configure("2") do |config|
   # Shared storage for all VMs
-  config.vm.synced_folder "./shared", "/mnt/shared"
+  config.vm.synced_folder "./output", "/mnt/shared"
   
   # Controller VM (ctrl)
   

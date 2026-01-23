@@ -1446,20 +1446,18 @@ kubectl delete pod sticky-test
 
 **Expected output:**
 ```
-x-app-version: v1
-x-app-version: v1
-x-app-version: v1
-x-app-version: v1
-x-app-version: v1
-x-app-version: v1
+x-app-version: v1            # could also be v2
+x-app-session: sticky-active
+x-app-session: sticky-active
+x-app-session: sticky-active
+x-app-session: sticky-active
+x-app-session: sticky-active
 ```
 
-All 6 requests return the same version (either all v1 or all v2).
-
 **What this proves:**
-- Cookie-based consistent hashing working
-- Users don't experience version flipping mid-session
-- 90% of users get consistent v1 experience, 10% get consistent v2 experience
+- Request 1 (no cookie): Hits the weighted split (90/10). You get assigned `v1` or `v2` randomly.
+- Requests 2-6 (with cookie): Hit the sticky rule. The presence of `sticky-active` confirms the cookie was accepted and the random split was skipped.
+- Failure: if you see `v1` or `v2` again inside the loop other than the first request, the cookie failed, and the request fell back on the random dice roll.
 
 ---
 

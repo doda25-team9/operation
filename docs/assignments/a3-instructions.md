@@ -92,36 +92,39 @@ minikube ssh "ls -la /mnt/shared"
 ## Deployment Step 2: Helm
 We use a single Helm chart to deploy the Application, Model Service, Prometheus, Grafana, and AlertManager.
 
-## 1. Quick Install
+### 1. Quick Install
 ```bash
     cd operation/helm-chart
     helm dependency update
     cd ..
     helm install sms-checker ./helm-chart
 ```
-## Important! For Option A: Production Cluster (Vagrant VMs)
+### 
 
-### ⚠️ Resource-Optimized Sidecar Injection
-Running a full observability stack alongside 5 microservices pushes the memory limits of our Vagrant VMs. A standard "Rolling Restart" temporarily duplicates pods, causing an Out-Of-Memory (OOM) Deadlock where new pods hang in Pending.
-
+> **_Important! For Option A: Production Cluster (Vagrant VMs) Resource-Optimized Sidecar Injection_**  
+> 
+> Running a full observability stack alongside 5 microservices pushes the memory limits of our Vagrant VMs. A standard "Rolling Restart" temporarily duplicates pods, causing an Out-Of-Memory (OOM) Deadlock where new pods hang in Pending.
 To solve this without adding hardware, we use a "Cold Swap" strategy: we stop the applications to free up RAM before enabling Istio, ensuring a clean startup.
+> 
+> Run these steps to inject sidecars safely:
+> 1. Wait for stable state
+> ```bash
+> kubectl wait --for=condition=available deployment --all --timeout=300s
+> ```
+> 2. Scale down: Free up RAM to prevent Deadlock2. Scale down: Free up RAM to prevent Deadlock
+> ```bash
+> kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=0
+> ```
+> 3. Enable Istio Injection
+> ```bash
+> kubectl label namespace default istio-injection=enabled --overwrite
+> ```
+> 4. Scale up: Restart with Sidecars injected
+> ```bash
+> kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
+> ```
 
-Run these steps to inject sidecars safely:
-
-### 1. Wait for stable state
-kubectl wait --for=condition=available deployment --all --timeout=300s
-
-### 2. Scale down: Free up RAM to prevent Deadlock
-kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=0
-
-### 3. Enable Istio Injection
-kubectl label namespace default istio-injection=enabled --overwrite
-
-### 4. Scale up: Restart with Sidecars injected
-kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
-
-
-## 2. Custom Configuration
+### 2. Custom Configuration
 You can override default values during installation using `--set` or a custom values file.
 
 | Parameter | Description | Default |
@@ -137,16 +140,16 @@ For example:
 helm install sms-checker ./helm-chart --set app.replicas=5 --set ingress.host=myapp.local
 ```
 
-## 3. Verify
+### 3. Verify
 ```bash
 helm status sms-checker
 kubectl get pods
 # Expected: App, Model, Prometheus, Grafana, AlertManager pods all 'Running'
 ```
 
-## 4. Access Application
+### 4. Access Application
 
-### Sms Checker App
+#### Sms Checker App
 To access the application via the hostname `sms-checker.local`, we need to map the hostname to cluster's Ingress IP.
 
 **For Vagrant Cluster:** Map the hostname to the Ingress Controller's fixed IP (`192.168.56.95`).
@@ -160,9 +163,9 @@ Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your brow
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 ```
-Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
+Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your browser.
 
-### Optional - Kubernetes Dashboard (Only Vagrant Cluster)
+#### Optional - Kubernetes Dashboard (Only Vagrant Cluster)
 To access the Kubernetes Dashboard, first retrieve the access token:
 ```bash
 vagrant ssh ctrl

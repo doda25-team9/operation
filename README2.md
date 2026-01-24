@@ -121,22 +121,28 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     export KUBECONFIG=$(pwd)/kubeconfig
     helm install sms-checker ./helm-chart --dependency-update
     ```
-3. **Important! For Option A: Production Cluster (Vagrant VMs)**
-
-    **Resource-Optimized Sidecar Injection**
-    _If you would like to know more about it, please check **a3-instructions.md**_
-
-    ### 1. Wait for stable state
-    kubectl wait --for=condition=available deployment --all --timeout=300s
-
-    ### 2. Scale down: Free up RAM to prevent Deadlock
-    kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=0
-
-    ### 3. Enable Istio Injection
-    kubectl label namespace default istio-injection=enabled --overwrite
-
-    ### 4. Scale up: Restart with Sidecars injected
-    kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
+    
+> **_Important! For Option A: Production Cluster (Vagrant VMs)_**
+> **_Resource-Optimized Sidecar Injection_**
+> 
+> _If you would like to know more about it, please check **a3-instructions.md**_
+> 
+> 1. Wait for stable state
+> ```bash
+> kubectl wait --for=condition=available deployment --all --timeout=300s
+> ```
+> 2. Scale down: Free up RAM to prevent Deadlock
+> ```bash
+> kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=0
+> ```
+> 3. Enable Istio Injection
+> ```bash
+> kubectl label namespace default istio-injection=enabled --overwrite
+> ```
+> 4. Scale up: Restart with Sidecars injected
+> ```bash
+> kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
+> ```
 
 ---
 ## Dashboard & App Access Table

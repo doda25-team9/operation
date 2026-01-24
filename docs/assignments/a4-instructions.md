@@ -43,6 +43,31 @@ The `Gateway` resource uses a label selector to find the Ingress Controller pod.
 helm upgrade --install sms-checker ./helm-chart \
   --set istio.gateway.ingressGatewaySelector=custom-gateway
 ```
+
+---
+## ⚠️ Troubleshooting: Helm Upgrade & Istio Sidecars
+
+### The Problem: "Pre-upgrade hooks failed"
+When running `helm upgrade`, you may encounter the following error:
+```text
+Error: UPGRADE FAILED: pre-upgrade hooks failed: resource not ready, name: prometheus-admission-create, kind: Job... context deadline exceeded
+```
+
+Since this is an assignment and we are low on RAM, the best fix is to simply disable these admission webhooks. They are "safety checks" that we don't strictly need right now, and they are causing this deadlock.
+So, to resolve this without complex sidecar configuration, we disable the Prometheus Admission Webhooks during the upgrade. This skips the creation of the conflicting Job.
+
+
+1. Delete the stuck job (if it exists)
+```
+kubectl delete job -l app.kubernetes.io/name=kube-prometheus-stack-admission-create
+```
+2. Run the upgrade with webhooks disabled
+```
+helm upgrade sms-checker ./helm-chart \
+  --set alertmanager.smtp.password="YOUR_APP_PASSWORD" \
+  --set alertmanager.recipient="YOUR_EMAIL" \
+  --set kube-prometheus-stack.prometheusOperator.admissionWebhooks.enabled=false
+```
 ---
 
 ## Documentation

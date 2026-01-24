@@ -242,3 +242,25 @@ done
 3. Verify
 - Prometheus: Check Alerts tab > HighRequestRate should turn Pending to Firing (in appx. 1 minute).
 - Email: Check the inbox of the recipient address configured above.
+
+---
+## ⚠️ Troubleshooting: Helm Upgrade & Istio Sidecars
+
+### The Problem: "Pre-upgrade hooks failed"
+When running `helm upgrade`, you may encounter the following error:
+```text
+Error: UPGRADE FAILED: pre-upgrade hooks failed: resource not ready, name: prometheus-admission-create, kind: Job... context deadline exceeded
+```
+
+1. Delete the stuck job (if it exists)
+```
+kubectl delete job -l app.kubernetes.io/name=kube-prometheus-stack-admission-create
+```
+2. Run the upgrade with webhooks disabled
+```
+helm upgrade sms-checker ./helm-chart \
+  --set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
+  --set alertmanager.recipient="YOUR_EMAIL" \
+  --set kube-prometheus-stack.prometheusOperator.admissionWebhooks.enabled=false
+```
+---

@@ -99,6 +99,27 @@ We use a single Helm chart to deploy the Application, Model Service, Prometheus,
     cd ..
     helm install sms-checker ./helm-chart
 ```
+## Important! For Option A: Production Cluster (Vagrant VMs)
+
+### ⚠️ Resource-Optimized Sidecar Injection
+Running a full observability stack alongside 5 microservices pushes the memory limits of our Vagrant VMs. A standard "Rolling Restart" temporarily duplicates pods, causing an Out-Of-Memory (OOM) Deadlock where new pods hang in Pending.
+
+To solve this without adding hardware, we use a "Cold Swap" strategy: we stop the applications to free up RAM before enabling Istio, ensuring a clean startup.
+
+Run these steps to inject sidecars safely:
+
+### 1. Wait for stable state
+kubectl wait --for=condition=available deployment --all --timeout=300s
+
+### 2. Scale down: Free up RAM to prevent Deadlock
+kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=0
+
+### 3. Enable Istio Injection
+kubectl label namespace default istio-injection=enabled --overwrite
+
+### 4. Scale up: Restart with Sidecars injected
+kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
+
 
 ## 2. Custom Configuration
 You can override default values during installation using `--set` or a custom values file.

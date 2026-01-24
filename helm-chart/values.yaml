@@ -1,6 +1,6 @@
 app:
   name: app
-  replicas: 3
+  replicas: 1
   
   image:
     repository: ghcr.io/doda25-team9/app
@@ -18,7 +18,7 @@ app:
 
 modelService:
   name: model
-  replicas: 2
+  replicas: 1
   
   image:
     repository: ghcr.io/doda25-team9/model-service
@@ -105,7 +105,7 @@ istio:
 versions:
   v1:
     enabled: true
-    replicas: 3
+    replicas: 1
     appImageTag: "0.0.8-SNAPSHOT"
     modelImageTag: "0.2.0"
     modelVersion: "v0.1.0"

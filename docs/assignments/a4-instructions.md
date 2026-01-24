@@ -29,7 +29,20 @@ helm upgrade sms-checker ./helm-chart \
 # Verify only v1 pods exist
 kubectl get pods | grep deployment
 ```
+### Ingress Gateway
 
+This chart deploys an Istio `Gateway` resource to route traffic into the mesh. It assumes an Istio Ingress Controller (Envoy proxy) is already running in the cluster (provisioned during the infrastructure phase).
+
+**Configuration:**
+The `Gateway` resource uses a label selector to find the Ingress Controller pod.
+* **Default Selector:** `istio: ingressgateway` (Standard Istio default)
+* **Customization:** If deploying to a cluster with a different Ingress Gateway name (e.g., `istio: custom-gateway`), you can configure this in `values.yaml`.
+
+**How to override for different clusters:**
+```bash
+helm upgrade --install sms-checker ./helm-chart \
+  --set istio.gateway.ingressGatewaySelector=custom-gateway
+```
 ---
 
 ## Documentation

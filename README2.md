@@ -47,6 +47,33 @@ your-folder/
 ```
 
 ---
+## Local Development Setup Using Docker Compose
+### Prerequisites
+You need to be logged into GitHub Container Registry to pull the images. If you haven't done this yet, follow these steps:
+1. Generate a Personal Access Token (PAT) on GitHub with the `read:packages` scope.
+2. Log in to GitHub Container Registry using Docker:
+```
+docker login ghcr.io -u YOUR_GITHUB_USERNAME
+```
+You will be prompted to enter your PAT as the password.
+
+### Starting the Application
+Please follow these steps to start the application:
+
+```
+cd operation
+docker compose pull
+docker compose up
+```
+
+This starts:
+
+- `app` (exposed externally)
+- `model-service` (internal only, so not exposed to host)
+
+You can access the web application in your browser [http://localhost:8080/sms](http://localhost:8080/sms).
+Alternatively, if you have specified a different `APP_PORT` in your `.env`, replace `8080` with that port.
+
 ## Deployment Guide
 
 Choose one of the following deployment paths depending on your environment.

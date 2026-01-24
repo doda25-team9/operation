@@ -1704,5 +1704,5 @@ If you want to access the stable (v1) and canary (v2) versions on custom URLs, c
 ```
 Then make sure to add both of them to `/etc/hosts` like:
 ```bash
-echo "127.0.0.1 <YOUR URL HERE>" | sudo tee -a /etc/hosts
+echo "127.0.0.1 <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
 ```

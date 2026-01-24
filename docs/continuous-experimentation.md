@@ -4,9 +4,9 @@
 
 We want to evaluate and compare a different model for spam prediction. According to the creators of the SMS Spam Collection Dataset, which was used to train our models, Support Vector Machines (SVCs) had the best baseline performance out of their evaluated models [[1]](#1). Further analysis that included more models still had the same conclusion [[2]](#2). Thus, we compared our initial model, a decision tree, against a Support Vector Classifier (SVC, a subtype of SVMs) which was trained by default in the `model-service` repository.
  
-However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in positive prediction rates. The reason for this being that we are trying to avoid models with with vastly different spam prediction rates. For example, a user that initially observes 20% of messages flagged as spam, might be dissatisfied if suddenly our app flags 40% of messages. We want to ensure stability for our users, hence we propose the following hypothesis:
+However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Additionally, we aim to mimic a real-life setting where we would not have information about the true labels of messages sent by users. Thus, we can not use an accuracy-based metrics, such as accuracy or F1-score. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in positive prediction rates. The reason for this being that we are trying to avoid models with with vastly different spam prediction rates. For example, a user that initially observes 20% of messages flagged as spam, might be dissatisfied if suddenly our app flags 40% of messages. We want to ensure stability for our users, hence we propose the following hypothesis:
 
-$H0$: Any observed difference in spam prediction rates between the two model versions is due to random variation and is not statistically significant.
+$H0$: Any observed difference in spam prediction rates between the two model versions are not statistically significant.
 
 ## Experiment Design
 
@@ -68,7 +68,7 @@ If you want to access the stable (v1) and canary (v2) versions on custom URLs, c
 ```
 Then make sure to add both of them to `/etc/hosts` like:
 ```bash
-echo "127.0.0.1 <YOUR URL HERE>" | sudo tee -a /etc/hosts
+echo "127.0.0.1 <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
 ```
 
 0. (Optional) Change the values if you want to evaluate different image versions
@@ -103,7 +103,7 @@ To obtain a more complete overview, we can compare the F1 scores: the SVC had an
 
 ## Conclusion
 
-We reject the null hypothesis ($H0$) as the outputs of model v0.2.0 (SVC) significantly differ from model v0.1.0 (decision tree). Moreover, the SVC is currently unsuitable for deployment as during our experiment it did not flag anything as spam. Therefore, we will keep using decision tree until the SVC is trained differently and achieves better performance.
+We reject the null hypothesis ($H0$) as the outputs of model v0.2.0 (SVC) significantly differ from model v0.1.0 (decision tree). Moreover, the SVC is currently unsuitable for deployment as during our experiment it did not flag anything as spam. This prevents us from conducting further experiments where we could check model outputs more thoroughly, such as evaluating using accuracy-based metrics and checking the prediction overlap on the ExAIS SMS dataset. Therefore, we will keep using the decision tree until the SVC is trained differently and achieves better performance.
 
 ## References
 

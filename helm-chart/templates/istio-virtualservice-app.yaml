@@ -16,7 +16,7 @@ spec:
   http:
   - match:
     - authority:
-        regex: '^stable\.sms-checker\.local.*'
+        regex: '^{{ .Values.istio.stableHost }}(:[0-9]+)?$'
       uri:
         prefix: /sms
     route:
@@ -31,7 +31,7 @@ spec:
 
   - match:
     - authority:
-        regex: '^canary\.sms-checker\.local.*'
+        regex: '^{{ .Values.istio.canaryHost }}(:[0-9]+)?$'
       uri:
         prefix: /sms
     route:

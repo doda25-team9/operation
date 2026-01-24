@@ -419,4 +419,12 @@ Reviewed:
 - [Added charts for missing metrics in Grafana dashboard #53](https://github.com/doda25-team9/operation/pull/53)
 - [ixing histogram dashboards in Grafana #46](https://github.com/doda25-team9/operation/pull/46)
 
+### **Johan**
+Updated kubernetes instructions and mount path to enable shared folder with minikube. I also updated a diagram
+- [Update Kubernetes instructions and mount path #58](https://github.com/doda25-team9/operation/pull/58)
+- [Update diagram #65](https://github.com/doda25-team9/operation/pull/65)
+
+Reviewed:
+- [A3; Complete the volume mount VMs task #61](https://github.com/doda25-team9/operation/pull/61)
+
 

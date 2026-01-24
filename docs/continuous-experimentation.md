@@ -2,11 +2,11 @@
 
 ## Introduction
 
-We want to evaluate and compare a different model for spam prediction. According to the creators of the SMS Spam Collection Dataset, which was used to train our models, Support Vector Machines (SVMs) had the best baseline performance out of their evaluated models [[1]](#1). Further analysis that included more models still had the same conclusion [[2]](#2). Thus, we compared our initial model, a decision tree, against a Support Vector Classifier (a subtype of SVMs) which was trained by default in the `model-service` repository.
+We want to evaluate and compare a different model for spam prediction. According to the creators of the SMS Spam Collection Dataset, which was used to train our models, Support Vector Machines (SVCs) had the best baseline performance out of their evaluated models [[1]](#1). Further analysis that included more models still had the same conclusion [[2]](#2). Thus, we compared our initial model, a decision tree, against a Support Vector Classifier (SVC, a subtype of SVMs) which was trained by default in the `model-service` repository.
  
-However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in predictions. Hence, our hypothesis is the following:
+However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in positive prediction rates. The reason for this being that we are trying to avoid models with with vastly different spam prediction rates. For example, a user that initially observes 20% of messages flagged as spam, might be dissatisfied if suddenly our app flags 40% of messages. We want to ensure stability for our users, hence we propose the following hypothesis:
 
-$H0$: The spam prediction rates of the new version will not differ significantly.
+$H0$: Any observed difference in spam prediction rates between the two model versions is due to random variation and is not statistically significant.
 
 ## Experiment Design
 
@@ -29,8 +29,8 @@ $$Z = \frac{(\hat{p}_1 - \hat{p}_2)}{\sqrt{\hat{p}(1-\hat{p})(\frac{1}{n_1} + \f
 | Symbol | Definition |
 | :--- | :--- |
 | $\hat{p}$ | **Pooled Proportion**: The combined success rate of both samples. |
-| $x_{1,2}$ | **Successes**: Number of positive/correct outcomes for Model 1 and Model 2. |
-| $n_{1,2}$ | **Sample Size**: Total observations for Model 1 (4,000) and Model 2 (400). |
+| $x_{1,2}$ | **Successes**: Number of positive/correct outcomes for model v1 and model v2. |
+| $n_{1,2}$ | **Sample Size**: Total observations for model v1  and model v2. |
 | $\hat{p}_{1,2}$ | **Sample Proportions**: The observed rates for each model ($x / n$). |
 | $Z$ | **Z-score**: The test statistic representing the difference in standard deviations. |
 
@@ -42,14 +42,9 @@ To measure the outcomes we created the `predictions_result_total` metric in `app
 
 ### Running the experiment
 
-The experiment was run with this configuration in `helm-chart/values.yaml`. The sticky sessions are disabled as otherwise every request will get routed to the same version.
+The experiment was run with this version configuration in `helm-chart/values.yaml`.
 
 ```yaml
-  stickySession:
-    enabled: false
-    cookieName: user-session
-    ttl: 3600
-
 versions:
   v1:
     enabled: true
@@ -64,13 +59,6 @@ versions:
     appImageTag: "0.0.9-SNAPSHOT"
     modelImageTag: "0.3.0-SNAPSHOT"
     modelVersion: "v0.2.0"
-
-shadowLaunch:
-  enabled: true
-  replicas: 1
-  modelImageTag: latest
-  modelVersion: "v0.1.0"
-  mirrorPercentage: 100.0
 ```
 
 If you want to access the stable (v1) and canary (v2) versions on custom URLs, change the following values in `/helm-chart/values.yaml`:
@@ -87,26 +75,26 @@ echo "127.0.0.1 <YOUR URL HERE>" | sudo tee -a /etc/hosts
 1. Start the cluster as described in the README.
 1. Wait for all pods to start.
 1. Port-forward ingress to connect to the cluster as described in the README. 
-1. From the `experimentation` folder run `send_requests.py` which snds 4981 messages to the cluster.
+1. From the `experimentation` folder run `send_requests.py` which sends 4981 messages to the cluster.
 1. Port-forward the Grafana dashboard, log in (instructions in the README) and open the `SMS Checker - A/B Experiment Results` dashboard. You should see the results there
 
 To reach the versions separately, visit `http://stable.sms-checker.local:8080/sms/` and `http://canary.sms-checker.local:8080/sms/` or your custom URLs if you changed them.
 
 ## Result
 
-The decision tree classified 835 spams and 3665 hams, whereas the SVM classified 0 spams and 490 hams.
+The decision tree classified 835 spams and 3665 hams, whereas the SVC classified 0 spams and 490 hams.
 
 Screenshot of Grafana results for the both models:
 ![Decision tree results](results_experiment.png)
-Version A uses the decision tree, version B uses the SVM. "No data" is caused by the model having no spams to calculate the metric with. 
+Version A uses the decision tree, version B uses the SVC. "No data" is caused by the model having no spams to calculate the metric with. 
 
 The value of our test metric $Z$ is 10.0697. The value of p is < .00001. Therefore, the result is significant at p < .05. The dashboard supports this decision as it shows version B classifying everything as ham.   
 
 ## Analysis
 
-To figure out why these results were so unbalanced, we analyzed model training. The SVM had 88% accuracy as opposed to 96% accuracy for the Decision tree. Initially, one might judge the training results based on accuracy, but in this context it can be largely misleading. In the SMS Spam Collection dataset, spam makes up 13.4% of the messages. Therefore, a model can achive high accuracy by always predicting ham.
+To figure out why these results were so unbalanced, we analyzed model training. The SVC had 88% accuracy as opposed to 96% accuracy for the Decision tree. Initially, one might judge the training results based on accuracy, but in this context it can be largely misleading. In the SMS Spam Collection dataset, spam makes up 13.4% of the messages. Therefore, a model can achive high accuracy by always predicting ham.
 
-To obtain a more complete overview, we can compare the F1 scores: the SVM had an abysmal score of 0 as opposed to 0.82 achieved by the decision tree. The model achieved such a low score by predicting everything as ham. This reaffirms our observation, where we found that even on a different dataset, the SVM performance is unsuitable for deployment.
+To obtain a more complete overview, we can compare the F1 scores: the SVC had an abysmal score of 0 as opposed to 0.82 achieved by the decision tree. The model achieved such a low score by predicting everything as ham. This reaffirms our observation, where we found that even on a different dataset, the SVC performance is unsuitable for deployment.
 
 <div style="display: flex; justify-content: space-around;">
   <img src="model_train_accuracy.png" alt="Model accuracy" style="width: 48%;"/>
@@ -115,7 +103,7 @@ To obtain a more complete overview, we can compare the F1 scores: the SVM had an
 
 ## Conclusion
 
-We reject the null hypothesis ($H0$) as the outputs of model v0.2.0 (SVM) significantly differ from model v0.1.0 (decision tree). Moreover, the SVM is currently unsuitable for deployment as during our experiment it did not flag anything as spam. Therefore, we will keep using decision tree until the SVM is trained differently and achieves better performance.
+We reject the null hypothesis ($H0$) as the outputs of model v0.2.0 (SVC) significantly differ from model v0.1.0 (decision tree). Moreover, the SVC is currently unsuitable for deployment as during our experiment it did not flag anything as spam. Therefore, we will keep using decision tree until the SVC is trained differently and achieves better performance.
 
 ## References
 

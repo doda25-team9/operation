@@ -7,7 +7,20 @@ You can either run this using Minikube or on the custom cluster deployed in prev
 
 ---
 
-## Deployment Step 1: Option A: Minikube Cluster
+## Deployment Step 1: Option A: Production Cluster (Vagrant VMs)
+
+Provision a cluster using Vagrant and Ansible as described in [Assignment 2 Instructions](./a2-instructions.md).
+```bash
+vagrant up 
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+```
+Now you need to configure your `kubectl` to connect to the cluster. You can do this by setting the `KUBECONFIG` environment variable to point to the `kubeconfig` file in the repository:
+```bash
+# Make sure you are in the root of the 'operation' directory
+export KUBECONFIG=$(pwd)/kubeconfig
+```
+
+## Deployment Step 1: Option B: Minikube Cluster
 Best for quick testing on your personal machine.
 
 1.  **Start Minikube:**
@@ -26,23 +39,10 @@ Best for quick testing on your personal machine.
     kubectl label namespace default istio-injection=enabled
     ```
 
-## Deployment Step 1: Option B: Production Cluster (Vagrant VMs)
 
-Provision a cluster using Vagrant and Ansible as described in [Assignment 2 Instructions](./a2-instructions.md).
-```bash
-vagrant up 
-ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
-```
-Now you need to configure your `kubectl` to connect to the cluster. You can do this by setting the `KUBECONFIG` environment variable to point to the `kubeconfig` file in the repository:
-```bash
-# Make sure you are in the root of the 'operation' directory
-export KUBECONFIG=$(pwd)/kubeconfig
-```
+## Deployment Step 1: Option C: Minikube Cluster with Shared Folder (VirtualBox Driver)
 
-
-## Deployment Step 1: Option C: Virtualbox shared folder
-
-If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps. This option will not work on MacBook's with Apple Silicon chips. 
+If you want to use Minikube with a shared VirtualBox folder across all VMs you can follow these steps. This option will not work on MacBook's with Apple Silicon chips.
 
 Start the Minikube cluster using the command below. You can adjust resources with flags such as `--cpus=8` and `--memory=16384`.
 ```

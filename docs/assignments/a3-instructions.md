@@ -31,7 +31,7 @@ Best for quick testing on your personal machine.
 Provision a cluster using Vagrant and Ansible as described in [Assignment 2 Instructions](./a2-instructions.md).
 ```bash
 vagrant up 
-ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
 ```
 Now you need to configure your `kubectl` to connect to the cluster. You can do this by setting the `KUBECONFIG` environment variable to point to the `kubeconfig` file in the repository:
 ```bash

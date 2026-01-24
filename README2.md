@@ -87,7 +87,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     vagrant up
 
     # 2. Finalize setup (Installs MetalLB, Ingress, Dashboard, Istio)
-    ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml 
+    ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
     ```
 2.  **Deploy Application:**
     ```bash

@@ -4,7 +4,60 @@ This guide explains how to run the **SMS Checker** application locally using Doc
 
 ## Prerequisites
 
-TODO: Add text from Konas PR about getting the model.
+**GitHub Token**: You need a Personal Access Token (PAT) with the read:packages scope to download the library dependencies.
+
+## Steps to Run Locally
+1. **Configure Maven Authentication**
+Before building, you must configure Maven to authenticate with GitHub Packages.
+Generate a Personal Access Token (PAT) on GitHub:
+Go to Settings -> Developer Settings -> Personal Access Tokens (Classic).
+Generate a new token with the scope: read:packages.
+Create or edit your Maven settings file: **~/.m2/settings.xml.**
+Paste the following configuration (replace **YOUR_USERNAME and YOUR_TOKEN**):
+
+
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <servers>
+    <server>
+      <id>github</id>
+      <username>**YOUR_GITHUB_USERNAME**</username>
+      <password>**YOUR_GHP_TOKEN_HERE**</password>
+    </server>
+  </servers>
+</settings>
+```
+
+2. Delete the files of output folder in model-service
+3.  Build the Java Application
+
+```
+# Navigate to the app directory
+cd app
+1. Build the JAR (skipping tests for speed)
+mvn clean package -DskipTests
+
+2. Rename the output to 'app.jar' so Docker can find it
+# (Adjust the source filename if your version is different)
+mv target/frontend-*.jar target/app.jar
+
+cd ..
+```
+
+4. **Build & Start Docker Containers**
+   From the root directory (where docker-compose.yml is located):
+
+```
+1. Build the images
+docker compose build --no-cache
+
+2. Start the services
+docker compose up
+```
 
 ---
 
@@ -20,7 +73,7 @@ APP_IMAGE=ghcr.io/doda25-team9/app:latest
 MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 ```
 
-#### Variable overview:
+### Variable overview:
 - `APP_PORT`:
   Port on the host machine where the web application will be exposed. After startup, the app is accessible at:
   `http://localhost:<APP_PORT>/sms`
@@ -39,7 +92,7 @@ MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 
 You can adjust ports or change image versions by editing this file before running `docker compose up`.
 
-### Running the Full Application
+## Running the Full Application
 
 Please follow these steps to start the application:
 
@@ -68,3 +121,8 @@ Alternatively, if you have specified a different `APP_PORT` in your `.env`, repl
 | **View logs**                        | `docker compose logs`        | Shows combined logs from all services  |
 | **View logs for a specific service** | `docker compose logs app`    | Shows logs only for the app            |
 | **Restart one service**              | `docker compose restart app` | Restarts only the app service          |
+
+## Grading Notes/Helpers
+1. Feature 5 (F5) requires multi-stage image that illustrates the reduction in image size. Our example was implemented in model-service. A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
+
+![Image MB reduction](../images/image_size_difference.png)

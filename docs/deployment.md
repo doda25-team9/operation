@@ -16,9 +16,9 @@ The deployment is configured with specific replica counts to support our stabili
 
 | Component | Version | Role | Replicas | Service Name |
 | :--- | :--- | :--- |:---------| :--- | 
-| **App** | v1 | Stable | **3**    | `app-service` |
+| **App** | v1 | Stable | **1**    | `app-service` |
 | **App** | v2 | Canary | **1**    | `app-service` |
-| **Model** | v1 | Stable | **3**    | `model-service` |
+| **Model** | v1 | Stable | **1**    | `model-service` |
 | **Model** | v2 | Canary | **1**    | `model-service` |
 | **Model** | v3 | Shadow | **1**    | `model-service` |
 

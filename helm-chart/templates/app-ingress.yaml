@@ -18,6 +18,13 @@ spec:
   - host: {{ .Values.ingress.host }}
     http:
       paths:
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.app.service.name }}
+            port:
+              number: {{ .Values.app.service.port }}
       - path: /
         pathType: Prefix
         backend:

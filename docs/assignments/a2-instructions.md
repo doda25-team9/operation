@@ -21,7 +21,7 @@ VMs are automatically configured using Vagrantfile and Ansible playbooks:
 Furthermore, we have another playbook that can be run from the host to perform final installation steps
 - **playbooks/finalization.yaml** - Needs to be run manually from the host using the following command:
 ```bash
-ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml
 ```
 
 ## Configuration variables & Information

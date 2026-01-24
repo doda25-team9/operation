@@ -133,7 +133,6 @@ You can override default values during installation using `--set` or a custom va
 | `modelService.replicas` | Number of backend pods | `2` |
 | `ingress.enabled` | Enable external access | `true` |
 | `ingress.host` | Hostname for the app | `sms-checker.local` |
-| `secret.smtpUser` | SMTP Username for alerts | `placeholder` |
 
 For example:
 ```bash
@@ -182,6 +181,27 @@ Now you can access the Kubernetes Dashboard at [https://dashboard.local](https:/
 ## Monitoring - Prometheus, Grafana and Alerting
 The monitoring stack is installed automatically.
 
+
+## Deploy secrets
+The application uses the following secrets for SMTP and admin credentials for the monitoring stack. You can create them before installing the chart, or deploy them later and run `helm upgrade` to apply the changes.
+```bash
+kubectl create secret generic smtp-credentials \
+  --from-literal=SMTP_USER="user" \
+  --from-literal=SMTP_PASS="password"
+
+kubectl create secret generic alertmanager-smtp-secret \
+  --from-literal=SMTP_USER="doda.team9@gmail.com" \
+  --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
+
+kubectl create secret generic grafana-admin-secret \
+  --from-literal=admin-user="user" \
+  --from-literal=admin-password="password"
+```
+If you deploy secrets after the Helm chart is already installed, apply them with:
+```bash
+helm upgrade sms-checker ./helm-chart
+```
+
 ## Prometheus
 - Command: `kubectl port-forward svc/prometheus-prometheus 9090:9090`
 - Access: [http://localhost:9090/prometheus](http://localhost:9090)
@@ -199,7 +219,7 @@ We collect the following metrics from the app:
 ## Grafana
 - Command: `kubectl port-forward svc/sms-checker-grafana 3000:80`
 - Access: [http://localhost:3000](http://localhost:3000)
-- Credentials: User: `admin` | Pass: `admin123`
+- Credentials: User: `user` | Pass: `password`
 
 Dashboards:
 1. Login to Grafana.
@@ -223,14 +243,18 @@ Dashboards:
 ## AlertManager
 We use AlertManager to send emails if traffic exceeds 15 requests/minute for 2 minutes.
 
-1. Configure Credentials
-   Update your deployment with the SMTP credentials.
+1. Deploy Secrets according to instructions above
+2. Update your deployment with the recipient email.
 ```bash
 helm upgrade sms-checker ./helm-chart \
---set alertmanager.smtp.password="gmmu jedd hfrl ftyh" \
---set alertmanager.recipient="your-email@example.com"
+    --set alertmanager.recipient="your-email@example.com"
 ```
-2. Trigger an Alert (Test)
+3. Forward port:
+```bash
+kubectl port-forward svc/prometheus-alertmanager 9093:9093
+```
+4. Access: [http://localhost:9093](http://localhost:9093)
+5. Trigger an Alert (Test)
    Run this loop to generate artificial traffic spikes:
 ```bash
 for i in {1..100}; do

@@ -455,4 +455,10 @@ A2 & A3: Tested the deployment of A3 in our provisioned K8s clister with Zosia.
 Reviewed:
 - [Update diagram #65](https://github.com/doda25-team9/operation/pull/65)
 - [README fill in the missing instructions for A3 deployment on A2 #60](https://github.com/doda25-team9/operation/pull/60)
-- [Remove secrets from deployment files #59](https://github.com/doda25-team9/operation/pull/59) 
+- [Remove secrets from deployment files #59](https://github.com/doda25-team9/operation/pull/59)
+
+## Week Q2.10 (January 26+) Wrapping up
+
+### **Johan**
+Expose the /metric endpoint for grading
+- [Expose /metric endpoint #67](https://github.com/doda25-team9/operation/pull/67/)

@@ -5,8 +5,6 @@ This guide covers the deployment of the full application stack (App, Model, Moni
 ## Prerequisites
 You can either run this using Minikube or on the custom cluster deployed in previous assignment.
 
-The assignments ask for pre-deployed secrets, when using the monitoring stack it is important to set these. See the section under monitoring for more information. Here it is also outlined how to set an SMTP secret for the model service.
-
 ---
 
 ## Deployment Step 1: Option A: Production Cluster (Vagrant VMs)
@@ -91,7 +89,25 @@ minikube ssh "ls -la /mnt/shared"
 
 ---
 
-## Deployment Step 2: Helm
+## Deployment Step 2: Deploy secrets
+The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alermanager. You have to create them before installing the chart.
+```bash
+kubectl create secret generic smtp-credentials \
+  --from-literal=SMTP_USER="user" \
+  --from-literal=SMTP_PASS="password"
+
+kubectl create secret generic alertmanager-smtp-secret \
+  --from-literal=SMTP_USER="doda.team9@gmail.com" \
+  --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
+
+kubectl create secret generic grafana-admin-secret \
+  --from-literal=admin-user="user" \
+  --from-literal=admin-password="password"
+```
+
+---
+
+## Deployment Step 3: Helm
 We use a single Helm chart to deploy the Application, Model Service, Prometheus, Grafana, and AlertManager.
 
 ### 1. Quick Install
@@ -182,27 +198,6 @@ Now you can access the Kubernetes Dashboard at [https://dashboard.local](https:/
 
 ## Monitoring - Prometheus, Grafana and Alerting
 The monitoring stack is installed automatically.
-
-
-## Deploy secrets
-The application uses the following secrets for SMTP and admin credentials for the monitoring stack. You can create them before installing the chart, or deploy them later and run `helm upgrade` to apply the changes.
-```bash
-kubectl create secret generic smtp-credentials \
-  --from-literal=SMTP_USER="user" \
-  --from-literal=SMTP_PASS="password"
-
-kubectl create secret generic alertmanager-smtp-secret \
-  --from-literal=SMTP_USER="doda.team9@gmail.com" \
-  --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
-
-kubectl create secret generic grafana-admin-secret \
-  --from-literal=admin-user="user" \
-  --from-literal=admin-password="password"
-```
-If you deploy secrets after the Helm chart is already installed, apply them with:
-```bash
-helm upgrade sms-checker ./helm-chart
-```
 
 ## Prometheus
 - Command: `kubectl port-forward svc/prometheus-prometheus 9090:9090`

@@ -117,7 +117,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
     ```
 3. **Deploy secrets**
-    The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alermanager. You have to create them before installing the chart.
+    The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alertmanager. You have to create them before installing the chart.
     ```bash
     kubectl create secret generic smtp-credentials \
       --from-literal=SMTP_USER="user" \

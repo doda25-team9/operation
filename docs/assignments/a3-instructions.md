@@ -128,18 +128,28 @@ kubectl get pods
 ### Sms Checker App
 To access the application via the hostname `sms-checker.local`, we need to map the hostname to cluster's Ingress IP.
 
-**For Vagrant Cluster:** Map the hostname to the Ingress Controller's fixed IP (`192.168.56.95`).
+**For Vagrant Cluster:** Map the hostnames to the Ingress Controller's fixed IP (`192.168.56.95`).
 ```bash
 echo "192.168.56.95 sms-checker.local" | sudo tee -a /etc/hosts
+echo "192.168.56.95 stable.sms-checker.local" | sudo tee -a /etc/hosts
+echo "192.168.56.95 canary.sms-checker.local" | sudo tee -a /etc/hosts
 ``` 
 Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your browser.
 
-**For Minikube:** Map the hostname to `127.0.0.1` and use port-forwarding.
+Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local/sms/](http://stable.sms-checker.local/sms/), or the canary version [http://canary.sms-checker.local/sms/](http://canary.sms-checker.local/sms/).
+
+**For Minikube:** Map the hostnames to `127.0.0.1` and use port-forwarding.
 ```bash
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 stable.sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 canary.sms-checker.local" | sudo tee -a /etc/hosts
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 ```
 Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
+
+Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local:8080/sms/](http://stable.sms-checker.local:8080/sms/), or the canary version [http://canary.sms-checker.local:8080/sms/](http://canary.sms-checker.local:8080/sms/).
+
+Instructions for using custom hostnames can be found in the [A4 instructions file](a4-instructions.md).
 
 ### Optional - Kubernetes Dashboard (Only Vagrant Cluster)
 To access the Kubernetes Dashboard, first retrieve the access token:

@@ -9,11 +9,9 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-  - "{{ .Values.istio.host }}"
-  
+  - "*"
   gateways:
   - {{ .Values.istio.gateway.name }}
-  
   http:
   - match:
     - uri:
@@ -29,41 +27,56 @@ spec:
   {{- if .Values.istio.stickySession.enabled }}
 
   - match:
-    - uri:
-        prefix: /sms/
-      headers:
-        cookie:
-          regex: ".*{{ .Values.istio.stickySession.cookieName }}=v1.*"
+    - authority:
+        regex: '^{{ .Values.istio.stableHost }}(:[0-9]+)?$'
+      uri:
+        prefix: /sms
     route:
     - destination:
         host: {{ .Values.app.service.name }}
-        port:
-          number: {{ .Values.app.service.port }}
         subset: v1
       headers:
         response:
           add:
             x-app-version: "v1"
     timeout: 30s
-  
+
   - match:
-    - uri:
-        prefix: /sms/
-      headers:
-        cookie:
-          regex: ".*{{ .Values.istio.stickySession.cookieName }}=v2.*"
+    - authority:
+        regex: '^{{ .Values.istio.canaryHost }}(:[0-9]+)?$'
+      uri:
+        prefix: /sms
     route:
     - destination:
         host: {{ .Values.app.service.name }}
-        port:
-          number: {{ .Values.app.service.port }}
         subset: v2
       headers:
         response:
           add:
             x-app-version: "v2"
     timeout: 30s
-  {{- end }}  
+
+  {{- if .Values.istio.stickySession.enabled }}
+  # Sticky Rule: If the cookie exists, route to the Service Root.
+  - match:
+    - uri:
+        prefix: /sms/
+      headers:
+        cookie:
+          regex: "^(.*?; )?{{ .Values.istio.stickySession.cookieName }}=.*"
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        port:
+          number: {{ .Values.app.service.port }}
+      headers:
+        response:
+          add:
+            x-app-session: "sticky-active"
+    timeout: 30s
+  {{- end }}
+  
+  # If no cookie, apply the 90/10 Weighted Split
   - match:
     - uri:
         prefix: /sms/

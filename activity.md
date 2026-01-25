@@ -439,3 +439,20 @@ Reviewed:
 - [Enable executable access to istio in vagrant #55](https://github.com/doda25-team9/operation/pull/55)
 - [Finish continuous experimentation #43](https://github.com/doda25-team9/operation/pull/43)
 
+### **Konstantina**
+A1: Implemented multi-stages in model-service Dockerfile, and followed a not-hardcoded model in model-service.\
+A3: Implemented the Volume Mounts requirement.\
+A3 & A4: Documentation of deployment steps / troubleshooting.\
+A2 & A3: Tested the deployment of A3 in our provisioned K8s clister with Zosia.
+
+- [A3; Complete the volume mount VMs task #61](https://github.com/doda25-team9/operation/pull/61)
+- [A1; F5 & F10; Multi-stages & model is not hardcoded #11](https://github.com/doda25-team9/model-service/pull/11)
+- [A1; F5 & F10; Model version as env var, so it is not hard-coded in model-service #49](https://github.com/doda25-team9/operation/pull/49)
+- [Fix: Removed v from version](https://github.com/doda25-team9/operation/pull/50)
+- [Add technical details in deployment.md #63](https://github.com/doda25-team9/operation/pull/63)
+    - Worked together with Zosia in this one, to document the instructions for Assignment 3 & 4.
+
+Reviewed:
+- [Update diagram #65](https://github.com/doda25-team9/operation/pull/65)
+- [README fill in the missing instructions for A3 deployment on A2 #60](https://github.com/doda25-team9/operation/pull/60)
+- [Remove secrets from deployment files #59](https://github.com/doda25-team9/operation/pull/59) 

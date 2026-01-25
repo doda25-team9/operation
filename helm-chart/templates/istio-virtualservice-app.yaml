@@ -9,12 +9,41 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-  - "{{ .Values.istio.host }}"
-  
+  - "*"
   gateways:
   - {{ .Values.istio.gateway.name }}
   
   http:
+  - match:
+    - authority:
+        regex: '^{{ .Values.istio.stableHost }}(:[0-9]+)?$'
+      uri:
+        prefix: /sms
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        subset: v1
+      headers:
+        response:
+          add:
+            x-app-version: "v1"
+    timeout: 30s
+
+  - match:
+    - authority:
+        regex: '^{{ .Values.istio.canaryHost }}(:[0-9]+)?$'
+      uri:
+        prefix: /sms
+    route:
+    - destination:
+        host: {{ .Values.app.service.name }}
+        subset: v2
+      headers:
+        response:
+          add:
+            x-app-version: "v2"
+    timeout: 30s
+
   {{- if .Values.istio.stickySession.enabled }}
 
   - match:

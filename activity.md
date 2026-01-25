@@ -427,4 +427,15 @@ Updated kubernetes instructions and mount path to enable shared folder with mini
 Reviewed:
 - [A3; Complete the volume mount VMs task #61](https://github.com/doda25-team9/operation/pull/61)
 
+### **Antonio**
+Added Grafana charts for missing metrics, fixed sticky sessions and made sure the model is loaded only once in the serve_model.py file.
+- [Added charts for missing metrics in Grafana dashboard #53](https://github.com/doda25-team9/operation/pull/53)
+- [Fix - Sticky Sessions #64](https://github.com/doda25-team9/operation/pull/64)
+- [Fix model loading efficiency and add default port handling #13](https://github.com/doda25-team9/model-service/pull/13)
+- [F8 - added snapshot versioning in workflow #17 -- CLOSED, MOVED TO PR #18](https://github.com/doda25-team9/app/pull/17)
+
+Reviewed:
+- [Fix; trigger release workflow on push to main and fix snapshot versioning #18](https://github.com/doda25-team9/app/pull/18)
+- [Enable executable access to istio in vagrant #55](https://github.com/doda25-team9/operation/pull/55)
+- [Finish continuous experimentation #43](https://github.com/doda25-team9/operation/pull/43)
 

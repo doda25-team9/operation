@@ -28,7 +28,17 @@ Best for quick testing on your personal machine.
 
 ## Deployment Step 1: Option B: Production Cluster (Vagrant VMs)
 
-TODO: Once we test compatibility of A3 and A2 we need to fill this section with instructions to deploy on the Vagrant cluster.
+Provision a cluster using Vagrant and Ansible as described in [Assignment 2 Instructions](./a2-instructions.md).
+```bash
+vagrant up 
+ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml
+```
+Now you need to configure your `kubectl` to connect to the cluster. You can do this by setting the `KUBECONFIG` environment variable to point to the `kubeconfig` file in the repository:
+```bash
+# Make sure you are in the root of the 'operation' directory
+export KUBECONFIG=$(pwd)/kubeconfig
+```
+
 
 ## Deployment Step 1: Option C: Virtualbox shared folder
 
@@ -113,14 +123,45 @@ kubectl get pods
 # Expected: App, Model, Prometheus, Grafana, AlertManager pods all 'Running'
 ```
 
----
+## 4. Access Application
 
-## Accessing the Application & Monitoring
-You need to port-forward ingress controller to access the app and monitoring tools.
+### Sms Checker App
+To access the application via the hostname `sms-checker.local`, we need to map the hostname to cluster's Ingress IP.
+
+**For Vagrant Cluster:** Map the hostnames to the Ingress Controller's fixed IP (`192.168.56.95`).
 ```bash
+echo "192.168.56.95 sms-checker.local" | sudo tee -a /etc/hosts
+echo "192.168.56.95 stable.sms-checker.local" | sudo tee -a /etc/hosts
+echo "192.168.56.95 canary.sms-checker.local" | sudo tee -a /etc/hosts
+``` 
+Open [http://sms-checker.local/sms/](http://sms-checker.local/sms/) in your browser.
+
+Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local/sms/](http://stable.sms-checker.local/sms/), or the canary version [http://canary.sms-checker.local/sms/](http://canary.sms-checker.local/sms/).
+
+**For Minikube:** Map the hostnames to `127.0.0.1` and use port-forwarding.
+```bash
+echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 stable.sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 canary.sms-checker.local" | sudo tee -a /etc/hosts
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 ```
-**Keep this terminal open!!!**
+Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
+
+Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local:8080/sms/](http://stable.sms-checker.local:8080/sms/), or the canary version [http://canary.sms-checker.local:8080/sms/](http://canary.sms-checker.local:8080/sms/).
+
+Instructions for using custom hostnames can be found in the [A4 instructions file](a4-instructions.md).
+
+### Optional - Kubernetes Dashboard (Only Vagrant Cluster)
+To access the Kubernetes Dashboard, first retrieve the access token:
+```bash
+vagrant ssh ctrl
+kubectl -n kubernetes-dashboard create token admin-user
+exit
+```
+```bash
+echo "192.168.56.99 dashboard.local" | sudo tee -a /etc/hosts
+```
+Now you can access the Kubernetes Dashboard at [https://dashboard.local](https://dashboard.local). 
 
 --- 
 
@@ -178,15 +219,15 @@ helm upgrade sms-checker ./helm-chart \
 2. Trigger an Alert (Test)
    Run this loop to generate artificial traffic spikes:
 ```bash
-# Send 500 requests (approx 2 req/sec)
-for i in {1..500}; do
-curl -X POST http://localhost:8080/sms/ \
--H "Host: sms-checker.local" \
--H "Content-Type: application/json" \
--d '{"sms":"Alert test"}'
-sleep 0.5
+for i in {1..100}; do
+  curl -X POST http://sms-checker.local/sms/ \
+    -H "Host: sms-checker.local" \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Alert test"}'
+  echo "Request $i sent"
+  sleep 0.2
 done
 ```
 3. Verify
-- Prometheus:Check Alerts tab > HighRequestRate should turn Pending to Firing.
+- Prometheus: Check Alerts tab > HighRequestRate should turn Pending to Firing (in appx. 1 minute).
 - Email: Check the inbox of the recipient address configured above.

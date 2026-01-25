@@ -562,19 +562,19 @@ minikube start --driver=virtualbox
 Same port every time (8080), works on any Kubernetes cluster.
 
 **Step 1: Add hostname to /etc/hosts (one-time setup)**
-Find the IP address of the minikube service:
-```bash
-minikube ip
-```
-Then run the following command substituting 127.0.0.1 with the result from the previous step.
+Run the following command:
 ```bash
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 stable.sms-checker.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 canary.sms-checker.local" | sudo tee -a /etc/hosts
 ```
 
 Verify it was added:
 ```bash
 cat /etc/hosts | grep sms-checker
 # Should show: 127.0.0.1 sms-checker.local
+# Should show: 127.0.0.1 stable.sms-checker.local
+# Should show: 127.0.0.1 canary.sms-checker.local
 ```
 
 **Step 2: Port-forward to Ingress Controller**
@@ -599,6 +599,8 @@ Or with curl:
 ```bash
 curl http://sms-checker.local:8080/sms/
 ```
+
+To reach the versions separately, visit `http://stable.sms-checker.local:8080/sms/` and `http://canary.sms-checker.local:8080/sms/`.
 
 **How It Works**
 
@@ -1689,4 +1691,16 @@ kubectl port-forward $(kubectl get pods | grep model-deployment-v3 | awk '{print
 
 # Check v3 metrics (should match total traffic)
 curl http://localhost:8082/metrics | grep model_predictions_total
+```
+
+## Accesing the application on separate URLs (Continuous Experimentation)
+
+If you want to access the stable (v1) and canary (v2) versions on custom URLs, change the following values in `/helm-chart/values.yaml`:
+```yaml
+  stableHost: stable.sms-checker.local
+  canaryHost: canary.sms-checker.local
+```
+Then make sure to add both of them to `/etc/hosts` like:
+```bash
+echo "127.0.0.1 <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
 ```

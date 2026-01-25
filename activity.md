@@ -407,4 +407,24 @@ Reviewed:
 - [ A1; F5 & F10; Multi-stages & model is not hardcoded #11 ](https://github.com/doda25-team9/model-service/pull/11)
 - [ Update Kubernetes instructions and mount path #57 ](https://github.com/doda25-team9/operation/pull/57)
 
+### **Zosia**
+Created documentation for each of the assignments, as well as a README quick start guide. Fixed data shown in Grafana dashboards. Added details in the deployment.md.
+- [1st Draft of README #56](https://github.com/doda25-team9/operation/pull/56)
+- [README fill in the missing instructions for A3 deployment on A2 #60](https://github.com/doda25-team9/operation/pull/60)
+- [Add technical details in deployment.md #63](https://github.com/doda25-team9/operation/pull/63)
+- [Filter by app version to differentiate dashboards #52](https://github.com/doda25-team9/operation/pull/52)
+
+Reviewed:
+- [Update Kubernetes instructions and mount path #57](https://github.com/doda25-team9/operation/pull/57)
+- [Added charts for missing metrics in Grafana dashboard #53](https://github.com/doda25-team9/operation/pull/53)
+- [ixing histogram dashboards in Grafana #46](https://github.com/doda25-team9/operation/pull/46)
+
+### **Johan**
+Updated kubernetes instructions and mount path to enable shared folder with minikube. I also updated a diagram
+- [Update Kubernetes instructions and mount path #58](https://github.com/doda25-team9/operation/pull/58)
+- [Update diagram #65](https://github.com/doda25-team9/operation/pull/65)
+
+Reviewed:
+- [A3; Complete the volume mount VMs task #61](https://github.com/doda25-team9/operation/pull/61)
+
 

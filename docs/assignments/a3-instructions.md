@@ -5,6 +5,7 @@ This guide covers the deployment of the full application stack (App, Model, Moni
 ## Prerequisites
 You can either run this using Minikube or on the custom cluster deployed in previous assignment.
 
+The assignments ask for pre-deployed secrets, when using the monitoring stack it is important to set these. See the section under monitoring for more information. Here it is also outlined how to set an SMTP secret for the model service.
 ---
 
 ## Deployment Step 1: Option A: Production Cluster (Vagrant VMs)

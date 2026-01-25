@@ -90,7 +90,7 @@ minikube ssh "ls -la /mnt/shared"
 ---
 
 ## Deployment Step 2: Deploy secrets
-The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alermanager. You have to create them before installing the chart.
+The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alertmanager. You have to create them before installing the chart.
 ```bash
 kubectl create secret generic smtp-credentials \
   --from-literal=SMTP_USER="user" \

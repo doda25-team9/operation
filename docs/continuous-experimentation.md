@@ -6,7 +6,7 @@ We want to evaluate and compare a different model for spam prediction. According
  
 However, changing the model will change the predictions. For example, some messages classified as spam can now be classified as ham and the other way around. Additionally, we aim to mimic a real-life setting where we would not have information about the true labels of messages sent by users. Thus, we can not use an accuracy-based metrics, such as accuracy or F1-score. Since we want the transition between the different versions to be smooth for the users, we will evaluate the differences in positive prediction rates. The reason for this being that we are trying to avoid models with with vastly different spam prediction rates. For example, a user that initially observes 20% of messages flagged as spam, might be dissatisfied if suddenly our app flags 40% of messages. We want to ensure stability for our users, hence we propose the following hypothesis:
 
-$H0$: Any observed difference in spam prediction rates between the two model versions are not statistically significant.
+$H0$: Any observed difference in spam prediction rates between the two model versions is not statistically significant.
 
 ## Experiment Design
 

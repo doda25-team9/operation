@@ -116,7 +116,20 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     # 2. Finalize setup (Installs MetalLB, Ingress, Dashboard, Istio)
     ansible-playbook -u vagrant -i 192.168.56.100, ./playbooks/finalization.yml --private-key .vagrant/machines/ctrl/virtualbox/private_key
     ```
-2.  **Deploy Application:**
+3. **Deploy secrets**
+    The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alermanager. You have to create them before installing the chart.
+    ```bash
+    kubectl create secret generic smtp-credentials \
+      --from-literal=SMTP_USER="user" \
+      --from-literal=SMTP_PASS="password"
+    kubectl create secret generic alertmanager-smtp-secret \
+      --from-literal=SMTP_USER="doda.team9@gmail.com" \
+      --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
+    kubectl create secret generic grafana-admin-secret \
+      --from-literal=admin-user="user" \
+      --from-literal=admin-password="password"
+    ```
+3.  **Deploy Application:**
     ```bash
     export KUBECONFIG=$(pwd)/kubeconfig
     helm install sms-checker ./helm-chart --dependency-update

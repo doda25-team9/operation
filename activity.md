@@ -346,6 +346,12 @@ Fixed a bug that was causing errors for Ubuntu users when running vagrant up.
 Reviewed:
 - [ Update minikube driver from docker to virtualbox #34 ](https://github.com/doda25-team9/operation/pull/34)
 
+### **Medon**
+Implemented workflow fixes
+- [Fixes: add automated release and pre-release workflows ](https://github.com/doda25-team9/lib-version/pull/5)
+- (PR date is later than this week however the commits are for the activity of week 7)
+
+
 
 ## Week Q2.8 (January 12+) Working on Fixes/Additions for Previous Assignments
 ### **Zosia**
@@ -391,6 +397,11 @@ Worked on finishing cont experimentation. The setup for which also included crea
 
 Reviewed:
 - [ Implementation of MetalLB #36 ](https://github.com/doda25-team9/operation/pull/36)
+
+### **Medon**
+Adjsuted trigger of the workflows based on assignmet requirement
+- [Release workflow triggered on push to main](https://github.com/doda25-team9/lib-version/pull/6
+)
 
 
 ## Week Q2.9 (January 19+) Working on Fixes/Additions for Previous Assignments
@@ -457,8 +468,19 @@ Reviewed:
 - [README fill in the missing instructions for A3 deployment on A2 #60](https://github.com/doda25-team9/operation/pull/60)
 - [Remove secrets from deployment files #59](https://github.com/doda25-team9/operation/pull/59)
 
+
+### **Medon**
+Fixed workflow triggers adn versioning
+- [Fix; trigger release workflow on push to main and fix snapshot versioning](https://github.com/doda25-team9/app/pull/18)
+- [Fix F9 (Automated Model Training/Release) trigger and versioning](https://github.com/doda25-team9/model-service/pull/15)
+
+
 ## Week Q2.10 (January 26+) Wrapping up
 
 ### **Johan**
 Expose the /metric endpoint for grading
 - [Expose /metric endpoint #67](https://github.com/doda25-team9/operation/pull/67/)
+
+
+### **Medon**
+..

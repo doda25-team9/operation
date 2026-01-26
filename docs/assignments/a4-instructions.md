@@ -5,6 +5,42 @@ You can read about the deployment process in the [Deployment File](../deployment
 If you already followed the setup instructions with Helm from [Assignment 3](./a3-instructions.md), you can directly proceed to the configuration options for Istio below.
 
 ## Configuration Options
+
+### Accesing the application versions on custom hostnames
+
+If you want to access the stable (v1) and canary (v2) versions on custom hostnames, change the following values in `/helm-chart/values.yaml`:
+```yaml
+  stableHost: stable.sms-checker.local
+  canaryHost: canary.sms-checker.local
+```
+
+Then make sure to add both of them to `/etc/hosts` as follows.
+**For Vagrant Cluster:** 
+```bash
+echo "192.168.56.95 <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
+echo "192.168.56.95 <YOUR HOSTNAME HERE" | sudo tee -a /etc/hosts
+```
+ 
+**For Minikube:** 
+```bash
+echo "127.0.0.1 <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
+echo "127.0.0.1 <YOUR HOSTNAME HERE" | sudo tee -a /etc/hosts
+```
+
+Then run:
+```bash
+helm upgrade sms-checker ./helm-chart
+```
+
+Alternatively, if you already installed the helm chart, you can set the hostnames like:
+```bash
+helm upgrade sms-checker ./helm-chart \
+  --set istio.canary=<YOUR HOSTNAME HERE>
+
+# Update /etc/hosts according to the IP you use to connect
+echo "<192.168.56.95 OR 127.0.0.1> <YOUR HOSTNAME HERE>" | sudo tee -a /etc/hosts
+```
+
 ### Adjust Traffic Split
 ```bash
 # 95/5 split (more conservative)
@@ -13,14 +49,6 @@ helm upgrade sms-checker ./helm-chart \
   --set istio.trafficSplit.canary=5
 ```
 
-### Change Hostname
-```bash
-helm upgrade sms-checker ./helm-chart \
-  --set istio.host=custom.grader.local
-
-# Update /etc/hosts if testing locally
-echo "127.0.0.1 custom.grader.local" | sudo tee -a /etc/hosts
-```
 ### Disable Canary
 ```bash
 helm upgrade sms-checker ./helm-chart \

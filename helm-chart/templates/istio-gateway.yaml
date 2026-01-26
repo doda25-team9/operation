@@ -18,5 +18,7 @@ spec:
       protocol: HTTP
     hosts:
     - "{{ .Values.istio.host }}"
-    - "*.{{ .Values.istio.host }}"  
+    - "*.{{ .Values.istio.host }}"
+    - "{{ .Values.istio.stableHost }}"
+    - "{{ .Values.istio.canaryHost }}"
 {{- end }}

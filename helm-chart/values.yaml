@@ -113,20 +113,20 @@ versions:
   v1:
     enabled: true
     replicas: 1
-    appImageTag: "0.0.8-SNAPSHOT"
-    modelImageTag: "0.2.0"
+    appImageTag: "0.0.9-SNAPSHOT"
+    modelImageTag: "0.5.0"
     modelVersion: "v0.1.0"
   
   v2:
     enabled: true
     replicas: 1
-    appImageTag: "0.0.9-SNAPSHOT"
-    modelImageTag: "0.3.0-SNAPSHOT"
+    appImageTag: "0.0.10"
+    modelImageTag: "0.5.3"
     modelVersion: "v0.2.0"
 
 shadowLaunch:
   enabled: true
   replicas: 1
-  modelImageTag: latest
-  modelVersion: "v0.1.0"
+  modelImageTag: "0.5.3"
+  modelVersion: "v0.2.0"
   mirrorPercentage: 100.0

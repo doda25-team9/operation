@@ -67,12 +67,13 @@ Figure 3: Diagram detailing the request flow for monitoring
 
 The following configuration is required to access the deployment:
 
-* **Hosts**: `sms-checker.local`
+* **Hosts**:
+  * `sms-checker.local` (Main strategy with traffic splitting)
+  * `stable.sms-checker.local` (Direct access to v1)
+  * `canary.sms-checker.local` (Direct access to v2)
 * **Ports**: Port 80
 * **Paths**: The application is served at:
-    * `/` Hello World - Starting page
-    * `/sms` Page allowing to enter sms messages
-    * `/metrics` Page responsible for exporting metrics in Prometheus format
+  * `/sms` Page allowing to enter sms messages
 
 ## Configuration
 We use Kubernetes resources to configure the deployment:

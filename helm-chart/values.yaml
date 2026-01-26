@@ -127,6 +127,6 @@ versions:
 shadowLaunch:
   enabled: true
   replicas: 1
-  modelImageTag: latest
-  modelVersion: "v0.1.0"
+  modelImageTag: "0.5.3"
+  modelVersion: "v0.2.0"
   mirrorPercentage: 100.0

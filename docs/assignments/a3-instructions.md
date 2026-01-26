@@ -215,13 +215,16 @@ The monitoring stack is installed automatically.
 
 We collect the following metrics from the app:
 
-| Metric Name | Type | Description |
-| :--- | :--- | :--- |
-| `sms_requests_total` | **Counter** | Total SMS prediction requests. |
-| `predictions_result_total`| **Counter** | Breakdown by result (`spam`/`ham`). |
-| `active_users` | **Gauge** | Currently active users. |
-| `request_duration` | **Histogram** | Processing time distribution. |
-| `sms_length` | **Histogram** | Character length distribution. |
+| Metric Name                  | Type          | Description                                                     |
+|:-----------------------------|:--------------|:----------------------------------------------------------------|
+| `sms_requests_total`         | **Counter**   | Total number of SMS prediction requests received.               |
+| `predictions_result_total`   | **Counter**   | Total predictions labeled by result (`spam` vs `ham`).          |
+| `in_flight_requests`         | **Gauge**     | How many requests are currently being processed.                |
+| `request_duration`           | **Histogram** | Distribution of request processing time (seconds).              |
+| `sms_length`                 | **Histogram** | Distribution of the character length of submitted SMS messages. |
+| `last_request_duration_ms`   | **Gauge**     | Duration of the last processed request (milliseconds).          |
+| `last_sms_length_characters` | **Gauge**     | Character length of the last submitted SMS message.             |
+
 
 ## Grafana
 - Command: `kubectl port-forward svc/sms-checker-grafana 3000:80`

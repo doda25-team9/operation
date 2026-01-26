@@ -234,13 +234,15 @@ helm install sms-checker ./helm-chart \
 
 We collect the following custom metrics:
 
-| Metric Name | Type | Description |
-| :--- | :--- | :--- |
-| `sms_requests_total` | **Counter** | Total number of SMS prediction requests received. |
-| `predictions_result_total` | **Counter** | Total predictions labeled by result (`spam` vs `ham`). |
-| `active_users` | **Gauge** | Number of currently active users on the platform. |
-| `request_duration` | **Histogram** | Distribution of request processing time (seconds). |
-| `sms_length` | **Histogram** | Distribution of the character length of submitted SMS messages. |
+| Metric Name                  | Type          | Description                                                     |
+|:-----------------------------|:--------------|:----------------------------------------------------------------|
+| `sms_requests_total`         | **Counter**   | Total number of SMS prediction requests received.               |
+| `predictions_result_total`   | **Counter**   | Total predictions labeled by result (`spam` vs `ham`).          |
+| `in_flight_requests`         | **Gauge**     | How many requests are currently being processed.                |
+| `request_duration`           | **Histogram** | Distribution of request processing time (seconds).              |
+| `sms_length`                 | **Histogram** | Distribution of the character length of submitted SMS messages. |
+| `last_request_duration_ms`   | **Gauge**     | Duration of the last processed request (milliseconds).          |
+| `last_sms_length_characters` | **Gauge**     | Character length of the last submitted SMS message.             |
 
 More on monitoring, dashboards, and alerting can be found in [Assignment 3 Documentation](./docs/assignments/a3-instructions.md).
 

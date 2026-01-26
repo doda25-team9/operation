@@ -222,16 +222,6 @@ sudo modprobe -r kvm
 More on deploying your own cluster can be found in [Assignment 2 Documentation](./docs/assignments/a2-instructions.md) and [Assignment 3 Documentation](./docs/assignments/a3-instructions.md).
 
 ---
-## Secrets
-1. Secret to setup alerting via mails
-```bash
-helm install sms-checker ./helm-chart \
-   --set secret.smtpUser=real@email.com \
-   --set secret.smtpPass=realpassword
-```
-2. NEED HELP HERE
-
----
 ## Monitoring & Metrics
 
 We collect the following custom metrics:

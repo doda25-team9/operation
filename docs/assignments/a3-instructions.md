@@ -186,9 +186,9 @@ Alternatively, you can connect directly to the stable version [http://stable.sms
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
 echo "127.0.0.1 stable.sms-checker.local" | sudo tee -a /etc/hosts
 echo "127.0.0.1 canary.sms-checker.local" | sudo tee -a /etc/hosts
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
-Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
+Open [http://sms-checker.local:8080/sms/](http://sms-checker.local:8080/sms/) in your browser.
 
 Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local:8080/sms/](http://stable.sms-checker.local:8080/sms/), or the canary version [http://canary.sms-checker.local:8080/sms/](http://canary.sms-checker.local:8080/sms/).
 
@@ -269,8 +269,19 @@ kubectl port-forward svc/prometheus-alertmanager 9093:9093
 5. Trigger an Alert (Test)
    Run this loop to generate artificial traffic spikes:
 ```bash
+# For Vagrant Cluster
 for i in {1..100}; do
   curl -X POST http://sms-checker.local/sms/ \
+    -H "Host: sms-checker.local" \
+    -H "Content-Type: application/json" \
+    -d '{"sms":"Alert test"}'
+  echo "Request $i sent"
+  sleep 0.2
+done
+
+# For Minikube
+for i in {1..100}; do
+  curl -X POST http://sms-checker.local:8080/sms/  \
     -H "Host: sms-checker.local" \
     -H "Content-Type: application/json" \
     -d '{"sms":"Alert test"}'

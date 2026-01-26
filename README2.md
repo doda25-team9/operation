@@ -87,6 +87,8 @@ Best for quick testing on your personal machine.
     --driver=docker \
     --memory=4096 \
     --cpus=3
+    
+    minikube addons enable ingress
     ```
     Note: You can adjust memory and CPU based on your system capabilities. This is the minimum recommended for smooth operation.
     Note: For this driver to work, ensure Docker Desktop is running on your host machine.
@@ -150,7 +152,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     helm install sms-checker ./helm-chart --dependency-update
     ```
     
-> **_Important! For Option A: Production Cluster (Vagrant VMs)_**
+> **_Important! For Option B: Production Cluster (Vagrant VMs)_**
 > **_Resource-Optimized Sidecar Injection_**
 > 
 > _If you would like to know more about it, please check **a3-instructions.md**_

@@ -29,6 +29,8 @@ Best for quick testing on your personal machine.
     --driver=docker \
     --memory=4096 \
     --cpus=3
+    
+    minikube addons enable ingress
     ```
     Note: You can adjust memory and CPU based on your system capabilities. This is the minimum recommended for smooth operation.
     Note: For this driver to work, ensure Docker Desktop is running on your host machine.

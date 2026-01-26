@@ -79,7 +79,7 @@ Alternatively, if you have specified a different `APP_PORT` in your `.env`, repl
 ![Image MB reduction](../images/image_size_difference.png)
 
 ## Building Your Own Images
-As suggested during the labs, we removed Maven installation from the Dockerfile in model-service, thus if you want to build your own images locally, please follow these steps:
+As suggested during the labs, we removed Maven installation from the Dockerfile in app, thus if you want to build your own images locally, please follow these steps:
 
 ### Prerequisites & Setup
 

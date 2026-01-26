@@ -78,48 +78,7 @@ Alternatively, if you have specified a different `APP_PORT` in your `.env`, repl
 
 Choose one of the following deployment paths depending on your environment.
 
-### Option A: Minikube Cluster
-Best for quick testing on your personal machine.
-
-1.  **Start Minikube:**
-    ```bash
-    minikube start \
-    --driver=docker \
-    --memory=4096 \
-    --cpus=3
-    
-    minikube addons enable ingress
-    ```
-    Note: You can adjust memory and CPU based on your system capabilities. This is the minimum recommended for smooth operation.
-    Note: For this driver to work, ensure Docker Desktop is running on your host machine.
-
-2.  **Install Istio:**
-    ```bash
-    istioctl install --set profile=demo -y
-    kubectl label namespace default istio-injection=enabled
-    ```
-3. **Deploy secrets**
-    The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alertmanager. You have to create them before installing the chart.
-    ```bash
-    kubectl create secret generic smtp-credentials \
-      --from-literal=SMTP_USER="user" \
-      --from-literal=SMTP_PASS="password"
-    kubectl create secret generic alertmanager-smtp-secret \
-      --from-literal=SMTP_USER="doda.team9@gmail.com" \
-      --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
-    kubectl create secret generic grafana-admin-secret \
-      --from-literal=admin-user="user" \
-      --from-literal=admin-password="password"
-    ```
-4.  **Deploy Application:**
-    ```bash
-    cd helm-chart
-    helm dependency update
-    cd ..
-    helm install sms-checker ./helm-chart
-    ```
-
-### Option B: Production Cluster (Vagrant VMs)
+### Option A: Production Cluster (Vagrant VMs)
 Simulates a real-world bare-metal cluster with 3 VMs.
 
 1.  **Provision Infrastructure:**
@@ -152,7 +111,7 @@ Simulates a real-world bare-metal cluster with 3 VMs.
     helm install sms-checker ./helm-chart --dependency-update
     ```
     
-> **_Important! For Option B: Production Cluster (Vagrant VMs)_**
+> **_Important! For Option A: Production Cluster (Vagrant VMs)_**
 > **_Resource-Optimized Sidecar Injection_**
 > 
 > _If you would like to know more about it, please check **a3-instructions.md**_
@@ -173,6 +132,47 @@ Simulates a real-world bare-metal cluster with 3 VMs.
 > ```bash
 > kubectl scale deployment app-deployment-v1 app-deployment-v2 model-deployment-v1 model-deployment-v2 model-deployment-v3 --replicas=1
 > ```
+
+### Option B: Minikube Cluster
+Best for quick testing on your personal machine.
+
+1.  **Start Minikube:**
+    ```bash
+    minikube start \
+    --driver=docker \
+    --memory=4096 \
+    --cpus=3
+    
+    minikube addons enable ingress
+    ```
+    Note: You can adjust memory and CPU based on your system capabilities. This is the minimum recommended for smooth operation.
+    Note: For this driver to work, ensure Docker Desktop is running on your host machine.
+
+2.  **Install Istio:**
+    ```bash
+    istioctl install --set profile=demo -y
+    kubectl label namespace default istio-injection=enabled
+    ```
+3. **Deploy secrets**
+   The assignments ask for pre-deployed secrets. They are used in model-service, Grafana and Alertmanager. You have to create them before installing the chart.
+    ```bash
+    kubectl create secret generic smtp-credentials \
+      --from-literal=SMTP_USER="user" \
+      --from-literal=SMTP_PASS="password"
+    kubectl create secret generic alertmanager-smtp-secret \
+      --from-literal=SMTP_USER="doda.team9@gmail.com" \
+      --from-literal=SMTP_PASS="gmmu jedd hfrl ftyh"
+    kubectl create secret generic grafana-admin-secret \
+      --from-literal=admin-user="user" \
+      --from-literal=admin-password="password"
+    ```
+4.  **Deploy Application:**
+    ```bash
+    cd helm-chart
+    helm dependency update
+    cd ..
+    helm install sms-checker ./helm-chart
+    ```
 
 ---
 ## Dashboard & App Access Table

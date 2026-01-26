@@ -194,9 +194,9 @@ Alternatively, you can connect directly to the stable version [http://stable.sms
 echo "127.0.0.1 sms-checker.local" | sudo tee -a /etc/hosts
 echo "127.0.0.1 stable.sms-checker.local" | sudo tee -a /etc/hosts
 echo "127.0.0.1 canary.sms-checker.local" | sudo tee -a /etc/hosts
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
-Open [http://sms-checker.local:8080/sms](http://sms-checker.local:8080/sms) in your browser.
+Open [http://sms-checker.local:8080/sms/](http://sms-checker.local:8080/sms/) in your browser.
 
 Alternatively, you can connect directly to the stable version [http://stable.sms-checker.local:8080/sms/](http://stable.sms-checker.local:8080/sms/), or the canary version [http://canary.sms-checker.local:8080/sms/](http://canary.sms-checker.local:8080/sms/).
 

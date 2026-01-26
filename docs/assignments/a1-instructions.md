@@ -10,8 +10,9 @@ The Docker Compose setup is controlled by a `.env` file located in the root of t
 ```
 APP_PORT=8080
 MODEL_PORT=8081
-APP_IMAGE=ghcr.io/doda25-team9/app:latest
-MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
+APP_IMAGE=ghcr.io/doda25-team9/app:<IMAGE TAG>
+MODEL_IMAGE=ghcr.io/doda25-team9/model-service:<IMAGE TAG>
+MODEL_VERSION=v0.1.0
 ```
 
 ### Variable overview:
@@ -25,11 +26,14 @@ MODEL_IMAGE=ghcr.io/doda25-team9/model-service:latest
 
 - `APP_IMAGE`:
   Docker image for web application.
-  You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+  You can change this to a specific version tag.
 
 - `MODEL_IMAGE`:
   Docker image for the model-service.
-  You can change this to a specific version tag (e.g.: `:0.1.0`) instead of `:latest` if needed.
+  You can change this to a specific version tag.
+
+- `MODEL_VERSION`:
+  Model version that is used if the model cannot be found in the volume mount.
 
 You can adjust ports or change image versions by editing this file before running `docker compose up`.
 

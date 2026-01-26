@@ -296,14 +296,17 @@ Reviewed:
 - [ Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
 
 ### **Adomas**
-Continued the experiment setup by triggering the creation of the model-service v0.2.0 Docker image, and creating a pr for a new version of app:
-- [ Continuous experimentation: Display model name and app version #12 ](https://github.com/doda25-team9/app/pull/12)
-Worked on the experimentation document:
-- [ Continuous Experimentation: Add experiment design #32 ](https://github.com/doda25-team9/operation/pull/32)
+Created a new version of the app with improvements and a bug fix (the frontend used to mistakenly disregard some response information, now it can access response fields such as model name).
+- [Continuous experimentation: Display model name and app version #12](https://github.com/doda25-team9/app/pull/12)
+
+Created model-service v0.2.0 Docker image, needed for experimentation.
+
+Continued working on the experimentation, for example, decided on the statistical test, created the document, began local runs for preliminary results:
+- [Continuous Experimentation: Add experiment design #32](https://github.com/doda25-team9/operation/pull/32)
 
 Reviewed:
-- [ Extension proposal #27 ](https://github.com/doda25-team9/operation/pull/27)
-- [ Add diagrams to deployment document #29 ](https://github.com/doda25-team9/operation/pull/29)
+- [Extension proposal #27](https://github.com/doda25-team9/operation/pull/27)
+- [Add diagrams to deployment document #29](https://github.com/doda25-team9/operation/pull/29)
 
 
 ## Week Q2.7 (January 5+) Working on Fixes/Additions for Previous Assignments
@@ -481,6 +484,18 @@ Fixed workflow triggers adn versioning
 Expose the /metric endpoint for grading
 - [Expose /metric endpoint #67](https://github.com/doda25-team9/operation/pull/67/)
 
+## **Adomas**
+Bump and sync the image versions in docker compose and in the helm chart:
+- [ Bump up images #68 ](https://github.com/doda25-team9/operation/pull/68)
+
+Removed obsolete config:
+- [ Remove obsolete k8s config #66 ](https://github.com/doda25-team9/operation/pull/66)
+
+Tested and verified the project cluster deployments.
+
+Reviewed:
+- [Expose /metric endpoint #67](https://github.com/doda25-team9/operation/pull/67)
+- [ Add technical details in deployment.md #63 ](https://github.com/doda25-team9/operation/pull/63)
 
 ### **Medon**
 ..

@@ -498,4 +498,9 @@ Reviewed:
 - [ Add technical details in deployment.md #63 ](https://github.com/doda25-team9/operation/pull/63)
 
 ### **Medon**
-..
+Add test scripts for verifying Istio sticky session implementation with traffic distribution and session persistence validation.
+- [Added test sciripts for sticky sessions](https://github.com/doda25-team9/operation/pull/70)
+
+Reviwed:
+
+- [Expose /metric endpoint](https://github.com/doda25-team9/operation/pull/67)

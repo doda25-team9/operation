@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# NOTE: For Minikube users, change the URL to include port 8080:
+# URL="http://sms-checker.local:8080/sms/"
+
 URL="http://sms-checker.local/sms/"
 COOKIE_FILE="/tmp/session-$$.txt"
 

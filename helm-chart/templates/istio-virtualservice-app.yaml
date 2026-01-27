@@ -14,6 +14,23 @@ spec:
   - {{ .Values.istio.gateway.name }}
   http:
   - match:
+    - uri:
+        exact: /metrics
+    route:
+      - destination:
+          host: {{ .Values.app.service.name }}
+          port:
+            number: {{ .Values.app.service.port }}
+          subset: v1
+        weight: {{ .Values.istio.trafficSplit.stable }}
+      - destination:
+          host: {{ .Values.app.service.name }}
+          port:
+            number: {{ .Values.app.service.port }}
+          subset: v2
+        weight: {{ .Values.istio.trafficSplit.canary }}
+    timeout: 30s
+  - match:
     - authority:
         regex: '^{{ .Values.istio.stableHost }}(:[0-9]+)?$'
       uri:
@@ -27,7 +44,6 @@ spec:
           add:
             x-app-version: "v1"
     timeout: 30s
-
   - match:
     - authority:
         regex: '^{{ .Values.istio.canaryHost }}(:[0-9]+)?$'
@@ -42,7 +58,6 @@ spec:
           add:
             x-app-version: "v2"
     timeout: 30s
-
   {{- if .Values.istio.stickySession.enabled }}
   # Sticky Rule: If the cookie exists, route to the Service Root.
   - match:

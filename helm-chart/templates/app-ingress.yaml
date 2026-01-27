@@ -10,14 +10,19 @@ metadata:
     component: {{ .Values.app.labels.component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
   - host: {{ .Values.ingress.host }}
     http:
       paths:
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.app.service.name }}
+            port:
+              number: {{ .Values.app.service.port }}
       - path: /
         pathType: Prefix
         backend:

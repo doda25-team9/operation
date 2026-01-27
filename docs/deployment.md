@@ -8,6 +8,20 @@ Our application is composed of a frontend (`app-service`) and a backend (`model-
 
 Moreover, we also deploy monitoring measures such as Prometheus and Grafana. More on that in the Monitoring section.
 
+## Cluster Resources & Scaling
+
+The deployment is configured with specific replica counts to support our stability and testing requirements (90/10 split).
+
+### Services & Replicas
+
+| Component | Version | Role | Replicas | Service Name |
+| :--- | :--- | :--- |:---------| :--- | 
+| **App** | v1 | Stable | **1**    | `app-service` |
+| **App** | v2 | Canary | **1**    | `app-service` |
+| **Model** | v1 | Stable | **1**    | `model-service` |
+| **Model** | v2 | Canary | **1**    | `model-service` |
+| **Model** | v3 | Shadow | **1**    | `model-service` |
+
 ## Data Flow
 
 The request follows the following path:
@@ -20,6 +34,7 @@ Our application supports consistent versioning; thus, if a user request is handl
 
 ![Kubernetes diagram](kubernetes-diagram.png)
 Figure 1: Diagram in Kubernetes-style detailing request path
+
 ## Routing Decision Process
 
 Two files are responsible for the decision process of the routing:
@@ -27,7 +42,7 @@ Two files are responsible for the decision process of the routing:
 * **Virtual Service of the app**: Here, we define the ratio of the requests sent to versions 1 and 2. We currently route 90% of the traffic to the stable version (`v1`) and 10 % to the canary release (`v2`) used for testing.
 * **Destination Rule**: This file defines the subset of pods based on Kubernetes labels. Subset `v1` is routed to version 1 pods, and accordingly for version 2.
 
-The resulting request flow can be seen in Kiali from which the diagram below was made. We see requests to app-service split into request for `v1` and `v2` and for model-service into v1`, `v2` and `v3`. The request flow for the metric collection is also visible in the diagram, where Prometheus, Grafana and kube-state-metrics poll Kubernetes for metrics. 
+The resulting request flow can be seen in Kiali from which the diagram below was made. We see requests to app-service split into request for `v1` and `v2` and for model-service into `v1`, `v2` and `v3`. The request flow for the metric collection is also visible in the diagram, where Prometheus, Grafana and kube-state-metrics poll Kubernetes for metrics. 
 
 ![Istio request flow](Istio-request-flow.png)
 Figure 2: Diagram from Kiali showing the request flow in practice 
@@ -39,9 +54,9 @@ Figure 2: Diagram from Kiali showing the request flow in practice
 ## Monitoring
 For observability purposes, we utilize Prometheus metrics and Grafana to visualize the patterns of the app usage.
 
-Prometheus scrapes metrics from the app service and exports them through \metrics endpoint. We currently export 5 metrics in total, of 3 different types (histogram, counter, gauge), mostly focusing on the requests and responses sent to/from model-service.
+Prometheus scrapes metrics from the app service which are exported through \metrics endpoint. We currently export 7 metrics in total, of 3 different types (histogram, counter, gauge), mostly focusing on the requests and responses sent to/from model-service.
 
-We also utilize Alert Manager to trigger an alert if number of request exceed 15 requests per minute.
+We also utilize Alert Manager to trigger an alert if number of request exceed 5 requests per minute.
 
 We visualize the metrics in Grafana which allows us to compare the performance of different versions, supporting continuous experimentation.
 
@@ -52,12 +67,13 @@ Figure 3: Diagram detailing the request flow for monitoring
 
 The following configuration is required to access the deployment:
 
-* **Hosts**: `sms-checker.local`
+* **Hosts**:
+  * `sms-checker.local` (Main strategy with traffic splitting)
+  * `stable.sms-checker.local` (Direct access to v1)
+  * `canary.sms-checker.local` (Direct access to v2)
 * **Ports**: Port 80
 * **Paths**: The application is served at:
-    * `/` Hello World - Starting page
-    * `/sms` Page allowing to enter sms messages
-    * `/metrics` Page responsible for exporting metrics in Prometheus format
+  * `/sms` Page allowing to enter sms messages
 
 ## Configuration
 We use Kubernetes resources to configure the deployment:

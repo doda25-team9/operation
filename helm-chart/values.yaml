@@ -63,6 +63,9 @@ kube-prometheus-stack:
   prometheus:
     enabled: true
     prometheusSpec:
+      podMetadata:
+        annotations:
+          sidecar.istio.io/inject: "false"
       serviceMonitorSelector:
         matchLabels:
           release: prometheus
@@ -78,6 +81,9 @@ kube-prometheus-stack:
   alertmanager:
     enabled: true
     alertmanagerSpec:
+      podMetadata:
+        annotations:
+          sidecar.istio.io/inject: "false"
       useExistingSecret: true
       secrets: 
         - alertmanager-smtp-secret
@@ -89,6 +95,8 @@ kube-prometheus-stack:
       existingSecret: grafana-admin-secret
       userKey: admin-user
       passwordKey: admin-password
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
   
 istio:
   enabled: true

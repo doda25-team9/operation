@@ -163,7 +163,7 @@ If you see the SMS Checker interface, can submit messages and get a model agreem
 
 A reduction of ~50MB was achieved, by applying 2 Stages (Builds, Runtime) in Dockerfile of model-service.
 
-![Image MB reduction](image.png)
+![Image MB reduction](docs/images/image_size_difference.png)
 
 ## VM Infrastructure (Assignment 2)
 
